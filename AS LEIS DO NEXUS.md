@@ -1,4 +1,4 @@
-# A Mente como Universo — um modelo para o seu projeto
+# A Mente como Universo — um modelo para o seu projetO
 
 > A pergunta central não é "que astro é cada coisa?", mas \\\*\\\*"que física governa esse universo?"\\\*\\\*.
 > Se você define as leis primeiro, cada astro se encaixa sozinho — e o modelo passa a gerar ideias

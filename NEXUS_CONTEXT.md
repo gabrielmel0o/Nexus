@@ -1,36 +1,42 @@
 # NEXUS · Contexto do projeto (para IAs)
 
-**Versão:** 2.4 · 30/09/2026
-**Stack atual:** HTML5, CSS3, JavaScript puro (ES Modules) e Three.js via CDN (3D ativo).
-**Prazo:** desenvolvimento de quarta 30/09 a domingo 04/10/2026.
-**Entrega/apresentação:** segunda 05/10/2026.
+**Versão:** 2.6 · 30/09/2026
+**Stack atual:** HTML5, CSS3, JavaScript clássico (sem módulos ES, sem build, sem frameworks) e Three.js r128 via CDN.
+**Estado atual:** base 3D estilizada com 3 sistemas, nível de detalhe por distância e estrelas-conquista. Prompts P1 a P5 concluídos e confirmados no navegador. Próximo: P6 (satélites).
+**Prazo:** desenvolvimento de quarta 30/09 a domingo 04/10/2026 (congelar o código às 20h de domingo).
+**Entrega/apresentação:** segunda 05/10/2026 (sem mexer no código nesse dia).
 
 ---
 
 ## Como usar este arquivo
 
-- **Claude / ChatGPT / Gemini / Windsurf / Antigravity / Cursor:** salve como `NEXUS_CONTEXT.md` na raiz do repositório ou cole como primeira mensagem.
-- Instrua a IA a ler este arquivo antes de propor alterações de código.
+- **Windsurf / Antigravity:** mantenha este arquivo na raiz do repositório (`nexus-base`) e peça para a IA lê-lo junto com o `HANDOFF.md` antes de qualquer alteração.
+- **IAs de chat (Claude, ChatGPT, Gemini):** anexe este arquivo, o `HANDOFF.md` e somente os arquivos de código indicados no prompt.
+- O `HANDOFF.md` descreve o estado detalhado do código (arquivos existentes, pendências, problemas conhecidos). Em caso de dúvida sobre o que existe hoje, o código e o `HANDOFF.md` valem mais que este arquivo.
 
 ---
 
 ## Instruções para a IA (leia primeiro)
 
-1. Leia este arquivo na íntegra antes de criar ou alterar qualquer elemento na base de código.
-2. Faça **uma mudança pequena e coerente por vez**. Não tente implementar várias funcionalidades de uma só vez.
-3. Escopo atual: **somente frontend em JavaScript puro + 3D + mock data.** Sem backend, banco de dados, autenticação ou integrações externas.
-4. **Não crie nem redesenhe o logo do NEXUS.** Mantenha apenas um placeholder/área delimitada na UI. O logo será feito pelo autor.
-5. **Não copie literalmente nenhuma referência visual.** As referências servem apenas como inspiração de atmosfera.
-6. Mantenha os dados **estritamente separados da renderização 3D**, permitindo a substituição futura por uma API real.
-7. Preserve o código 3D/Canvas existente e funcional. Altere apenas o que for solicitado na tarefa atual.
-8. Se algo neste arquivo conflitar com o pedido direto do usuário, o pedido do usuário prevalece. Avise o conflito em uma frase simples.
-9. Em caso de ambiguidade, escolha a solução mais simples, informe a escolha e prossiga. Faça no máximo uma pergunta por resposta.
-10. **Regras de Git (obrigatórias):**
+1. Leia este arquivo e o `HANDOFF.md` na íntegra antes de criar ou alterar qualquer coisa. Siga também a seção **Regras (não quebrar)** do `HANDOFF.md`, que detalha as regras técnicas do código.
+2. Faça **somente a tarefa pedida**, em **uma mudança pequena e coerente por vez**. Preserve tudo que já funciona.
+3. **JavaScript clássico com Three.js r128 via CDN.** Sem build, sem módulos ES (`import`/`export`, `type="module"`), sem frameworks. O projeto precisa funcionar com duplo clique em `index.html`.
+4. **Objeto global `NEXUS`:** cada arquivo registra o que oferece dentro dele. **A ordem das tags `<script>` em `index.html` importa.**
+5. **Dados separados da renderização:** os dados vivem somente em `js/data/mockUniverse.js` e são lidos por `NEXUS.getUniverse()`. Nunca escreva planetas, elementos ou eventos dentro de outros arquivos.
+6. **Um arquivo = uma responsabilidade.** Objeto novo = arquivo novo em `js/world/` (elementos em `js/world/elements/`) + uma chamada em `main.js` + uma tag `<script>` em `index.html`.
+7. Escopo atual: **somente frontend + mock data.** Sem backend, banco de dados, autenticação ou integrações externas.
+8. **Não crie nem redesenhe o logo do NEXUS.** Mantenha o placeholder atual (div com classe `logo`). O logo será feito pelo autor e inserido depois.
+9. **Não copie literalmente nenhuma referência visual.** Elas servem de atmosfera, não de molde.
+10. **Comente o código em português simples:** o autor está aprendendo.
+11. **Ao terminar**, responda em poucas linhas: o que mudou, quais arquivos foram tocados e como testar. Entregue também uma tabela com **todos** os arquivos criados ou alterados, com as colunas: (1) caminho completo a partir da pasta `nexus`; (2) **NOVO** ou **SUBSTITUI**; (3) o que mudou, em uma frase. Diga se é preciso adicionar alguma linha `<script>` em `index.html` e em qual posição.
+12. **Regras de Git (obrigatórias):**
     - Nunca execute `git push`.
     - Nunca crie repositórios, nem adicione ou altere remotes.
-    - Nunca altere a configuração global do git (`--global`).
-    - Faça commits locais somente quando o usuário pedir.
-    - O envio ao GitHub é sempre feito manualmente pelo usuário, porque a máquina tem mais de uma conta configurada.
+    - Nunca altere a configuração global do git.
+    - Nunca use comandos destrutivos (`reset --hard`, `clean`, `push --force`) sem o usuário pedir explicitamente.
+    - Faça commits somente quando o usuário pedir. O envio ao GitHub é sempre manual, feito pelo usuário.
+13. Se algo neste arquivo conflitar com o pedido direto do usuário, o pedido do usuário prevalece. Avise o conflito em uma frase.
+14. Em caso de ambiguidade, escolha a solução mais simples, diga qual escolheu e siga. No máximo uma pergunta por resposta.
 
 ---
 
@@ -40,27 +46,16 @@ Uma interface visual interativa que representa a vida de uma pessoa como um **un
 
 > "Se a sua vida fosse um universo, como ele estaria hoje?"
 
-O universo **é a própria interface.**
+O universo **é a própria interface.** Não é um dashboard com fundo espacial nem um aplicativo de produtividade com tema de espaço. Conforme aspectos da vida do usuário mudam, o universo muda visualmente.
 
-Não se trata de:
-
-- um dashboard com fundo espacial;
-- uma aplicação de produtividade tradicional com uma skin espacial.
-
-Conforme os aspectos da vida do usuário mudam, o universo 3D se transforma visualmente.
+O usuário deve sentir: *"É assim que minha vida está agora"* e, com o tempo, *"Eu consigo ver minha vida mudando."*
 
 ---
 
-## 2. Estrutura conceitual no espaço 3D
+## 2. Estrutura conceitual
 
 ```
-Universo
-   ↓
-Sistemas
-   ↓
-Planetas
-   ↓
-Elementos
+Universo → Sistemas → Planetas → Elementos
 ```
 
 | Elemento | Representa |
@@ -70,269 +65,171 @@ Elementos
 | Asteroide / cometa | Evento, prazo ou mudança se aproximando |
 | Buraco negro | Problema ou preocupação persistente |
 | Satélite | Hábito ou rotina mantida |
-| Constelação | Agrupamento de projetos ou objetivos |
-| Lua / fenômenos | Elementos temporários ou secundários |
+| Constelação, lua, fenômenos | Possibilidades futuras, ainda não definidas |
 
-> As regras semânticas ainda não estão fechadas. A cosmologia do NEXUS deve continuar sendo um experimento visual orgânico.
+**As regras semânticas ainda não estão fechadas.** Trate como experimento visual. Não trave regras rígidas (por exemplo, "faculdade é sempre azul").
+
+### Comportamentos esperados
+
+- Prova se aproximando de um planeta → o asteroide chega mais perto conforme os dias passam.
+- Projeto concluído → uma nova estrela surge.
+- Problema que persiste → o buraco negro cresce.
+- Hábito mantido → o satélite permanece em órbita estável.
+
+### Sistemas e níveis de aproximação
+
+Um sistema **não é um card**: é uma pequena cena espacial, com uma estrela central e planetas em órbita, separada dos outros sistemas por muito espaço vazio.
+
+- **Longe:** estrela com brilho e pontinhos onde estão os planetas (sem órbitas e sem nomes).
+- **Médio:** planetas e órbitas discretas.
+- **Perto:** também os nomes e as informações.
+
+Os limites de distância ficam como constantes fáceis de ajustar no topo do arquivo responsável.
 
 ---
 
-## 3. Diretrizes do motor 3D (Three.js puro)
+## 3. Motor 3D (Three.js r128 via CDN)
 
-- Three.js via CDN, **com a versão fixada no endereço do script**.
-- ES Modules nativos (`<script type="module">`).
-- OrbitControls para navegação.
-
-### Estilo visual
-
-**Ilustrativo / toon.**
-
-Evitar:
-
-- fotorrealismo;
-- materiais PBR complexos.
-
-Preferir:
-
-- formas simples;
-- materiais estilizados;
-- iluminação limpa;
-- brilho suave em estrelas.
-
-Materiais possíveis:
-
-- `MeshToonMaterial`
-- `MeshBasicMaterial`
-- shaders customizados leves
-
-### Desempenho
-
-Manter:
-
-- FPS estável;
-- poucos polígonos;
-- poucas luzes dinâmicas;
-- partículas controladas.
+- Fixar a versão r128 no endereço do script.
+- Estilo **ilustrativo / toon**: formas simples, cores saturadas e controladas, iluminação limpa, brilho suave nas estrelas.
+- Materiais possíveis: `MeshToonMaterial`, `MeshBasicMaterial`, shaders customizados leves.
+- Névoa, estrelas de fundo em camadas e partículas discretas para profundidade.
+- A câmera é controlada por `controls.js` (controle próprio do projeto): arrastar para girar, zoom (14 a 260) e pinça no celular, sempre olhando para a origem. O alvo móvel e o voo até o planeta virão no P10.
+- Evitar: fotorrealismo, materiais PBR complexos, shaders pesados, muitas luzes dinâmicas.
+- Desempenho: fluido em notebook comum e celular; poucos polígonos; geometrias e materiais reaproveitados.
 
 ---
 
 ## 4. Direção artística
 
-A estética combina três referências:
+Mistura de três referências, sem copiar nenhuma:
 
-### Kurzgesagt
+- **Kurzgesagt:** formas geométricas, composição limpa, linguagem de ilustração.
+- **Star Birds:** universo lúdico, planetas com personalidade, atmosfera convidativa.
+- **Outer Wilds:** exploração, descoberta, mistério, iluminação cinematográfica, profundidade.
 
-Inspirado em:
+**Síntese:** simples + lúdica + exploratória + contemplativa + misteriosa.
 
-- formas geométricas;
-- composição limpa;
-- linguagem ilustrativa.
-
-### Star Birds
-
-Inspirado em:
-
-- universo lúdico;
-- planetas com personalidade;
-- atmosfera convidativa.
-
-### Outer Wilds
-
-Inspirado em:
-
-- exploração;
-- descoberta;
-- iluminação cinematográfica;
-- profundidade espacial.
-
-### Evitar
-
-- dashboards corporativos;
-- excesso de HUD;
-- cyberpunk exagerado;
-- neon excessivo;
-- texturas realistas.
+**Evitar:** visual corporativo, dashboard, excesso de HUD, excesso de neon, cyberpunk exagerado, fotorrealismo.
 
 ---
 
-## 5. Paleta de cores
+## 5. Paleta
 
-| Aplicação | Cor |
+| Uso | Cor |
 |---|---|
 | Espaço profundo | `#100819` |
 | Espaço iluminado | `#111450` |
-| Tipografia / UI | `#FFFFFF` |
+| Texto / UI | `#FFFFFF` |
 
-A atmosfera deve utilizar:
-
-- névoa (`scene.fog`);
-- partículas discretas;
-- variação de profundidade.
-
-Cada planeta possui identidade visual própria. Não existe regra fixa de cor por área da vida.
+Cada planeta tem identidade cromática própria, harmônica com o universo. **Não existe regra fixa de cor por área da vida.** Tipografia da UI: Nunito, branca.
 
 ---
 
-## 6. Interface do usuário (UI overlay)
+## 6. Interface
 
-A UI deve ser:
+Mínima e integrada ao universo. O universo é o protagonista; a UI aparece quando necessária.
 
-- mínima;
-- integrada ao universo.
+- HTML/CSS sobre o canvas, com `pointer-events: none` no container geral e `pointer-events: auto` nos elementos clicáveis.
+- Interação por raycaster: passar o mouse destaca, clicar seleciona e abre um painel discreto (fundo translúcido escuro, sem bordas pesadas).
+- **Evitar:** sidebar, cards de dashboard, tabelas, excesso de menus, HUD cheio de informações.
 
-Implementação:
-
-- HTML/CSS sobre o canvas Three.js.
-- `pointer-events: none` no container geral.
-- `pointer-events: auto` nos elementos clicáveis.
-
-Interação:
-
-- Raycaster do Three.js.
-- Clique em planetas/elementos.
-- Abrir painéis HTML minimalistas.
-
-Critério:
-
-> "Este componente parece parte do universo ou um painel colado por cima dele?"
+Teste para qualquer elemento de UI: *"Isto parece parte do universo ou um painel colado por cima dele?"*
 
 ---
 
-## 7. Placeholder de logo
+## 7. Logo
 
-Não criar o logo.
-
-Manter apenas:
-
-```html
-<div id="nexus-logo-placeholder">
-    NEXUS
-</div>
-```
-
-O logo final será criado pelo autor.
+O autor cria o logo pessoalmente (Affinity). **Não criar nem redesenhar.** Manter o placeholder atual e, quando o arquivo existir, apenas usá-lo (`assets/logo.svg`), sem editá-lo.
 
 ---
 
 ## 8. Arquitetura de dados
 
-A cena 3D consome dados exclusivamente de:
+Fluxo futuro: apps e serviços → APIs → backend do NEXUS → dados do usuário → universo visual. **Nada disso deve ser implementado agora.** Trocar o mock por uma API no futuro deve exigir mudanças apenas na camada de dados.
 
+### Formato
+
+```javascript
+{
+  today: '2026-09-30',          // "hoje" virtual (a demo avança esta data)
+  systems: [
+    {
+      id, name,
+      position: [x, y, z],
+      starColor, starPatch,      // starPatch: 3 cores das manchas da estrela
+      planets: [
+        { id, name, base, patch, size, orbit, speed, elements: [] }
+      ]
+    }
+  ]
+}
 ```
-./data/mockUniverse.js
-```
-
-Nenhuma informação do universo (planetas, eventos, hábitos etc.) deve ficar fixa dentro do código de renderização. Trocar o mock por uma API no futuro deve exigir mudanças apenas nesta camada.
-
-### Formato dos dados
-
-**Sistema:** `id`, `name`, `position` (`[x, y, z]`), `starColor`, `planets`.
-
-**Planeta:** `id`, `name`, `area`, `color`, `size`, `orbitRadius`, `orbitSpeed`, `elements`. Opcionais: `accent`, `hasRings`.
 
 **Elemento:**
 
 | Campo | Valores |
 |---|---|
 | `id` | texto único |
-| `type` | `star`, `asteroid`, `satellite`, `blackhole`, `moon`, `constellation` |
+| `type` | `'star'`, `'asteroid'`, `'satellite'`, `'blackhole'` (outros tipos virão depois) |
 | `title` | texto |
-| `date` | data em formato ISO (opcional; usada para aproximar asteroides) |
-| `importance` | `low`, `medium`, `high` |
-| `status` | `active`, `growing`, `resolved` |
+| `date` | data ISO, opcional (usada para aproximar asteroides) |
+| `importance` | `'low'`, `'medium'`, `'high'` |
+| `status` | `'active'`, `'growing'`, `'resolved'` |
 
-### Exemplo
-
-```javascript
-export const mockUniverse = {
-  systems: [
-    {
-      id: "sys-estudos-trabalho",
-      name: "Estudos e Trabalho",
-      position: [0, 0, 0],
-      starColor: "#ffd36e",
-      planets: [
-        {
-          id: "p-faculdade",
-          name: "Faculdade",
-          area: "estudos",
-          color: "#5b8cff",
-          size: 1.2,
-          orbitRadius: 6,
-          orbitSpeed: 0.01,
-          elements: [
-            {
-              id: "e-prova-calculo",
-              type: "asteroid",
-              title: "Prova de Cálculo",
-              date: "2026-10-08",
-              importance: "high",
-              status: "active"
-            },
-            {
-              id: "e-rotina-estudo",
-              type: "satellite",
-              title: "Estudar todo dia",
-              importance: "medium",
-              status: "active"
-            },
-            {
-              id: "e-prazo-tcc",
-              type: "blackhole",
-              title: "Prazo do TCC",
-              importance: "high",
-              status: "growing"
-            },
-            {
-              id: "e-projeto-concluido",
-              type: "star",
-              title: "Projeto concluído",
-              importance: "medium",
-              status: "resolved"
-            }
-          ]
-        }
-      ]
-    }
-  ]
-};
-
-export function useUniverse() {
-  return mockUniverse;
-}
-```
+**Planeta:** `id`, `name`, `base` (cor principal), `patch` (3 cores das manchas), `size`, `orbit`, `speed`, `rings?`, `moon?`, `elements`. Leia o `js/data/mockUniverse.js` antes de alterar. A linha do tempo da demonstração ficará em `NEXUS.data.timeline`.
 
 ---
 
-## 9. Requisitos do MVP
+## 9. Estrutura de arquivos (resumo)
 
-Entrega: **segunda-feira 05/10.**
+O mapa completo, com o que cada arquivo expõe, está no `HANDOFF.md`. Resumo:
 
-### Necessário
+- `index.html`, `style.css`
+- `js/core/`: `utils.js` (cria o objeto `NEXUS`), `scene.js`, `controls.js`
+- `js/data/mockUniverse.js`: todos os dados
+- `js/world/`: `background.js`, `starfield.js`, `sun.js`, `planets.js`, `lod.js`, `system.js`
+- `js/world/elements/`: `star.js` (um arquivo por tipo de elemento, registrado em `NEXUS.elementBuilders`)
+- `js/ui/`: `labels.js`
+- `js/main.js`
+- `HANDOFF.md` e `NEXUS_PROMPTS.md` ficam na raiz de `nexus-base`, junto deste arquivo (fora da pasta `nexus`, que contém o código)
 
-1. Navegação 3D fluida (OrbitControls: zoom, rotação, pan).
-2. Renderização de 2 ou 3 sistemas planetários.
-3. Sistemas gerados a partir do `mockUniverse.js`.
-4. Seleção via raycasting.
-5. Clique em planeta: destacar o objeto e abrir um cartão HTML discreto.
-6. Simulação de tempo, por exemplo: aproximar um asteroide, aumentar a escala de um buraco negro, fazer uma estrela nascer, mudar estados visuais.
-7. Direção artística reconhecível e logo em placeholder.
+Planejados: `elements/satellite.js`, `asteroid.js` e `blackhole.js` (P6 a P8); `js/core/picking.js` (P9); `js/ui/panel.js` (P11); `js/ui/legend.js` (P12); `js/core/timeline.js` (P13); `assets/logo.svg` (P19).
+
+### Como um elemento funciona
+
+`planets.js` lê `planet.elements` e chama `NEXUS.elementBuilders[tipo](elemento, planeta)`, que devolve `{ object, update(dt) }`. O `object` vira filho do grupo do planeta e o `update(dt)` roda a cada quadro. O nível de detalhe (`lod.js`) controla a opacidade de tudo que está dentro do grupo do planeta, então **não animar `material.opacity`** desses objetos: animar cor, escala ou posição.
 
 ---
 
-## 10. O que NÃO fazer
+## 10. MVP (o que precisa existir na segunda)
 
-- Não introduzir bundlers (Vite/Webpack) enquanto o HTML/JS puro via CDN estiver funcionando.
-- Não introduzir frameworks (React, Vue etc.) nem ferramentas de build.
+1. Explorar o universo com rotação e zoom fluidos (e pinça no celular).
+2. Três sistemas, cada um com estrela central e planetas em órbita.
+3. Planetas com personalidade e cor própria.
+4. Elementos (estrela, asteroide, satélite, buraco negro) vindos do mock.
+5. Clicar em um planeta: a câmera voa até ele e um painel discreto explica o que ele representa.
+6. **Ver o universo mudar:** botão "Avançar o tempo" em que o asteroide chega, uma estrela nasce e o buraco negro cresce.
+7. Direção artística reconhecível e o logo do autor inserido.
+8. Link publicado para a apresentação, e a versão local como reserva.
+
+Objetivo final: olhar e pensar **"minha vida está sendo representada como um universo."**
+
+---
+
+## 11. O que NÃO fazer
+
+- Não introduzir bundlers (Vite/Webpack), frameworks (React, Vue etc.) nem módulos ES.
 - Não misturar a criação de objetos 3D com os dados do universo.
-- Não usar shaders pesados.
-- Não sacrificar desempenho por efeitos visuais.
+- Não usar shaders pesados nem sacrificar desempenho por efeitos visuais.
 - Não implementar backend, banco de dados, autenticação ou integrações externas.
 - Não criar nem redesenhar o logo.
+- Não adicionar funcionalidades fora do MVP.
+- Não executar `git push` nem outras ações de git fora das regras da seção de instruções.
 
 ---
 
-## 11. Perguntas ainda em aberto (não resolver sozinho)
+## 12. Perguntas ainda em aberto (não resolver sozinho)
 
 - Regras definitivas da cosmologia (o que cada objeto representa de fato).
 - Se haverá semântica de cor por área da vida.

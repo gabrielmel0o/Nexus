@@ -14,6 +14,19 @@ NEXUS.data = {
   title: 'A galáxia de Helena',
   chapter: 0,   // capítulo atual (será gerenciado pelo state.js mais adiante)
 
+  // ─── ESTRUTURAS DA GALÁXIA ────────────────────────────────────────────────
+  galaxy: {
+    arms: {
+      routines: [
+        { id: 'rot-trabalho',     name: 'Trabalho',     arm: 0, progress: 0.22 },
+        { id: 'rot-academia',     name: 'Academia',     arm: 1, progress: 0.38 },
+        { id: 'rot-contas',       name: 'Contas',       arm: 0, progress: 0.55 },
+        { id: 'rot-mensagens',    name: 'Mensagens',    arm: 1, progress: 0.72 },
+        { id: 'rot-compromissos', name: 'Compromissos', arm: 0, progress: 0.88 }
+      ]
+    }
+  },
+
   // ─── AS LEIS (textos que aparecem no painel de cada corpo) ─────────────────
   laws: {
     luz:      'Lei da luz: quem emite luz é interno; quem reflete é derivado; quem não faz nem um nem outro é inconsciente.',

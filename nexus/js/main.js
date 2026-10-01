@@ -5,6 +5,7 @@
 
   N.buildBackground();                       // 2) monta o mundo, peça por peça
   N.buildStarfield();
+  const arms = N.buildArms ? N.buildArms() : null; // braços espirais da galáxia (rotinas)
   
   // Cria um sistema para cada item dos dados
   const systems = universe.systems.map(s => N.buildSystem(s));   
@@ -16,6 +17,7 @@
     
     N.state.update(dt);                      // aproxima valores animáveis (suavização)
     N.controls.update(dt);                   // mexe a câmera
+    if (arms && arms.update) arms.update(dt);// rotação dos braços e rótulos
     systems.forEach(s => N.updateSystem(s, dt));     // gira estrelas e move planetas
     
     N.renderer.render(N.scene, N.cam);       // desenha

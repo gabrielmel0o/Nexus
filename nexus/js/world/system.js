@@ -1,64 +1,99 @@
 /* system.js — monta UM sistema inteiro: uma "caixa" (grupo) com posição própria que guarda
-   a estrela, a luz da estrela (só em sistemas com planetas), as órbitas e os planetas.
+   o centro (via centerBuilders), a luz (só em sistemas com planetas), planetas, orbitantes e LOD.
 
-   A partir do P6, cada sistema tem um "center" tipado (kind: 'star', 'blackhole', 'binary', etc.).
-   Por enquanto, QUALQUER tipo de center é desenhado como a estrela simples (sun.js),
-   até que os builders específicos sejam criados (P8, P10, P11...).
-
-   No P7, sun.js vai se registrar em NEXUS.centerBuilders['star'] e este arquivo vai
-   chamar centerBuilders[kind]. Por ora, chama buildSun diretamente. */
+   Orbitantes (orbiters) são construídos via N.elementBuilders[type]:
+     companion, dream etc. São filhos do grupo do sistema (não do planeta). */
 (function () {
-  const N = NEXUS;
+  var N = NEXUS;
 
   N.buildSystem = function (systemData) {
-    const group = new THREE.Group();                         // a caixa deste sistema
-    group.position.set(...systemData.position);             // coloca no lugar certo do universo
+    var group = new THREE.Group();                          // a caixa deste sistema
+    group.position.set.apply(group.position, systemData.position);
     group.rotation.x = .16;                                 // leve inclinação — dá profundidade
     N.scene.add(group);
 
     // A estrela emite PointLight SOMENTE se o sistema tiver planetas.
-    // (Lei: só estrelas com planetas iluminam área. Buraco negro, binária, etc. sem planetas = sem luz.)
     // No universo de Helena, só "criacao" e "nao-escolhida" têm planetas.
     if (systemData.planets && systemData.planets.length > 0) {
-      // Usa a cor do center (campo "color"); se não tiver, usa branco como fallback seguro.
-      const baseColor = systemData.center && systemData.center.color
+      var baseColor = systemData.center && systemData.center.color
         ? systemData.center.color
         : '#ffffff';
-      const lightColor = new THREE.Color(baseColor).lerp(new THREE.Color(0xffffff), .75);
+      var lightColor = new THREE.Color(baseColor).lerp(new THREE.Color(0xffffff), .75);
       group.add(new THREE.PointLight(lightColor, 1.7, 60, .5));
     }
 
-    // Constrói o centro visual. Por enquanto usa buildSun para qualquer kind.
-    // buildSun espera um objeto com "starColor" e "starPatch" — montamos esses campos
-    // a partir do novo formato (center.color, center.patch) sem quebrar sun.js.
-    const centerData = systemData.center || {};
-    const fakeSystem = {
-      // sun.js usa esses dois campos; traduzimos aqui para não alterar sun.js agora
-      starColor: centerData.color || '#ffb020',
-      starPatch:  centerData.patch || ['#ffd43b', '#ff8a1f', '#fff3a0']
-    };
-    const sun = N.buildSun(fakeSystem, group);
+    // ── Centro visual (por kind: star, binary, blackhole, nebula, visitor…) ──
+    N.centerBuilders = N.centerBuilders || {};
+    var kind = (systemData.center && systemData.center.kind) || 'star';
+    var builder = N.centerBuilders[kind];
 
-    // Planetas: só monta se existirem. Sistemas sem planetas (Eu, binária, etc.) ficam sem planetas.
-    const planets = (systemData.planets && systemData.planets.length > 0)
+    // Fallback: se não conhecer o kind, usa 'star' e avisa no console
+    if (!builder) {
+      console.warn('Center kind \'' + kind + '\' desconhecido. Usando \'star\'.');
+      builder = N.centerBuilders['star'];
+    }
+
+    var centerObj = builder(systemData, group);
+
+    // ── Planetas ──────────────────────────────────────────────────────────────
+    var planets = (systemData.planets && systemData.planets.length > 0)
       ? N.buildPlanets(systemData.planets, group)
       : [];
 
-    const system = { data: systemData, group, sun, planets };
+    // ── Orbitantes (companion, dream etc.) ────────────────────────────────────
+    // São filhos do grupo do sistema (orbitam o centro, não um planeta).
+    // Cada orbitante usa N.elementBuilders[type] da mesma forma que os elementos dos planetas.
+    var orbiters = [];
+    var orbitersData = systemData.orbiters || [];
+    orbitersData.forEach(function (orb) {
+      N.elementBuilders = N.elementBuilders || {};
+      var orbBuilder = N.elementBuilders[orb.type];
+      if (orbBuilder) {
+        // O segundo argumento é o contexto — aqui passamos o systemData
+        var inst = orbBuilder(orb, systemData);
+        group.add(inst.object);
+        orbiters.push(inst);
+      } else {
+        console.warn('Orbiter type \'' + orb.type + '\' sem builder. Ignorado.');
+      }
+    });
 
-    // LOD: só faz sentido se houver planetas.
+    // Rótulo com o nome do sistema
+    var label = N.createLabel(systemData.name);
+
+    var system = {
+      data: systemData,
+      group: group,
+      centerObj: centerObj,
+      planets: planets,
+      orbiters: orbiters,
+      label: label
+    };
+
+    // LOD cuida de esconder planetas, luas, órbitas, nomes e elementos quando longe
+    // O centro NUNCA some — o LOD só controla planetas, órbitas, nomes e elementos.
     system.lod = N.buildLOD(group, planets);
     return system;
   };
 
-  // Chamado a cada quadro: gira a estrela e move os planetas.
-  N.updateSystem = (system, dt) => {
-    system.sun.rotation.y += dt * .05;
+  // Chamado a cada quadro para cada sistema
+  N.updateSystem = function (system, dt) {
+    // Atualiza o centro (seja ele qual for)
+    system.centerObj.update(dt);
+
+    // Atualiza os orbitantes (companion, dream etc.)
+    system.orbiters.forEach(function (o) { o.update(dt); });
+
     // "nomes" = quão visíveis os nomes estão agora (0 a 1). No 1º quadro o LOD ainda não calculou: começa em 0.
-    const nomes = system.lod.cur ? system.lod.cur.nomes : 0;
+    var nomes = system.lod.cur ? system.lod.cur.nomes : 0;
+
+    // Atualiza o rótulo do sistema (posicionado logo acima do centro)
+    N.updateLabel(system.label, system.group, 4, nomes);
+
     if (system.planets.length > 0) {
       N.updatePlanets(system.planets, dt, nomes);
     }
-    N.updateLOD(system, dt);   // depois dos planetas: usa a posição nova deles
+
+    N.updateLOD(system, dt);
   };
 })();

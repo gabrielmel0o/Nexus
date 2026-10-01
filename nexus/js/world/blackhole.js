@@ -38,11 +38,21 @@
       // 1. O EU (supermassivo, escuro, inalcançável)
       // ═════════════════════════════════════════════════════════════════
       const raioEu = 4.2;
+      group.userData.pickId = systemId;
       // Esfera preta pura, sem reflexo nem brilho
       const blackGeo = new THREE.SphereGeometry(raioEu, 48, 32);
       const blackMat = new THREE.MeshBasicMaterial({ color: 0x010003 });
       const sphere = new THREE.Mesh(blackGeo, blackMat);
+      sphere.userData.pickId = systemId;
       group.add(sphere);
+
+      // Alvo invisível amplo para facilitar clique no Eu
+      const hitSphere = new THREE.Mesh(
+        new THREE.SphereGeometry(raioEu * 1.5, 16, 12),
+        new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
+      );
+      hitSphere.userData.pickId = systemId;
+      group.add(hitSphere);
 
       // Anel finíssimo e muito sutil (índigo/lilás tênue)
       const ringGeo = new THREE.RingGeometry(raioEu * 1.05, raioEu * 1.09, 96);
@@ -63,6 +73,9 @@
       return {
         object: group,
         update(dt) {
+          // Realce de hover
+          const isHov = (N.hoveredId === systemId);
+          group.scale.setScalar(isHov ? 1.06 : 1.0);
           // Rotação sutil e contemplativa do anel tênue
           ring.rotation.z += dt * 0.03;
         }
@@ -73,11 +86,21 @@
     // 2. TRAUMA (estelar, com disco de acreção em espiral e espinhos)
     // ═════════════════════════════════════════════════════════════════
     const raioTrauma = 2.4;
+    group.userData.pickId = systemId;
     const sphere = new THREE.Mesh(
       new THREE.SphereGeometry(raioTrauma, 40, 28),
       new THREE.MeshBasicMaterial({ color: 0x020005 })
     );
+    sphere.userData.pickId = systemId;
     group.add(sphere);
+
+    // Alvo invisível cobrindo o disco de acreção
+    const hitSphere = new THREE.Mesh(
+      new THREE.SphereGeometry(raioTrauma * 3.5, 16, 12),
+      new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
+    );
+    hitSphere.userData.pickId = systemId;
+    group.add(hitSphere);
 
     // Borda interna suave (horizonte de eventos)
     const rimGeo = new THREE.RingGeometry(raioTrauma * 0.98, raioTrauma * 1.15, 64);
@@ -179,6 +202,10 @@
       object: group,
       update(dt) {
         tempo += dt;
+
+        // Realce de hover
+        const isHov = (N.hoveredId === systemId);
+        group.scale.setScalar(isHov ? 1.06 : 1.0);
 
         // Parâmetro animável 'disk' (0 a 1) do capítulo atual
         let diskParam = N.state ? N.state.get(systemId, 'disk') : 0.9;

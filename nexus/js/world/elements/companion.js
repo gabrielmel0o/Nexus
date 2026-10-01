@@ -79,7 +79,17 @@
     // O pivô fica no centro do sistema; girar o pivô faz a estrela orbitar.
     var pivo = new THREE.Group();
     var corpo = new THREE.Group();
+    corpo.userData.pickId = el.id;
+    esfera.userData.pickId = el.id;
     corpo.add(esfera, makeGlow(v.glow1, v.opac1), makeGlow(v.glow2, v.opac2));
+
+    // Alvo invisível para clique na estrela companheira
+    var hitSphere = new THREE.Mesh(
+      new THREE.SphereGeometry(Math.max(v.raio * 2.2, 3.5), 16, 12),
+      new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
+    );
+    hitSphere.userData.pickId = el.id;
+    corpo.add(hitSphere);
 
     // Afasta o corpo do centro pela distância orbital
     var orbitDist = el.orbit || 9;
@@ -96,6 +106,9 @@
     return {
       object: pivo,
       update: function (dt) {
+        var isHov = (N.hoveredId === el.id);
+        corpo.scale.setScalar(isHov ? 1.06 : 1.0);
+
         angulo += velocidade * dt;
         corpo.position.x = Math.cos(angulo) * orbitDist;
         corpo.position.z = Math.sin(angulo) * orbitDist;

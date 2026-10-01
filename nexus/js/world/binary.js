@@ -83,8 +83,20 @@
 
     // Pivô que gira e carrega as duas estrelas em lados opostos
     var pivo = new THREE.Group();
+    pivo.userData.pickId = systemId;
+    estA.esfera.userData.pickId = systemId;
+    estB.esfera.userData.pickId = systemId;
     pivo.add(estA.grupo);
     pivo.add(estB.grupo);
+
+    // Alvo invisível amplo cobrindo a região entre as duas estrelas
+    var hitSphere = new THREE.Mesh(
+      new THREE.SphereGeometry(DIST_MAX + RAIO_ESTRELA * 1.5, 16, 12),
+      new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
+    );
+    hitSphere.userData.pickId = systemId;
+    pivo.add(hitSphere);
+
     // Leve inclinação para a órbita não ficar perfeitamente horizontal
     pivo.rotation.x = 0.3;
 
@@ -95,6 +107,10 @@
     return {
       object: pivo,
       update: function (dt) {
+        // Realce de hover
+        var isHov = (N.hoveredId === systemId);
+        pivo.scale.setScalar(isHov ? 1.06 : 1.0);
+
         // Lê a tensão do state (0 a 1)
         var tension = N.state.get(systemId, 'tension');
 

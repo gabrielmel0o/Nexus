@@ -58,7 +58,17 @@
       gradientMap: N.toon
     });
     const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+    bodyMesh.userData.pickId = orbiterId;
+    dreamPivot.userData.pickId = orbiterId;
     dreamPivot.add(bodyMesh);
+
+    // Alvo invisível para clique no sonho
+    const hitSphere = new THREE.Mesh(
+      new THREE.SphereGeometry(1.8, 16, 12),
+      new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
+    );
+    hitSphere.userData.pickId = orbiterId;
+    dreamPivot.add(hitSphere);
 
     // Glow suave ao redor do corpo
     const glowMat = new THREE.SpriteMaterial({
@@ -117,6 +127,10 @@
 
         // Distância atual ao foco (centro da nebulosa)
         const r = p / (1 + e * Math.cos(theta));
+
+        // Realce de hover
+        const isHov = (N.hoveredId === orbiterId);
+        dreamPivot.scale.setScalar(isHov ? 1.15 : 1.0);
 
         // Velocidade angular kepleriana: dTheta/dt = h / r^2 (acelera perto do centro)
         const baseSpeed = el.speed || 0.18;

@@ -80,6 +80,7 @@
 
     // Subgrupo visual: corpo, halo, névoa e anéis (é este que escala com o param 'size')
     const visualGroup = new THREE.Group();
+    visualGroup.userData.pickId = d.id;
     group.add(visualGroup);
 
     // Corpo esférico com material toon e textura gerada com semente
@@ -90,7 +91,16 @@
       map: bodyTex
     });
     const body = new THREE.Mesh(bodyGeo, bodyMat);
+    body.userData.pickId = d.id;
     visualGroup.add(body);
+
+    // Alvo invisível amplo para clique no planeta
+    const hitSphere = new THREE.Mesh(
+      new THREE.SphereGeometry(d.size * 1.35, 16, 12),
+      new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
+    );
+    hitSphere.userData.pickId = d.id;
+    visualGroup.add(hitSphere);
 
     // Névoa da superfície para simular atmosfera espessa (oculta o contraste das manchas)
     // Usa AdditiveBlending: quando atmosphere é baixo, a cor vai para preto (invisível);
@@ -149,6 +159,7 @@
     const moons = d.moons || [];
     moons.forEach((m, idx) => {
       const moonPivot = new THREE.Group();
+      moonPivot.userData.pickId = m.id;
       // Inclinação suave para não ficar perfeitamente no mesmo plano
       moonPivot.rotation.x = 0.15 + (idx * 0.18);
       moonPivot.rotation.z = -0.1 + (idx * 0.12);
@@ -160,14 +171,29 @@
           gradientMap: N.toon
         })
       );
+      moonMesh.userData.pickId = m.id;
       // Posição orbital inicial no raio especificado
       moonMesh.position.x = m.orbit;
       moonPivot.add(moonMesh);
+
+      // Alvo invisível para clique na lua
+      const moonHit = new THREE.Mesh(
+        new THREE.SphereGeometry(Math.max(m.size * 2.4, 1.2), 12, 10),
+        new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
+      );
+      moonHit.position.x = m.orbit;
+      moonHit.userData.pickId = m.id;
+      moonPivot.add(moonHit);
+
       group.add(moonPivot);
+
+      const moonLabel = N.createLabel(m.name, m.id);
 
       moonControllers.push({
         data: m,
         pivot: moonPivot,
+        moonMesh,
+        label: moonLabel,
         angle: rng() * Math.PI * 2
       });
     });
@@ -190,6 +216,22 @@
     // Ângulo inicial: usa startAngle fixo se existir; senão, semente determinística
     const angle = typeof d.startAngle === 'number' ? d.startAngle : rng() * Math.PI * 2;
 
+    // Registra o PLANETA no mapa de seleção (segue o grupo em órbita)
+    const planetWP = new THREE.Vector3();
+    N.pickRegistry[d.id] = {
+      getPos: () => { group.getWorldPosition(planetWP); return planetWP; },
+      radius: d.size
+    };
+
+    // Registra cada LUA (segue a moonMesh em órbita ao redor do planeta)
+    moonControllers.forEach(mc => {
+      const moonWP = new THREE.Vector3();
+      N.pickRegistry[mc.data.id] = {
+        getPos: () => { mc.moonMesh.getWorldPosition(moonWP); return moonWP; },
+        radius: mc.data.size
+      };
+    });
+
     return {
       d,
       group,
@@ -202,7 +244,7 @@
       ringsGroup,
       moonControllers,
       orbit,
-      label: N.createLabel(d.name),
+      label: N.createLabel(d.name, d.id),
       angle,
       elementos
     };
@@ -229,7 +271,10 @@
       // 2) Parâmetros dinâmicos via state
       // Escala 'size': afeta corpo, halo e anéis (visualGroup), preservando o raio orbital
       const sizeParam = (N.state && N.state.get(id, 'size')) || (p.d.params && p.d.params.size) || 1.0;
-      p.visualGroup.scale.set(sizeParam, sizeParam, sizeParam);
+      const isHovered = (N.hoveredId === id);
+      const hoverMult = isHovered ? 1.06 : 1.0;
+      const finalScale = sizeParam * hoverMult;
+      p.visualGroup.scale.set(finalScale, finalScale, finalScale);
 
       // 'atmosphere' (0 a 1): controla tamanho e intensidade do halo e a névoa
       let atmoParam = (N.state && N.state.get(id, 'atmosphere'));
@@ -256,13 +301,20 @@
       p.moonControllers.forEach(mc => {
         mc.angle += mc.data.speed * dt;
         mc.pivot.rotation.y = mc.angle;
+
+        const isMoonHovered = (N.hoveredId === mc.data.id);
+        mc.pivot.scale.setScalar(isMoonHovered ? 1.15 : 1.0);
+
+        // Atualiza o rótulo da lua
+        const moonAlpha = isMoonHovered ? 1.0 : (nomes * 0.7);
+        N.updateLabel(mc.label, mc.moonMesh, mc.data.size, moonAlpha);
       });
 
       // 5) Elementos
       p.elementos.forEach(e => e.update(dt));
 
       // Rótulo posicionado sobre o planeta
-      N.updateLabel(p.label, p.group, p.d.size * sizeParam, nomes);
+      N.updateLabel(p.label, p.group, p.d.size * finalScale, nomes);
     });
   };
 })();

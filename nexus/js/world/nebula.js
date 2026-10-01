@@ -140,6 +140,15 @@
     protoGroup.add(protoGlow);
     group.add(protoGroup);
 
+    // Alvo invisível amplo para clique na nebulosa
+    const hitSphere = new THREE.Mesh(
+      new THREE.SphereGeometry(8.5, 16, 12),
+      new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
+    );
+    hitSphere.userData.pickId = systemId;
+    group.userData.pickId = systemId;
+    group.add(hitSphere);
+
     parent.add(group);
 
     let tempo = 0;
@@ -148,6 +157,10 @@
       object: group,
       update(dt) {
         tempo += dt;
+
+        // Realce de hover
+        const isHov = (N.hoveredId === systemId);
+        group.scale.setScalar(isHov ? 1.06 : 1.0);
 
         // Deriva suave das manchas da nebulosa
         clouds.forEach((c, idx) => {

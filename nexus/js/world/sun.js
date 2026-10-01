@@ -88,7 +88,18 @@
     var g2 = makeGlowSprite(glowTex, v.glow2, v.opac2);
 
     var grupo = new THREE.Group();
+    grupo.userData.pickId = systemId;
+    esfera.userData.pickId = systemId;
     grupo.add(esfera, g1.sprite, g2.sprite);
+
+    // Alvo invisível de raio generoso para facilitar o clique (especialmente anãs branca/marrom)
+    var hitRaio = Math.max(v.raio * 1.8, 5.0);
+    var hitSphere = new THREE.Mesh(
+      new THREE.SphereGeometry(hitRaio, 16, 12),
+      new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
+    );
+    hitSphere.userData.pickId = systemId;
+    grupo.add(hitSphere);
 
     // ── Ondas concêntricas da anã branca (halos finos que pulsam devagar) ─
     var ondas = [];
@@ -119,6 +130,10 @@
       object: grupo,
       update: function (dt) {
         esfera.rotation.y += dt * .05;
+
+        // Realce de escala quando sob hover do mouse (~1.06)
+        var isHov = (N.hoveredId === systemId);
+        grupo.scale.setScalar(isHov ? 1.06 : 1.0);
 
         // Lê o brilho do state (0 a 1.5)
         var bri = N.state.get(systemId, 'brightness');

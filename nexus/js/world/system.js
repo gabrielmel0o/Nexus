@@ -35,6 +35,20 @@
 
     var centerObj = builder(systemData, group);
 
+    // Registra o CENTRO do sistema no mapa de seleção.
+    // getPos: função que devolve a posição ATUAL do centro no mundo (o grupo do sistema).
+    // radius: tamanho aproximado do centro — usado pelo flyTo para não entrar dentro.
+    var RAIOS_CENTRO = { star: 4, binary: 10, blackhole: 6, nebula: 9, visitor: 3 };
+    var centroRadius = RAIOS_CENTRO[(systemData.center && systemData.center.kind) || 'star'] || 4;
+    var centroWP = new THREE.Vector3();
+    N.pickRegistry[systemData.id] = {
+      getPos: function () {
+        group.getWorldPosition(centroWP);
+        return centroWP;
+      },
+      radius: centroRadius
+    };
+
     // ── Planetas ──────────────────────────────────────────────────────────────
     var planets = (systemData.planets && systemData.planets.length > 0)
       ? N.buildPlanets(systemData.planets, group)
@@ -42,24 +56,34 @@
 
     // ── Orbitantes (companion, dream etc.) ────────────────────────────────────
     // São filhos do grupo do sistema (orbitam o centro, não um planeta).
-    // Cada orbitante usa N.elementBuilders[type] da mesma forma que os elementos dos planetas.
     var orbiters = [];
     var orbitersData = systemData.orbiters || [];
     orbitersData.forEach(function (orb) {
       N.elementBuilders = N.elementBuilders || {};
       var orbBuilder = N.elementBuilders[orb.type];
       if (orbBuilder) {
-        // O segundo argumento é o contexto — aqui passamos o systemData
         var inst = orbBuilder(orb, systemData);
         group.add(inst.object);
         orbiters.push(inst);
+
+        // Registra o orbitante: getPos segue o objeto 3D em movimento
+        var orbWP = new THREE.Vector3();
+        N.pickRegistry[orb.id] = {
+          getPos: (function (obj) {
+            return function () {
+              obj.getWorldPosition(orbWP);
+              return orbWP;
+            };
+          })(inst.object),
+          radius: 1.5  // anã vermelha / sonho recorrente são pequenos
+        };
       } else {
         console.warn('Orbiter type \'' + orb.type + '\' sem builder. Ignorado.');
       }
     });
 
-    // Rótulo com o nome do sistema
-    var label = N.createLabel(systemData.name);
+    // Rótulo com o nome do sistema (vinculado ao id para highlight)
+    var label = N.createLabel(systemData.name, systemData.id);
 
     var system = {
       data: systemData,

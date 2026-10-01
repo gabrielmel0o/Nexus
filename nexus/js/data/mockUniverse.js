@@ -157,8 +157,13 @@ NEXUS.data = {
           orbit: 34,
           speed: 0.048,
           startAngle: 4.5,
-          // Anéis: cor quente (lembranças) e cor fria (pendências)
-          rings: '#d4a84b',        // campo antigo, lido pelo planets.js atual
+          // Anéis: ~4 camadas de história: quentes (lembranças) e cinza-lilás (pendências)
+          rings: [
+            { inner: 1.45, outer: 1.62, color: '#f5d87a' }, // quente: lembranças
+            { inner: 1.72, outer: 1.88, color: '#b8a5d1' }, // cinza-lilás: pendências
+            { inner: 1.98, outer: 2.16, color: '#ffd56b' }, // quente: lembranças
+            { inner: 2.26, outer: 2.42, color: '#9d8eb5' }  // cinza-lilás: pendências
+          ],
           params: { size: 1, mass: 6 },
           moons: [],
           elements: [],

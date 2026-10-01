@@ -2,8 +2,27 @@
    Aqui nasce o "NEXUS": uma caixa onde cada arquivo guarda o que oferece aos outros. */
 window.NEXUS = {};
 
-// Sorteia um número entre a e b (usado para espalhar estrelas e manchas).
+// Sorteia um número entre a e b (usado para espalhar estrelas e elementos aleatórios).
 NEXUS.rand = (a, b) => a + Math.random() * (b - a);
+
+// Gerador pseudo-aleatório baseado em texto (semente por id).
+// Garante que planetas e sistemas abram sempre com o mesmo desenho e ângulos.
+NEXUS.createRNG = (seedStr) => {
+  let h = 2166136261 >>> 0;
+  const str = String(seedStr || 'nexus');
+  for (let i = 0; i < str.length; i++) {
+    h = Math.imul(h ^ str.charCodeAt(i), 16777619);
+  }
+  return () => {
+    h += 0x6D2B79F5;
+    let t = Math.imul(h ^ (h >>> 15), 1 | h);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+};
+
+// Sorteia com RNG customizado entre a e b
+NEXUS.randSeeded = (rng, a, b) => a + rng() * (b - a);
 
 // Desenha uma imagem por código e a transforma em "textura" (a pele de um objeto 3D).
 NEXUS.makeTexture = (w, h, draw) => {
@@ -32,12 +51,16 @@ NEXUS.capsule = (g, x, y, bw, bh) => {
   g.fill();
 };
 
-// Espalha n manchas coloridas numa imagem. Desenha também deslocado (x - w) para a emenda não aparecer.
-NEXUS.blobs = (g, w, h, cols, n) => {
+// Espalha n manchas coloridas numa imagem.
+// Aceita um gerador rng opcional para reprodutibilidade.
+NEXUS.blobs = (g, w, h, cols, n, rng) => {
+  const randomFn = rng ? () => rng() : Math.random;
   for (let i = 0; i < n; i++) {
     g.fillStyle = cols[i % cols.length];
-    const bw = NEXUS.rand(50, 150), bh = NEXUS.rand(24, 56);
-    const x = NEXUS.rand(0, w), y = NEXUS.rand(h * .08, h * .85);
+    const bw = 50 + randomFn() * 100;
+    const bh = 24 + randomFn() * 32;
+    const x = randomFn() * w;
+    const y = (h * .08) + randomFn() * (h * .77);
     NEXUS.capsule(g, x, y, bw, bh);
     NEXUS.capsule(g, x - w, y, bw, bh);
   }

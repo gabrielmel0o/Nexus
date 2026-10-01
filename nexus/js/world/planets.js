@@ -1,80 +1,178 @@
-/* planets.js — cria os planetas A PARTIR DOS DADOS e os faz orbitar.
-
-   A partir do P6, o formato dos planetas mudou:
-   - "moons" é agora um array de objetos { id, name, size, orbit, speed, color }
-     (o antigo campo "moon: true" foi removido dos dados)
-   - "params" guarda os valores animáveis (size, mass, atmosphere, signals...)
-   - "elements" e "rings" continuam iguais e são lidos como antes.
-   Campos novos desconhecidos são simplesmente ignorados, sem erro. */
+/* planets.js — cria os planetas a partir dos dados e os faz orbitar.
+   Evoluído com:
+   1) Tipos visuais por kind ('rocky', 'gas', 'ringed', 'exo').
+   2) Animação suave de state: 'size' (escala corpo, halo, anéis) e 'atmosphere' (halo e névoa).
+      REGRA: Não mexe em material.opacity (controlado pelo LOD); usa escala e cor aditiva.
+   3) Anéis múltiplos finos e coloridos girando devagar.
+   4) Luas estilizadas com leve inclinação e órbita circular própria.
+   5) Semente determinística por id (reprodutível, universo sempre abre igual). */
 (function () {
   const N = NEXUS;
 
-  // Cria UM planeta dentro da "caixa" do sistema (parent), com órbita, anel, luas, nome e elementos.
+  // Cria a textura do planeta conforme seu kind
+  function createPlanetTexture(d, rng) {
+    return N.makeTexture(512, 256, (g, w, h) => {
+      // Cor base
+      g.fillStyle = d.base;
+      g.fillRect(0, 0, w, h);
+
+      const patch = d.patch || [d.base];
+
+      if (d.kind === 'gas') {
+        // GIGANTE GASOSO: faixas horizontais suaves e ondulações
+        const bands = 12;
+        for (let i = 0; i < bands; i++) {
+          const y = (i / bands) * h;
+          const bandHeight = (h / bands) * (0.8 + rng() * 0.6);
+          const col = patch[i % patch.length];
+          g.fillStyle = col;
+          g.fillRect(0, y, w, bandHeight);
+
+          // Faixas/manchas horizontais alongadas para dar movimento atmosférico
+          const streaks = 4;
+          for (let s = 0; s < streaks; s++) {
+            g.fillStyle = patch[(i + s + 1) % patch.length];
+            const sw = 80 + rng() * 140;
+            const sh = 10 + rng() * 20;
+            const sx = rng() * w;
+            const sy = y + (rng() - 0.5) * 10;
+            N.capsule(g, sx, sy, sw, sh);
+            N.capsule(g, sx - w, sy, sw, sh);
+          }
+        }
+      } else if (d.kind === 'exo') {
+        // EXOPLANETA: misterioso, suave, poucas manchas sutis com transições calmas
+        for (let i = 0; i < 10; i++) {
+          g.fillStyle = patch[i % patch.length];
+          const bw = 60 + rng() * 90;
+          const bh = 30 + rng() * 40;
+          const x = rng() * w;
+          const y = (h * 0.12) + rng() * (h * 0.72);
+          N.capsule(g, x, y, bw, bh);
+          N.capsule(g, x - w, y, bw, bh);
+        }
+      } else {
+        // ROCHOSO / COM ANÉIS (padrão): manchas orgânicas em cápsula
+        const numBlobs = d.kind === 'rocky' ? 22 : 16;
+        N.blobs(g, w, h, patch, numBlobs, rng);
+      }
+    });
+  }
+
+  // Cria UM planeta dentro do grupo do sistema (parent)
   function buildPlanet(d, parent) {
-    // Linha da órbita (um círculo fino e discreto).
+    const rng = N.createRNG(d.id);
+
+    // 1) Linha discreta da órbita do planeta
     const pts = [];
     for (let i = 0; i <= 128; i++) {
-      const a = i / 128 * 6.283;
+      const a = (i / 128) * Math.PI * 2;
       pts.push(new THREE.Vector3(Math.cos(a) * d.orbit, 0, Math.sin(a) * d.orbit));
     }
     const orbit = new THREE.Line(
       new THREE.BufferGeometry().setFromPoints(pts),
-      new THREE.LineBasicMaterial({ color: 0x8a8fe8, transparent: true, opacity: .2 })
+      new THREE.LineBasicMaterial({ color: 0x8a8fe8, transparent: true, opacity: 0.2 })
     );
     parent.add(orbit);
 
+    // Grupo do planeta (posicionado ao longo da órbita)
     const group = new THREE.Group();
 
-    // Corpo: cor base + manchas em cápsula, sombreamento em degraus (toon).
-    const body = new THREE.Mesh(
-      new THREE.SphereGeometry(d.size, 48, 32),
-      new THREE.MeshToonMaterial({
-        gradientMap: N.toon,
-        map: N.makeTexture(512, 256, (g, w, h) => {
-          g.fillStyle = d.base;
-          g.fillRect(0, 0, w, h);
-          N.blobs(g, w, h, d.patch, 18);
-        })
-      })
-    );
+    // Subgrupo visual: corpo, halo, névoa e anéis (é este que escala com o param 'size')
+    const visualGroup = new THREE.Group();
+    group.add(visualGroup);
 
-    // Halo: esfera um pouco maior, translúcida, vista por dentro = brilho de atmosfera.
-    const halo = new THREE.Mesh(
-      new THREE.SphereGeometry(d.size * 1.1, 32, 16),
-      new THREE.MeshBasicMaterial({ color: d.patch[0], transparent: true, opacity: .16, side: THREE.BackSide })
-    );
-    group.add(body, halo);
+    // Corpo esférico com material toon e textura gerada com semente
+    const bodyTex = createPlanetTexture(d, rng);
+    const bodyGeo = new THREE.SphereGeometry(d.size, 48, 32);
+    const bodyMat = new THREE.MeshToonMaterial({
+      gradientMap: N.toon,
+      map: bodyTex
+    });
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    visualGroup.add(body);
 
-    // Anéis: lê "rings" como antes (string de cor). Ignorado se não existir.
+    // Névoa da superfície para simular atmosfera espessa (oculta o contraste das manchas)
+    // Usa AdditiveBlending: quando atmosphere é baixo, a cor vai para preto (invisível);
+    // quando alto, clareia e unifica a superfície.
+    const mistColor = new THREE.Color(d.patch && d.patch[0] ? d.patch[0] : d.base);
+    const mistMat = new THREE.MeshBasicMaterial({
+      color: 0x000000,
+      transparent: true,
+      opacity: 0.85,
+      blending: THREE.AdditiveBlending
+    });
+    const mistMesh = new THREE.Mesh(new THREE.SphereGeometry(d.size * 1.002, 32, 24), mistMat);
+    visualGroup.add(mistMesh);
+
+    // Halo atmosférico externo: visto por dentro (BackSide)
+    const baseHaloColor = new THREE.Color(d.patch && d.patch[0] ? d.patch[0] : d.base);
+    const haloMat = new THREE.MeshBasicMaterial({
+      color: baseHaloColor.clone(),
+      transparent: true,
+      opacity: 0.45,
+      side: THREE.BackSide,
+      blending: THREE.AdditiveBlending
+    });
+    const halo = new THREE.Mesh(new THREE.SphereGeometry(d.size * 1.1, 32, 16), haloMat);
+    visualGroup.add(halo);
+
+    // Anéis: aceita array de anéis finos ou valor único
+    let ringsGroup = null;
     if (d.rings) {
-      [[1.5, 2.0, .85], [2.15, 2.3, .5]].forEach(([a, b, o]) => {
-        const ring = new THREE.Mesh(
-          new THREE.RingGeometry(d.size * a, d.size * b, 64),
-          new THREE.MeshBasicMaterial({ color: d.rings, transparent: true, opacity: o, side: THREE.DoubleSide })
-        );
-        ring.rotation.set(Math.PI / 2 - .4, 0, .25);
-        group.add(ring);
+      ringsGroup = new THREE.Group();
+      ringsGroup.rotation.set(Math.PI / 2 - 0.38, 0, 0.22);
+
+      const ringList = Array.isArray(d.rings)
+        ? d.rings
+        : [{ inner: 1.5, outer: 2.0, color: d.rings }, { inner: 2.15, outer: 2.3, color: d.rings }];
+
+      ringList.forEach(r => {
+        const innerRadius = d.size * (r.inner || 1.4);
+        const outerRadius = d.size * (r.outer || 1.6);
+        const ringGeo = new THREE.RingGeometry(innerRadius, outerRadius, 64);
+        const ringMat = new THREE.MeshBasicMaterial({
+          color: r.color || 0xffffff,
+          transparent: true,
+          opacity: 0.75,
+          side: THREE.DoubleSide
+        });
+        const mesh = new THREE.Mesh(ringGeo, ringMat);
+        ringsGroup.add(mesh);
       });
+      visualGroup.add(ringsGroup);
     }
 
-    // Luas: novo formato — array de objetos { id, name, size, orbit, speed, color }.
-    // O antigo campo "moon: true" não existe mais; se o array estiver vazio (ou ausente), nenhuma lua é criada.
-    const luaGrupos = [];
-    const moons = d.moons || [];   // compatibilidade: se não vier, trata como lista vazia
-    moons.forEach(lua => {
-      const luaGrupo = new THREE.Group();
-      const luaCorpo = new THREE.Mesh(
-        new THREE.SphereGeometry(lua.size, 24, 16),
-        new THREE.MeshToonMaterial({ color: lua.color || '#e9ecef', gradientMap: N.toon })
+    // Luas: array de { id, name, size, orbit, speed, color }
+    // As luas orbitam o grupo do planeta com leve inclinação individual
+    const moonControllers = [];
+    const moons = d.moons || [];
+    moons.forEach((m, idx) => {
+      const moonPivot = new THREE.Group();
+      // Inclinação suave para não ficar perfeitamente no mesmo plano
+      moonPivot.rotation.x = 0.15 + (idx * 0.18);
+      moonPivot.rotation.z = -0.1 + (idx * 0.12);
+
+      const moonMesh = new THREE.Mesh(
+        new THREE.SphereGeometry(m.size, 24, 16),
+        new THREE.MeshToonMaterial({
+          color: m.color || '#e9ecef',
+          gradientMap: N.toon
+        })
       );
-      luaCorpo.position.x = lua.orbit;    // começa no raio da órbita; vai girar pelo luaGrupo
-      luaGrupo.add(luaCorpo);
-      group.add(luaGrupo);
-      luaGrupos.push({ luaGrupo, lua });  // guarda para animar a cada quadro
+      // Posição orbital inicial no raio especificado
+      moonMesh.position.x = m.orbit;
+      moonPivot.add(moonMesh);
+      group.add(moonPivot);
+
+      moonControllers.push({
+        data: m,
+        pivot: moonPivot,
+        angle: rng() * Math.PI * 2
+      });
     });
 
-    // Elementos: igual ao formato anterior (d.elements é uma lista de { id, type, ... }).
-    // N.elementBuilders[tipo] cria o visual; tipo sem builder gera aviso no console, sem erro.
+    // Elementos em volta do planeta (ex: estrela de conquista / sinal)
     const elementos = [];
     if (d.elements) {
       d.elements.forEach(el => {
@@ -89,28 +187,82 @@
 
     parent.add(group);
 
-    // Ângulo de partida: usa startAngle dos dados (fixo por planeta) ou aleatório como antes.
-    // Com startAngle nos dados, o retrato de Helena será sempre igual a cada carregamento.
-    const angle = typeof d.startAngle === 'number' ? d.startAngle : N.rand(0, 6.283);
+    // Ângulo inicial: usa startAngle fixo se existir; senão, semente determinística
+    const angle = typeof d.startAngle === 'number' ? d.startAngle : rng() * Math.PI * 2;
 
-    return { d, group, body, luaGrupos, orbit, label: N.createLabel(d.name), angle, elementos };
+    return {
+      d,
+      group,
+      visualGroup,
+      body,
+      mistMesh,
+      mistColor,
+      halo,
+      baseHaloColor,
+      ringsGroup,
+      moonControllers,
+      orbit,
+      label: N.createLabel(d.name),
+      angle,
+      elementos
+    };
   }
 
   N.buildPlanets = (list, parent) => list.map(d => buildPlanet(d, parent));
 
-  // Chamado a cada quadro: avança a órbita, gira o planeta, gira as luas, anima elementos e atualiza o nome.
-  // nomes = de 0 a 1, o quanto os nomes devem aparecer agora (vem do LOD).
-  N.updatePlanets = (items, dt, nomes = 1) => items.forEach(p => {
-    p.angle += p.d.speed * dt;
-    p.group.position.set(Math.cos(p.angle) * p.d.orbit, 0, Math.sin(p.angle) * p.d.orbit);
-    p.body.rotation.y += dt * .25;
+  // Chamado a cada quadro: move órbita, rotações, luas, anima parâmetros dinâmicos e atualiza rótulo
+  N.updatePlanets = (items, dt, nomes = 1) => {
+    items.forEach(p => {
+      const id = p.d.id;
 
-    // Gira cada lua ao redor do planeta na velocidade que seus dados indicam.
-    p.luaGrupos.forEach(({ luaGrupo, lua }) => {
-      luaGrupo.rotation.y += lua.speed * dt;
+      // 1) Animação da posição orbital em torno da estrela
+      p.angle += p.d.speed * dt;
+      p.group.position.set(
+        Math.cos(p.angle) * p.d.orbit,
+        0,
+        Math.sin(p.angle) * p.d.orbit
+      );
+
+      // Rotação axial do planeta
+      p.body.rotation.y += dt * 0.25;
+
+      // 2) Parâmetros dinâmicos via state
+      // Escala 'size': afeta corpo, halo e anéis (visualGroup), preservando o raio orbital
+      const sizeParam = (N.state && N.state.get(id, 'size')) || (p.d.params && p.d.params.size) || 1.0;
+      p.visualGroup.scale.set(sizeParam, sizeParam, sizeParam);
+
+      // 'atmosphere' (0 a 1): controla tamanho e intensidade do halo e a névoa
+      let atmoParam = (N.state && N.state.get(id, 'atmosphere'));
+      if (atmoParam === undefined || atmoParam === null) {
+        atmoParam = (p.d.params && p.d.params.atmosphere !== undefined) ? p.d.params.atmosphere : 0.4;
+      }
+
+      // Halo: ajusta escala e escurece a cor aditiva (sem alterar opacity)
+      // Quando atmosphere é 0.1 = halo quase imperceptível; quando 0.95 = halo espesso
+      const haloScale = 1.02 + atmoParam * 0.22;
+      p.halo.scale.set(haloScale, haloScale, haloScale);
+      p.halo.material.color.copy(p.baseHaloColor).multiplyScalar(Math.max(0.04, atmoParam * 0.9));
+
+      // Névoa da superfície: oculta o contraste das manchas quando a atmosfera é densa
+      const mistIntensity = Math.max(0.0, (atmoParam - 0.15) * 0.7);
+      p.mistMesh.material.color.copy(p.mistColor).multiplyScalar(mistIntensity);
+
+      // 3) Anéis: rotação lenta
+      if (p.ringsGroup) {
+        p.ringsGroup.rotation.z += dt * 0.04;
+      }
+
+      // 4) Luas: avançam na sua respectiva velocidade orbital
+      p.moonControllers.forEach(mc => {
+        mc.angle += mc.data.speed * dt;
+        mc.pivot.rotation.y = mc.angle;
+      });
+
+      // 5) Elementos
+      p.elementos.forEach(e => e.update(dt));
+
+      // Rótulo posicionado sobre o planeta
+      N.updateLabel(p.label, p.group, p.d.size * sizeParam, nomes);
     });
-
-    p.elementos.forEach(e => e.update(dt));   // piscar, orbitar, etc. — cada elemento cuida do seu
-    N.updateLabel(p.label, p.group, p.d.size, nomes);
-  });
+  };
 })();

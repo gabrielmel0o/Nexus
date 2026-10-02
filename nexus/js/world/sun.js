@@ -138,9 +138,12 @@
           bri = 1;
         }
 
-        // Escala do glow proporcional ao brilho (modularizado por forças externas como eclipse)
+        // Escala do glow proporcional ao brilho (modularizado por forças externas como eclipse e supernova)
         var glowMod = (grupo.userData.glowModifier !== undefined) ? grupo.userData.glowModifier : 1.0;
-        var fatorGlow = Math.max(bri * glowMod, 0.04);
+        var pulseMod = (grupo.userData.supernovaPulse !== undefined)
+          ? grupo.userData.supernovaPulse
+          : ((parent && parent.userData && parent.userData.supernovaPulse !== undefined) ? parent.userData.supernovaPulse : 1.0);
+        var fatorGlow = Math.max(bri * glowMod * pulseMod, 0.04);
         var t1 = g1.baseTamanho * fatorGlow;
         var t2 = g2.baseTamanho * fatorGlow;
         g1.sprite.scale.set(t1, t1, 1);

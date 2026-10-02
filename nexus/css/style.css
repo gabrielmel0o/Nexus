@@ -60,3 +60,7 @@ canvas:active{cursor:grabbing}
   .nexus-panel{top:auto;bottom:0;left:0;right:0;width:100%;max-width:100%;max-height:75vh;border-radius:18px 18px 0 0;padding:20px 18px calc(env(safe-area-inset-bottom,0px) + 16px) 18px;transform:translateY(100%)}
   .nexus-panel.is-visible{transform:translateY(0)}
 }
+
+/* ─── FLASH DE TELA DA SUPERNOVA (NEXUS.events.supernova) ───────────────────── */
+.nexus-supernova-flash{position:fixed;inset:0;pointer-events:none;z-index:999;background:radial-gradient(circle at center,rgba(255,252,235,.42) 0%,rgba(255,215,120,.16) 45%,transparent 75%);opacity:1;transition:opacity .5s cubic-bezier(.2,.8,.4,1)}
+.nexus-supernova-flash.fade-out{opacity:0}

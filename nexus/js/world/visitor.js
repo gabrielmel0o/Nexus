@@ -106,10 +106,15 @@
         sparkSprite.material.rotation += dt * 0.05;
         glowSprite.material.rotation -= dt * 0.03;
 
-        // Pulsação suave do brilho da estrelinha
-        const pulse = 0.88 + 0.12 * Math.sin(t * 2.2);
+        // Pulsação suave do brilho da estrelinha (com suporte ao pulso da supernova)
+        const pulseSupernova = (parent && parent.userData && parent.userData.supernovaPulse !== undefined)
+          ? parent.userData.supernovaPulse
+          : (group.userData.supernovaPulse !== undefined ? group.userData.supernovaPulse : 1.0);
+        const pulse = (0.88 + 0.12 * Math.sin(t * 2.2)) * pulseSupernova;
         sparkSprite.scale.set(4.2 * pulse, 4.2 * pulse, 1);
         glowSprite.scale.set(7.6 * pulse, 7.6 * pulse, 1);
+        sparkSprite.material.color.setScalar(pulseSupernova);
+        glowSprite.material.color.setScalar(pulseSupernova);
 
         // Ondas de gravidade emanando do centro
         for (let i = 0; i < waves.length; i++) {

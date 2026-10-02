@@ -20,6 +20,7 @@
     if (N.updateForces) N.updateForces(dt);  // sentimentos como forças: marés, eclipses, gravidade
     if (arms && arms.update) arms.update(dt);// rotação dos braços e rótulos
     systems.forEach(s => N.updateSystem(s, dt));     // gira estrelas e move planetas
+    if (N.events && N.events.update) N.events.update(dt); // eventos cósmicos como supernova
     if (N.panel && N.panel.update) N.panel.update(); // atualiza painel se capítulo mudar
     
     N.renderer.render(N.scene, N.cam);       // desenha

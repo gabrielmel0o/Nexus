@@ -140,6 +140,9 @@
     if (N.state && typeof N.state.applyChapter === 'function') {
       N.state.applyChapter(0);
     }
+    if (N.events && typeof N.events.cleanup === 'function') {
+      N.events.cleanup();
+    }
     updateUI();
   };
 

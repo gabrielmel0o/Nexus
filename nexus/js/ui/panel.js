@@ -94,16 +94,20 @@
     panelEl.setAttribute('aria-hidden', 'true');
     document.body.appendChild(panelEl);
 
-    // Fecha ao clicar no botão de fechar (×)
+    // Fecha a UI ao clicar no botão de fechar (×), sem interferir no estado da câmera
     panelEl.addEventListener('click', (e) => {
       if (e.target.closest('.nexus-panel-close')) {
-        if (typeof N.deselectBody === 'function') {
-          N.deselectBody();
-        } else {
-          N.panel.close();
-        }
+        N.panel.close();
       }
     });
+
+    // Tecla Esc: se o painel estiver aberto, fecha apenas a UI sem resetar a câmera
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && N.panel && N.panel.isOpen()) {
+        N.panel.close();
+        e.stopImmediatePropagation();
+      }
+    }, true);
 
     return panelEl;
   }

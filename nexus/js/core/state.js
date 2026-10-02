@@ -9,6 +9,7 @@
     chapter: data.chapter || 0,
     current: {},
     target: {},
+    initial: {},
 
     // Retorna o valor atual (suavizado) de um parâmetro
     get(id, nome) {
@@ -27,6 +28,14 @@
       const cap = data.chapters.find(c => c.id === n);
       if (!cap) return;
       this.chapter = n;
+      // Ao voltar ao capítulo 0, restaura todos os parâmetros originais
+      if (n === 0 && this.initial) {
+        for (const id in this.initial) {
+          for (const param in this.initial[id]) {
+            this.setTarget(id, param, this.initial[id][param]);
+          }
+        }
+      }
       if (cap.set) {
         for (const id in cap.set) {
           for (const param in cap.set[id]) {
@@ -58,6 +67,7 @@
     if (obj && obj.params) {
       state.current[id] = { ...obj.params };
       state.target[id] = { ...obj.params };
+      state.initial[id] = { ...obj.params };
     }
   };
 

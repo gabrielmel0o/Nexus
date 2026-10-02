@@ -334,7 +334,32 @@ NEXUS.data = {
           startAngle: 1.0,
           params: { size: 1, mass: 2, signals: 0 },
           moons: [],
-          elements: [],
+          elements: [
+            {
+              id: 'sinal-1',
+              type: 'star',
+              title: 'Sinal',
+              importance: 'medium',
+              signalIndex: 1,
+              params: { appear: 0 }
+            },
+            {
+              id: 'sinal-2',
+              type: 'star',
+              title: 'Sinal',
+              importance: 'medium',
+              signalIndex: 2,
+              params: { appear: 0 }
+            },
+            {
+              id: 'sinal-3',
+              type: 'star',
+              title: 'Sinal',
+              importance: 'medium',
+              signalIndex: 3,
+              params: { appear: 0 }
+            }
+          ],
           info: {
             label: 'Exoplaneta · O eu que poderia ter sido',
             summary: 'Fora do sistema principal existe um exoplaneta: a versão de Helena que teria estudado música e aberto um pequeno estúdio. Não é necessariamente "a vida certa"; revela o que falta no planeta atual — espaço para improvisar.',

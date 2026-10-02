@@ -148,6 +148,7 @@
     // Cria a estrutura de controle da animação
     activeSupernova = {
       elapsed: 0,
+      origin: origin,
       flashSprite: flashSprite,
       shockwaveMesh: shockwaveMesh,
       systemsToCross: systemsToCross
@@ -226,11 +227,18 @@
 
     // ── 3) Pulso de brilho nos sistemas cruzados (×1,3 por 0,5 s) ─────────
     var anyPulsing = false;
+    var vSys = new THREE.Vector3();
     for (var i = 0; i < s.systemsToCross.length; i++) {
       var item = s.systemsToCross[i];
 
+      var currentDist = item.dist;
+      if (!item.triggered && item.system && item.system.group) {
+        item.system.group.getWorldPosition(vSys);
+        currentDist = s.origin.distanceTo(vSys);
+      }
+
       // Dispara o pulso assim que a frente da onda atinge a distância do sistema
-      if (!item.triggered && currentRadius >= item.dist && t <= 3.1) {
+      if (!item.triggered && currentRadius >= currentDist && t <= 3.1) {
         item.triggered = true;
         item.isPulsing = true;
         item.pulseTimer = 0;

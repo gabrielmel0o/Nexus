@@ -13,7 +13,8 @@
   const NUM_PONTOS_TOTAL     = 400;    // Quantidade total de pontos discretos
   const RAIO_INICIAL         = 20;     // Início da espiral próximo ao Eu
   const RAIO_FINAL           = 150;    // Raio máximo dos braços
-  const ROTACAO_VELOCIDADE   = 0.0035; // Rotação lentíssima da estrutura
+  // Velocidade angular alinhada à do sistema mais próximo (criacao, 1 volta em 10 min = 600s)
+  const ROTACAO_VELOCIDADE   = (2 * Math.PI) / 600; // ~0.01047 rad/s
   const DIST_LABEL_VISIVEL   = 65;     // Distância da câmera onde os rótulos de rotina aparecem
   const OPACIDADE_PONTOS     = 0.38;   // Opacidade sutil dos pontos (não ofusca estrelas)
   // ══════════════════════════════════════════════════════════════════
@@ -162,8 +163,10 @@
     return {
       object: armsGroup,
       update(dt) {
-        // Rotação lentíssima dos braços da galáxia
-        armsGroup.rotation.y += dt * ROTACAO_VELOCIDADE;
+        // Rotação lentíssima dos braços da galáxia (sincronizada com a galáxia)
+        if (N.ROTACAO_GALAXIA !== false) {
+          armsGroup.rotation.y += dt * ROTACAO_VELOCIDADE;
+        }
 
         // Atualização dos rótulos das rotinas com a câmera perto
         const camPos = N.cam.position;

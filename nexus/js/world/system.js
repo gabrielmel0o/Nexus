@@ -87,6 +87,27 @@
     // Rótulo com o nome do sistema (vinculado ao id para highlight)
     var label = N.createLabel(systemData.name, systemData.id);
 
+    // ── Rotação diferencial galáctica em torno do Eu [0,0,0] (Extra E4) ──────
+    // Fórmula: ω(r) = ω0 / (1 + r / 40)
+    // ω0 calibrado para o sistema mais próximo (criacao, r≈51.26) dar 1 volta em 10 min (600s).
+    var isEu = systemData.id === 'eu';
+    var isRafael = systemData.id === 'rafael';
+    var x0 = systemData.position[0];
+    var y0 = systemData.position[1];
+    var z0 = systemData.position[2];
+    var rXZ = Math.sqrt(x0 * x0 + z0 * z0);
+    var theta0 = Math.atan2(z0, x0);
+    var OMEGA_0 = (2 * Math.PI / 600) * (1 + 51.264 / 40); // ~0.023893 rad/s
+    var omega = (isEu || isRafael || rXZ < 0.001) ? 0 : (OMEGA_0 / (1 + rXZ / 40));
+
+    var galaxyOrbit = {
+      isStatic: isEu || isRafael || rXZ < 0.001,
+      r: rXZ,
+      y: y0,
+      angle: theta0,
+      omega: omega
+    };
+
     var system = {
       data: systemData,
       group: group,
@@ -94,7 +115,8 @@
       pointLight: pointLight,
       planets: planets,
       orbiters: orbiters,
-      label: label
+      label: label,
+      galaxyOrbit: galaxyOrbit
     };
 
     // Registra no mapa global de sistemas para acesso direto por forças / outros módulos
@@ -109,6 +131,21 @@
 
   // Chamado a cada quadro para cada sistema
   N.updateSystem = function (system, dt) {
+    // 0) Rotação diferencial da galáxia em torno do Eu (eixo Y horizontal)
+    if (system.galaxyOrbit && !system.galaxyOrbit.isStatic) {
+      if (N.ROTACAO_GALAXIA !== false) {
+        system.galaxyOrbit.angle += system.galaxyOrbit.omega * dt;
+        system.group.position.x = system.galaxyOrbit.r * Math.cos(system.galaxyOrbit.angle);
+        system.group.position.z = system.galaxyOrbit.r * Math.sin(system.galaxyOrbit.angle);
+        system.group.position.y = system.galaxyOrbit.y;
+      } else {
+        // Retorna ao estado estático caso ROTACAO_GALAXIA seja desligado
+        system.group.position.x = system.data.position[0];
+        system.group.position.y = system.data.position[1];
+        system.group.position.z = system.data.position[2];
+      }
+    }
+
     // Atualiza o centro (seja ele qual for)
     system.centerObj.update(dt);
 

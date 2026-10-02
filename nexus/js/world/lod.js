@@ -80,10 +80,13 @@
     };
   };
 
+  const sysWorldPos = new THREE.Vector3();
+
   // Chamado a cada quadro, DEPOIS de updatePlanets (para os pontos usarem a posição nova dos planetas).
   N.updateLOD = (system, dt) => {
     const L = system.lod;
-    const dist = N.cam.position.distanceTo(system.group.position);   // câmera até o centro deste sistema
+    system.group.getWorldPosition(sysWorldPos);
+    const dist = N.cam.position.distanceTo(sysWorldPos);   // câmera até o centro deste sistema no mundo
 
     // Alvo de cada coisa neste nível: 1 = aparece, 0 = some.
     let alvo;

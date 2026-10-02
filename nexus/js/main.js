@@ -1,6 +1,13 @@
 /* main.js — o MAESTRO. Não desenha nada: só chama cada peça, na ordem, e mantém o relógio andando. */
 (function () {
+  // ══════════════════════════════════════════════════════════════════
+  // ROTAÇÃO GALÁCTICA (Extra E4)
+  // Com false, o universo volta a ficar parado como era antes.
+  // ══════════════════════════════════════════════════════════════════
+  const ROTACAO_GALAXIA = true;
+
   const N = NEXUS;
+  N.ROTACAO_GALAXIA = ROTACAO_GALAXIA;
   const universe = N.getUniverse();          // 1) pega os dados
 
   N.buildBackground();                       // 2) monta o mundo, peça por peça

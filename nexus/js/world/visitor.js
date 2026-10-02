@@ -147,10 +147,38 @@
           }
         }
 
-        // Posição no mundo interpolada suavemente
-        const curX = p0[0] + (p1[0] - p0[0]) * approach;
-        const curY = p0[1] + (p1[1] - p0[1]) * approach;
-        const curZ = p0[2] + (p1[2] - p0[2]) * approach;
+        // Calcula o corredor dinâmico entre "A criação" e "A vida não escolhida"
+        let pStart = p0;
+        let pEnd = p1;
+
+        if (N.systemsById && N.systemsById['criacao'] && N.systemsById['nao-escolhida']) {
+          const sysCriacao = N.systemsById['criacao'].group;
+          const sysNao = N.systemsById['nao-escolhida'].group;
+
+          const vCriacao = new THREE.Vector3();
+          const vNao = new THREE.Vector3();
+          sysCriacao.getWorldPosition(vCriacao);
+          sysNao.getWorldPosition(vNao);
+
+          // Ponto médio no corredor entre os dois sistemas (destino máximo approach = 1)
+          const midPoint = new THREE.Vector3().addVectors(vCriacao, vNao).multiplyScalar(0.5);
+          midPoint.y += 2.0;
+
+          // Direção radial externa a partir do centro da galáxia
+          const dirOut = new THREE.Vector3(midPoint.x, 0, midPoint.z).normalize();
+
+          // Ponto de entrada externo (vindo de fora da galáxia, approach = 0)
+          const startPoint = midPoint.clone().addScaledVector(dirOut, 60);
+          startPoint.y += 8.0;
+
+          pStart = [startPoint.x, startPoint.y, startPoint.z];
+          pEnd = [midPoint.x, midPoint.y, midPoint.z];
+        }
+
+        // Posição no mundo interpolada suavemente pelo approach
+        const curX = pStart[0] + (pEnd[0] - pStart[0]) * approach;
+        const curY = pStart[1] + (pEnd[1] - pStart[1]) * approach;
+        const curZ = pStart[2] + (pEnd[2] - pStart[2]) * approach;
 
         parent.position.set(curX, curY, curZ);
       }

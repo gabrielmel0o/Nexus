@@ -5,6 +5,7 @@
 
   N.buildBackground();                       // 2) monta o mundo, peça por peça
   N.buildStarfield();
+  if (N.buildHalo) N.buildHalo();            // halo de matéria escura (inconsciente herdado)
   const arms = N.buildArms ? N.buildArms() : null; // braços espirais da galáxia (rotinas)
   
   // Cria um sistema para cada item dos dados

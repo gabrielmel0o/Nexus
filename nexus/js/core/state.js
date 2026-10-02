@@ -79,7 +79,10 @@
     // O centro do sistema usa o próprio ID do sistema como chave
     loadParams(sys.center, sys.id);
     
-    (sys.planets || []).forEach(p => loadParams(p, p.id));
+    (sys.planets || []).forEach(p => {
+      loadParams(p, p.id);
+      (p.elements || []).forEach(el => loadParams(el, el.id));
+    });
     (sys.orbiters || []).forEach(o => loadParams(o, o.id));
   });
 

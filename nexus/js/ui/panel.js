@@ -63,10 +63,25 @@
               }
             }
           }
+
+          // 4. Elementos do planeta (ex: cometa da proposta)
+          if (p.elements) {
+            for (const el of p.elements) {
+              if (el.id === id) {
+                return {
+                  id: el.id,
+                  name: el.title || el.name || 'Elemento',
+                  depth: el.depth !== undefined ? el.depth : (p.depth !== undefined ? p.depth : sys.depth),
+                  params: el.params,
+                  info: el.info
+                };
+              }
+            }
+          }
         }
       }
 
-      // 4. Orbitantes do sistema
+      // 5. Orbitantes do sistema
       if (sys.orbiters) {
         for (const o of sys.orbiters) {
           if (o.id === id) {

@@ -171,7 +171,25 @@ NEXUS.data = {
               }
             }
           ],
-          elements: [],
+          elements: [
+            {
+              id: 'proposta',
+              type: 'comet',
+              title: 'A proposta',
+              params: { approach: 0.1, appear: 1 },
+              info: {
+                label: 'Cometa · Evento',
+                summary: 'Uma proposta para coordenar um grande projeto em outra cidade. Prestigiosa, segura e coerente com a imagem de Helena — mas passageira. Aparece, pressiona a Carreira e, no equilíbrio final, é recusada.',
+                law: 'escala',
+                why: 'A proposta é passageira: aparece, pressiona a Carreira e é recusada. Cometa porque tem duração limitada — não é uma estrutura permanente, é um evento que altera órbitas enquanto passa.',
+                phase: 'em aproximação (cap. 1), recusada e some (cap. 3)',
+                notes: {
+                  1: 'Helena aceita a proposta; o cometa se aproxima ao máximo da Carreira.',
+                  3: 'Helena recusa. A proposta se afasta e desaparece do sistema.'
+                }
+              }
+            }
+          ],
           info: {
             label: 'Gigante gasoso · Área da vida',
             summary: 'A carreira tem enorme massa gravitacional: mesmo quando Helena pensa em outra coisa, ela continua puxando decisões, horários e energia. A atmosfera ficou tão espessa que Helena já não consegue enxergar a superfície.',
@@ -554,7 +572,8 @@ NEXUS.data = {
         rafael:           { approach: 0.55 },
         'amor-rafael':    { strength: 0.8 },
         'eclipse-medo':   { strength: 1.0 },
-        'mare-aprovacao': { strength: 1.0 }
+        'mare-aprovacao': { strength: 1.0 },
+        proposta:         { approach: 0.9, appear: 1 }  // cometa pressiona a Carreira
       }
     },
     {
@@ -575,7 +594,8 @@ NEXUS.data = {
         rafael:           { approach: 0.55 },
         'amor-rafael':    { strength: 0.8 },
         'eclipse-medo':   { strength: 0.7 },
-        'mare-aprovacao': { strength: 0.7 }
+        'mare-aprovacao': { strength: 0.7 },
+        proposta:         { approach: 0.9, appear: 1 }  // ainda presente durante a supernova
       }
     },
     {
@@ -595,7 +615,8 @@ NEXUS.data = {
         rafael:           { approach: 0.9 },
         'amor-rafael':    { strength: 0.5 },
         'eclipse-medo':   { strength: 0.2 },
-        'mare-aprovacao': { strength: 0.35 }
+        'mare-aprovacao': { strength: 0.35 },
+        proposta:         { approach: 0, appear: 0 }    // proposta recusada: some do sistema
       }
     }
   ] // fim de chapters[]

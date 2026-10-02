@@ -107,10 +107,6 @@
     return {
       object: pivo,
       update: function (dt) {
-        // Realce de hover
-        var isHov = (N.hoveredId === systemId);
-        pivo.scale.setScalar(isHov ? 1.06 : 1.0);
-
         // Lê a tensão do state (0 a 1)
         var tension = N.state.get(systemId, 'tension');
 

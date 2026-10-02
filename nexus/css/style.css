@@ -8,3 +8,39 @@ canvas:active{cursor:grabbing}
 .hint{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);left:0;right:0;text-align:center;font-size:12px;opacity:.55;pointer-events:none}
 .lb{position:fixed;left:0;top:0;font-size:12px;font-weight:800;letter-spacing:.06em;pointer-events:none;white-space:nowrap;text-shadow:0 1px 8px var(--deep),0 0 2px var(--deep);transition:opacity .4s}
 .lb.highlight{color:#fff;text-shadow:0 0 8px #c8b6ff,0 0 16px #9b5de5,0 1px 8px var(--deep);font-size:13px;letter-spacing:.08em}
+
+/* ─── PAINEL CONTEXTUAL (NEXUS.panel) ──────────────────────────────────────── */
+.nexus-panel{position:fixed;top:calc(env(safe-area-inset-top,0px) + 20px);right:20px;width:330px;max-width:calc(100vw - 40px);max-height:calc(100vh - 40px);overflow-y:auto;background:rgba(16,8,25,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.08);border-radius:14px;box-shadow:0 16px 40px rgba(0,0,0,.45);padding:22px 20px 20px 20px;box-sizing:border-box;color:#fff;pointer-events:none;opacity:0;transform:translateY(-8px);transition:opacity .32s cubic-bezier(.16,1,.3,1),transform .32s cubic-bezier(.16,1,.3,1);z-index:100;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
+.nexus-panel::-webkit-scrollbar{width:4px}
+.nexus-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:2px}
+.nexus-panel.is-visible{opacity:1;pointer-events:auto;transform:translateY(0)}
+
+.nexus-panel-close{position:absolute;top:14px;right:14px;width:28px;height:28px;background:none;border:none;color:rgba(255,255,255,.5);font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:50%;padding:0;transition:color .2s,background .2s}
+.nexus-panel-close:hover{color:#fff;background:rgba(255,255,255,.1)}
+
+.nexus-panel-label{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.48);margin-bottom:6px;padding-right:26px}
+.nexus-panel-title{font-size:22px;font-weight:800;letter-spacing:-.01em;margin:0 0 10px 0;color:#fff;line-height:1.2;padding-right:24px}
+.nexus-panel-summary{font-size:13px;line-height:1.5;color:rgba(255,255,255,.85);margin:0 0 16px 0}
+
+.nexus-panel-section{margin-bottom:16px}
+.nexus-panel-section-title{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(200,182,255,.85);margin-bottom:6px}
+.nexus-panel-law{font-size:12px;font-style:italic;line-height:1.45;color:rgba(255,255,255,.7);margin:0 0 6px 0;padding-left:8px;border-left:2px solid rgba(155,93,229,.45)}
+.nexus-panel-why{font-size:12.5px;line-height:1.45;color:rgba(255,255,255,.85);margin:0}
+
+.nexus-panel-phase-row{display:flex;align-items:baseline;gap:8px;margin-bottom:6px;font-size:12.5px}
+.nexus-panel-phase-badge{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.5)}
+.nexus-panel-phase-text{color:rgba(255,255,255,.9);font-style:italic}
+.nexus-panel-note{font-size:12px;line-height:1.45;color:#ffe7b0;background:rgba(255,231,176,.08);padding:8px 10px;border-radius:6px;border-left:2px solid #ffd166;margin-top:6px}
+
+.nexus-panel-meta{display:flex;justify-content:space-between;align-items:flex-end;padding-top:14px;border-top:1px solid rgba(255,255,255,.07);margin-top:6px}
+.nexus-panel-meta-item{display:flex;flex-direction:column;gap:6px}
+.nexus-panel-meta-title{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+.nexus-panel-dots{display:flex;align-items:center;gap:5px;height:16px}
+.nexus-panel-dot{width:7px;height:7px;border-radius:50%;border:1px solid rgba(255,255,255,.3);box-sizing:border-box;transition:background .2s,border-color .2s}
+.nexus-panel-dot.is-filled{background:#fff;border-color:#fff;box-shadow:0 0 6px rgba(255,255,255,.6)}
+.nexus-panel-depth{font-size:12.5px;font-weight:800;color:#fff;letter-spacing:.02em}
+
+@media(max-width:600px){
+  .nexus-panel{top:auto;bottom:0;left:0;right:0;width:100%;max-width:100%;max-height:75vh;border-radius:18px 18px 0 0;padding:20px 18px calc(env(safe-area-inset-bottom,0px) + 16px) 18px;transform:translateY(100%)}
+  .nexus-panel.is-visible{transform:translateY(0)}
+}

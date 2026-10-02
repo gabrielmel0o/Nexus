@@ -106,9 +106,6 @@
     return {
       object: pivo,
       update: function (dt) {
-        var isHov = (N.hoveredId === el.id);
-        corpo.scale.setScalar(isHov ? 1.06 : 1.0);
-
         angulo += velocidade * dt;
         corpo.position.x = Math.cos(angulo) * orbitDist;
         corpo.position.z = Math.sin(angulo) * orbitDist;

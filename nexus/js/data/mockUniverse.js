@@ -135,7 +135,19 @@ NEXUS.data = {
               size: 0.28,
               orbit: 3.2,
               speed: 0.85,
-              color: '#f9e4a0'     // dourado quente — aprovação aquecida
+              color: '#f9e4a0',     // dourado quente — aprovação aquecida
+              params: { mass: 3 },
+              info: {
+                label: 'Lua · Faceta da carreira',
+                summary: 'Aumenta as marés quando Helena recebe elogios, críticas ou reconhecimento. Faz a carreira parecer maior do que é.',
+                law: 'massa',
+                why: 'Lua de baixa massa mas órbita próxima: perturba a estabilidade da carreira através de forças de maré.',
+                phase: 'órbita luminosa em torno da carreira',
+                notes: {
+                  1: 'A promoção amplifica a busca por validação externa.',
+                  3: 'A aprovação perde peso; Helena valida as próprias escolhas.'
+                }
+              }
             },
             {
               id: 'medo',
@@ -143,7 +155,20 @@ NEXUS.data = {
               size: 0.22,
               orbit: 4.6,
               speed: 1.3,
-              color: '#8b5cf6'    // violeta escuro — medo como sombra
+              color: '#8b5cf6',    // violeta escuro — medo como sombra
+              params: { mass: 4 },
+              info: {
+                label: 'Lua · Faceta da carreira',
+                summary: 'Provoca eclipses ao passar diante da estrela da criação. Helena continua vendo o trabalho, mas deixa de enxergar por que começou a fazê-lo.',
+                law: 'luz',
+                why: 'Uma lua escura e veloz que não emite luz própria e projeta sua sombra sobre a área mais ativa de sua vida.',
+                phase: 'órbita rápida em sombra periódica',
+                notes: {
+                  1: 'O medo do fracasso atinge o ápice com o novo cargo.',
+                  2: 'A supernova dissipa parte do medo paralisante.',
+                  3: 'O medo desacelera e se torna apenas cautela.'
+                }
+              }
             }
           ],
           elements: [],
@@ -199,7 +224,7 @@ NEXUS.data = {
           spectral: 'redDwarf',
           orbit: 9,
           speed: 0.4,
-          params: { brightness: 1 },
+          params: { brightness: 1, mass: 2 },
           info: {
             label: 'Anã vermelha · Hábito de cuidar',
             summary: 'Helena manda mensagens para os amigos, leva comida quando alguém está doente e lembra de detalhes que os outros esquecem. Não é a parte mais chamativa de sua personalidade, mas continua brilhando mesmo nos períodos difíceis.',
@@ -386,7 +411,7 @@ NEXUS.data = {
           name: 'O sonho recorrente',
           orbit: 18,
           speed: 0.18,
-          params: { reach: 0.55 },
+          params: { reach: 0.55, mass: 1 },
           info: {
             label: 'Corpo em órbita excêntrica · Sonho recorrente',
             summary: 'Em um sonho recorrente, Helena está dentro de um prédio enorme projetado por ela mesma. Quando abre a porta do último cômodo, encontra um céu noturno dentro do quarto. Ela tenta entrar, mas acorda antes.',

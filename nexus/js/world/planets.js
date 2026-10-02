@@ -63,6 +63,10 @@
   function buildPlanet(d, parent) {
     const rng = N.createRNG(d.id);
 
+    // Grupo para a órbita do planeta: permite que forças como gravidade inclinem o plano orbital inteiro
+    const orbitGroup = new THREE.Group();
+    parent.add(orbitGroup);
+
     // 1) Linha discreta da órbita do planeta
     const pts = [];
     for (let i = 0; i <= 128; i++) {
@@ -73,10 +77,11 @@
       new THREE.BufferGeometry().setFromPoints(pts),
       new THREE.LineBasicMaterial({ color: 0x8a8fe8, transparent: true, opacity: 0.2 })
     );
-    parent.add(orbit);
+    orbitGroup.add(orbit);
 
     // Grupo do planeta (posicionado ao longo da órbita)
     const group = new THREE.Group();
+    orbitGroup.add(group);
 
     // Subgrupo visual: corpo, halo, névoa e anéis (é este que escala com o param 'size')
     const visualGroup = new THREE.Group();
@@ -156,6 +161,7 @@
     // Luas: array de { id, name, size, orbit, speed, color }
     // As luas orbitam o grupo do planeta com leve inclinação individual
     const moonControllers = [];
+    const moonsById = {};
     const moons = d.moons || [];
     moons.forEach((m, idx) => {
       const moonPivot = new THREE.Group();
@@ -189,13 +195,15 @@
 
       const moonLabel = N.createLabel(m.name, m.id);
 
-      moonControllers.push({
+      const mc = {
         data: m,
         pivot: moonPivot,
         moonMesh,
         label: moonLabel,
         angle: rng() * Math.PI * 2
-      });
+      };
+      moonControllers.push(mc);
+      moonsById[m.id] = mc;
     });
 
     // Elementos em volta do planeta (ex: estrela de conquista / sinal)
@@ -210,8 +218,6 @@
         }
       });
     }
-
-    parent.add(group);
 
     // Ângulo inicial: usa startAngle fixo se existir; senão, semente determinística
     const angle = typeof d.startAngle === 'number' ? d.startAngle : rng() * Math.PI * 2;
@@ -232,9 +238,10 @@
       };
     });
 
-    return {
+    const planetObj = {
       d,
       group,
+      orbitGroup,
       visualGroup,
       body,
       mistMesh,
@@ -243,11 +250,23 @@
       baseHaloColor,
       ringsGroup,
       moonControllers,
+      moonsById,
       orbit,
       label: N.createLabel(d.name, d.id),
       angle,
-      elementos
+      elementos,
+      // Modificadores dinâmicos de forças
+      scaleModifier: 1.0,
+      haloModifier: 1.0,
+      haloColorFactor: 1.0,
+      colorModifier: new THREE.Color(1, 1, 1)
     };
+
+    // Registra no mapa global para fácil acesso por forças
+    N.planetsById = N.planetsById || {};
+    N.planetsById[d.id] = planetObj;
+
+    return planetObj;
   }
 
   N.buildPlanets = (list, parent) => list.map(d => buildPlanet(d, parent));
@@ -271,9 +290,8 @@
       // 2) Parâmetros dinâmicos via state
       // Escala 'size': afeta corpo, halo e anéis (visualGroup), preservando o raio orbital
       const sizeParam = (N.state && N.state.get(id, 'size')) || (p.d.params && p.d.params.size) || 1.0;
-      const isHovered = (N.hoveredId === id);
-      const hoverMult = isHovered ? 1.06 : 1.0;
-      const finalScale = sizeParam * hoverMult;
+      const scaleMod = (p.scaleModifier !== undefined) ? p.scaleModifier : 1.0;
+      const finalScale = sizeParam * scaleMod;
       p.visualGroup.scale.set(finalScale, finalScale, finalScale);
 
       // 'atmosphere' (0 a 1): controla tamanho e intensidade do halo e a névoa
@@ -284,13 +302,20 @@
 
       // Halo: ajusta escala e escurece a cor aditiva (sem alterar opacity)
       // Quando atmosphere é 0.1 = halo quase imperceptível; quando 0.95 = halo espesso
-      const haloScale = 1.02 + atmoParam * 0.22;
+      const haloMod = (p.haloModifier !== undefined) ? p.haloModifier : 1.0;
+      const haloScale = (1.02 + atmoParam * 0.22) * haloMod;
       p.halo.scale.set(haloScale, haloScale, haloScale);
-      p.halo.material.color.copy(p.baseHaloColor).multiplyScalar(Math.max(0.04, atmoParam * 0.9));
+      const haloColFactor = (p.haloColorFactor !== undefined) ? p.haloColorFactor : 1.0;
+      p.halo.material.color.copy(p.baseHaloColor).multiplyScalar(Math.max(0.04, atmoParam * 0.9 * haloColFactor));
 
       // Névoa da superfície: oculta o contraste das manchas quando a atmosfera é densa
       const mistIntensity = Math.max(0.0, (atmoParam - 0.15) * 0.7);
       p.mistMesh.material.color.copy(p.mistColor).multiplyScalar(mistIntensity);
+
+      // Modificador de cor do corpo do planeta (forças como eclipse escurecem o material, NUNCA opacity)
+      if (p.colorModifier) {
+        p.body.material.color.copy(p.colorModifier);
+      }
 
       // 3) Anéis: rotação lenta
       if (p.ringsGroup) {
@@ -303,7 +328,6 @@
         mc.pivot.rotation.y = mc.angle;
 
         const isMoonHovered = (N.hoveredId === mc.data.id);
-        mc.pivot.scale.setScalar(isMoonHovered ? 1.15 : 1.0);
 
         // Atualiza o rótulo da lua
         const moonAlpha = isMoonHovered ? 1.0 : (nomes * 0.7);

@@ -73,9 +73,6 @@
       return {
         object: group,
         update(dt) {
-          // Realce de hover
-          const isHov = (N.hoveredId === systemId);
-          group.scale.setScalar(isHov ? 1.06 : 1.0);
           // Rotação sutil e contemplativa do anel tênue
           ring.rotation.z += dt * 0.03;
         }
@@ -202,10 +199,6 @@
       object: group,
       update(dt) {
         tempo += dt;
-
-        // Realce de hover
-        const isHov = (N.hoveredId === systemId);
-        group.scale.setScalar(isHov ? 1.06 : 1.0);
 
         // Parâmetro animável 'disk' (0 a 1) do capítulo atual
         let diskParam = N.state ? N.state.get(systemId, 'disk') : 0.9;

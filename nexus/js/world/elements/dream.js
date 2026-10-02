@@ -128,10 +128,6 @@
         // Distância atual ao foco (centro da nebulosa)
         const r = p / (1 + e * Math.cos(theta));
 
-        // Realce de hover
-        const isHov = (N.hoveredId === orbiterId);
-        dreamPivot.scale.setScalar(isHov ? 1.15 : 1.0);
-
         // Velocidade angular kepleriana: dTheta/dt = h / r^2 (acelera perto do centro)
         const baseSpeed = el.speed || 0.18;
         const h = baseSpeed * a * 1.5;

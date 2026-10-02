@@ -14,12 +14,14 @@
 
     // A estrela emite PointLight SOMENTE se o sistema tiver planetas.
     // No universo de Helena, só "criacao" e "nao-escolhida" têm planetas.
+    var pointLight = null;
     if (systemData.planets && systemData.planets.length > 0) {
       var baseColor = systemData.center && systemData.center.color
         ? systemData.center.color
         : '#ffffff';
       var lightColor = new THREE.Color(baseColor).lerp(new THREE.Color(0xffffff), .75);
-      group.add(new THREE.PointLight(lightColor, 1.7, 60, .5));
+      pointLight = new THREE.PointLight(lightColor, 1.7, 60, .5);
+      group.add(pointLight);
     }
 
     // ── Centro visual (por kind: star, binary, blackhole, nebula, visitor…) ──
@@ -89,10 +91,15 @@
       data: systemData,
       group: group,
       centerObj: centerObj,
+      pointLight: pointLight,
       planets: planets,
       orbiters: orbiters,
       label: label
     };
+
+    // Registra no mapa global de sistemas para acesso direto por forças / outros módulos
+    N.systemsById = N.systemsById || {};
+    N.systemsById[systemData.id] = system;
 
     // LOD cuida de esconder planetas, luas, órbitas, nomes e elementos quando longe
     // O centro NUNCA some — o LOD só controla planetas, órbitas, nomes e elementos.

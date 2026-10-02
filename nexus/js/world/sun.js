@@ -131,10 +131,6 @@
       update: function (dt) {
         esfera.rotation.y += dt * .05;
 
-        // Realce de escala quando sob hover do mouse (~1.06)
-        var isHov = (N.hoveredId === systemId);
-        grupo.scale.setScalar(isHov ? 1.06 : 1.0);
-
         // Lê o brilho do state (0 a 1.5)
         var bri = N.state.get(systemId, 'brightness');
         // Sem brightness no state (ex: Eu, trauma) → usa 1 como fallback seguro
@@ -142,8 +138,12 @@
           bri = 1;
         }
 
-        // Escala do glow proporcional ao brilho
-        var fatorGlow = Math.max(bri, 0.05);
+        // Escala do glow proporcional ao brilho (modularizado por forças externas como eclipse e supernova)
+        var glowMod = (grupo.userData.glowModifier !== undefined) ? grupo.userData.glowModifier : 1.0;
+        var pulseMod = (grupo.userData.supernovaPulse !== undefined)
+          ? grupo.userData.supernovaPulse
+          : ((parent && parent.userData && parent.userData.supernovaPulse !== undefined) ? parent.userData.supernovaPulse : 1.0);
+        var fatorGlow = Math.max(bri * glowMod * pulseMod, 0.04);
         var t1 = g1.baseTamanho * fatorGlow;
         var t2 = g2.baseTamanho * fatorGlow;
         g1.sprite.scale.set(t1, t1, 1);

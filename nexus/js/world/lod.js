@@ -112,10 +112,13 @@
     L.pontos.visible = L.cur.pontos > .01;
     if (L.pontos.visible) {                          // copia a posição de cada planeta para o seu pontinho
       const arr = L.geo.attributes.position.array;
+      const vLOD = new THREE.Vector3();
       system.planets.forEach((p, i) => {
-        arr[i * 3] = p.group.position.x;
-        arr[i * 3 + 1] = p.group.position.y;
-        arr[i * 3 + 2] = p.group.position.z;
+        p.group.getWorldPosition(vLOD);
+        system.group.worldToLocal(vLOD);
+        arr[i * 3] = vLOD.x;
+        arr[i * 3 + 1] = vLOD.y;
+        arr[i * 3 + 2] = vLOD.z;
       });
       L.geo.attributes.position.needsUpdate = true;
     }

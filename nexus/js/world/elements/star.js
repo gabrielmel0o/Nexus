@@ -66,13 +66,32 @@
         t += dt;
         pivo.rotation.y += dt * VEL_ORBITA;  // orbita devagar ao redor do planeta
 
+        // Fator appear (multiplica a escala de 0 a 1)
+        let appear = 1.0;
+        if (N.state) {
+          if (el.signalIndex) {
+            // Sinal do planeta: acende conforme state.get(planeta.id, 'signals')
+            const planetId = (planeta && (planeta.id || (planeta.d && planeta.d.id))) || 'exoplaneta';
+            const signals = N.state.get(planetId, 'signals');
+            // O sinal n acende quando signals >= n (escala de 0 a 1 entre n-1 e n)
+            appear = Math.max(0, Math.min(1, signals - (el.signalIndex - 1)));
+          } else if (N.state.current[el.id] && N.state.current[el.id].appear !== undefined) {
+            appear = N.state.get(el.id, 'appear');
+          } else if (el.params && el.params.appear !== undefined) {
+            appear = el.params.appear;
+          }
+        } else if (el.params && el.params.appear !== undefined) {
+          appear = el.params.appear;
+        }
+
         // k vai de 0.5 a 1: usamos para escurecer a COR (não a opacidade, que é do LOD).
         // Escurecer em mistura aditiva = diminuir a luz → efeito de piscar suave.
         const k = .75 + .25 * Math.sin(t * VEL_PISCAR + seed * 6.283);
         camadas.forEach(c => {
           c.mat.color.copy(c.cor).multiplyScalar(k);
-          const e = c.esc * (.8 + .2 * k);   // varia levemente o tamanho junto com o brilho
+          const e = c.esc * (.8 + .2 * k) * appear;   // appear multiplica a escala mantendo o piscar
           c.sprite.scale.set(e, e, 1);
+          c.sprite.visible = (appear > 0.001);
         });
       }
     };

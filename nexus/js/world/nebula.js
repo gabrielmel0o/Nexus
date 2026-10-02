@@ -158,10 +158,6 @@
       update(dt) {
         tempo += dt;
 
-        // Realce de hover
-        const isHov = (N.hoveredId === systemId);
-        group.scale.setScalar(isHov ? 1.06 : 1.0);
-
         // Deriva suave das manchas da nebulosa
         clouds.forEach((c, idx) => {
           c.sprite.position.x = c.basePos.x + Math.sin(tempo * c.driftSpeed + idx) * 0.4;

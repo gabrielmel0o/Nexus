@@ -107,10 +107,6 @@
     return {
       object: pivo,
       update: function (dt) {
-        // Realce de hover
-        var isHov = (N.hoveredId === systemId);
-        pivo.scale.setScalar(isHov ? 1.06 : 1.0);
-
         // Lê a tensão do state (0 a 1)
         var tension = N.state.get(systemId, 'tension');
 
@@ -130,6 +126,13 @@
         // Gira as esferas no próprio eixo
         estA.esfera.rotation.y += dt * 0.06;
         estB.esfera.rotation.y += dt * 0.04;
+
+        // Pulso da supernova no brilho do glow
+        var pulseMod = (parent && parent.userData && parent.userData.supernovaPulse !== undefined)
+          ? parent.userData.supernovaPulse
+          : 1.0;
+        estA.glowMat.color.setScalar(pulseMod);
+        estB.glowMat.color.setScalar(pulseMod);
       }
     };
   };

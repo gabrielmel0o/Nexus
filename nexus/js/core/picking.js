@@ -149,7 +149,13 @@
   // Esc já está tratado em controls.js (chama flyHome),
   // mas também limpa N.selected aqui para manter consistência
   window.addEventListener('keydown', e => {
-    if (e.key === 'Escape') N.deselectBody();
+    if (e.key === 'Escape') {
+      if (N.panel && N.panel.isOpen()) {
+        N.panel.close();
+        return;
+      }
+      N.deselectBody();
+    }
   });
 
   N.picking = { update() {} };

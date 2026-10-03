@@ -38,7 +38,7 @@
     const orbitGeo = new THREE.BufferGeometry();
     const orbitPositions = new Float32Array((orbitPtsCount + 1) * 3);
     orbitGeo.setAttribute('position', new THREE.BufferAttribute(orbitPositions, 3));
-    const orbitLineMat = new THREE.LineBasicMaterial({
+    const orbitLineMat = N.createOrbitMaterial ? N.createOrbitMaterial(0xc8b6ff) : new THREE.LineBasicMaterial({
       color: 0xc8b6ff,
       transparent: true,
       opacity: 0.16,
@@ -109,6 +109,24 @@
     let theta = 0; // Ângulo orbital verdadeiro
     const rMax = el.orbit || 18; // Distância do afélio (ponto mais distante)
     let trailTimer = 0;
+
+    if (N.registerOrbit) {
+      const dreamWP = new THREE.Vector3();
+      N.registerOrbit({
+        line: orbitLine,
+        category: 'major',
+        getBodyPos: function () {
+          bodyMesh.getWorldPosition(dreamWP);
+          return dreamWP;
+        },
+        getPhase: function () {
+          return theta / (Math.PI * 2);
+        },
+        getDir: function () {
+          return 1.0;
+        }
+      });
+    }
 
     return {
       object: group,

@@ -10,6 +10,8 @@
      flyHome()    — volta à visão geral
      update(dt)   — chamado a cada quadro */
 (function () {
+  const CAMERA_GIRO_AUTOMATICO = false;
+
   const N = NEXUS;
   const canvas = N.renderer.domElement;
 
@@ -113,7 +115,7 @@
     // Chamado a cada quadro pelo main.js
     update(dt) {
       // Deriva lenta quando ninguém mexe
-      if (!dragging) T.th += dt * .025;
+      if (!dragging && CAMERA_GIRO_AUTOMATICO) T.th += dt * .025;
 
       // Se há um corpo selecionado, atualiza o alvo seguindo sua posição atual
       if (followFn) {

@@ -97,7 +97,7 @@
     var z0 = systemData.position[2];
     var rXZ = Math.sqrt(x0 * x0 + z0 * z0);
     var theta0 = Math.atan2(z0, x0);
-    var OMEGA_0 = (2 * Math.PI / 600) * (1 + 51.264 / 40); // ~0.023893 rad/s
+    var OMEGA_0 = (2 * Math.PI / N.VOLTA_GALAXIA_SEGUNDOS) * (1 + 51.264 / 40);
     var omega = (isEu || isRafael || rXZ < 0.001) ? 0 : (OMEGA_0 / (1 + rXZ / 40));
 
     var galaxyOrbit = {
@@ -108,6 +108,39 @@
       omega: omega
     };
 
+    // ── Linha de órbita do sistema em torno de O Eu (Correção 2) ──────────
+    var galaxyOrbitLine = null;
+    if (!galaxyOrbit.isStatic) {
+      var ptsCount = 128;
+      var pts = [];
+      for (var i = 0; i <= ptsCount; i++) {
+        var a = (i / ptsCount) * Math.PI * 2;
+        pts.push(new THREE.Vector3(Math.cos(a) * rXZ, y0, Math.sin(a) * rXZ));
+      }
+      var lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
+      var lineMat = N.createOrbitMaterial ? N.createOrbitMaterial(0x8a8fe8) : new THREE.LineBasicMaterial({ color: 0x8a8fe8, transparent: true, opacity: 0.2 });
+      galaxyOrbitLine = new THREE.Line(lineGeo, lineMat);
+      N.scene.add(galaxyOrbitLine);
+
+      if (N.registerOrbit) {
+        var sysOrbitWP = new THREE.Vector3();
+        N.registerOrbit({
+          line: galaxyOrbitLine,
+          category: 'major',
+          getBodyPos: function () {
+            group.getWorldPosition(sysOrbitWP);
+            return sysOrbitWP;
+          },
+          getPhase: function () {
+            return galaxyOrbit ? (galaxyOrbit.angle / (Math.PI * 2)) : 0;
+          },
+          getDir: function () {
+            return (galaxyOrbit.omega < 0) ? -1.0 : 1.0;
+          }
+        });
+      }
+    }
+
     var system = {
       data: systemData,
       group: group,
@@ -116,7 +149,8 @@
       planets: planets,
       orbiters: orbiters,
       label: label,
-      galaxyOrbit: galaxyOrbit
+      galaxyOrbit: galaxyOrbit,
+      galaxyOrbitLine: galaxyOrbitLine
     };
 
     // Registra no mapa global de sistemas para acesso direto por forças / outros módulos
@@ -155,8 +189,11 @@
     // "nomes" = quão visíveis os nomes estão agora (0 a 1). No 1º quadro o LOD ainda não calculou: começa em 0.
     var nomes = system.lod.cur ? system.lod.cur.nomes : 0;
 
-    // Atualiza o rótulo do sistema (posicionado logo acima do centro)
-    N.updateLabel(system.label, system.group, 4, nomes);
+    // Atualiza o rótulo do sistema com a curva de distância da categoria 'major'
+    var sysWP = new THREE.Vector3();
+    system.group.getWorldPosition(sysWP);
+    var sysLabelAlpha = N.getLabelDistFactor ? N.getLabelDistFactor(sysWP, 'major') : nomes;
+    N.updateLabel(system.label, system.group, 4, sysLabelAlpha);
 
     if (system.planets.length > 0) {
       N.updatePlanets(system.planets, dt, nomes);

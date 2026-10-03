@@ -7,7 +7,14 @@
 
    Cada sistema tem: id, name, position, depth, center + planets + orbiters
    Cada corpo tem:   params (valores animáveis do cap. 0) + info (texto do painel)
-   Os capítulos só alteram os params via "set". */
+   Os capítulos só alteram os params via "set".
+
+   ALIGN_Y: valor único que define o Y mundial de todos os centros dos sistemas.
+   Todos os Y de position[] usam esta constante — não espalhar este valor em outros arquivos. */
+
+// Constante única de alinhamento vertical.
+// Para mudar o plano base da galáxia, edite SÓ aqui.
+NEXUS.ALIGN_Y = 0;
 
 NEXUS.data = {
 
@@ -48,6 +55,7 @@ NEXUS.data = {
       center: {
         kind: 'blackhole',
         variant: 'self',
+        subtype: 'supermassivo',
         color: '#1a0a2e',       // quase preto; o Eu não emite luz própria
         patch: ['#2a1045', '#150830', '#0d0520'],
         params: { mass: 10 },
@@ -68,7 +76,7 @@ NEXUS.data = {
     {
       id: 'criacao',
       name: 'A criação',
-      position: [48, 3, 18],
+      position: [48, 0, 18],   // Y = ALIGN_Y (era 3)
       depth: 1,   // 1 = recente (acessível)
       center: {
         kind: 'star',
@@ -260,7 +268,7 @@ NEXUS.data = {
       id: 'desejo-seguranca',
       name: 'Desejo e segurança',
       // Cores das antigas estrelas "Corpo e mente" (vermelha) e "Pessoas" (azul)
-      position: [-34, -4, -52],
+      position: [-34, 0, -52],  // Y = ALIGN_Y (era -4)
       depth: 1,
       center: {
         kind: 'binary',
@@ -291,7 +299,7 @@ NEXUS.data = {
     {
       id: 'mae',
       name: 'A voz da mãe',
-      position: [-96, 6, 6],
+      position: [-96, 0, 6],
       depth: 3,   // 3 = inconsciente (longe, mas muito pesada)
       center: {
         kind: 'star',
@@ -319,7 +327,7 @@ NEXUS.data = {
     {
       id: 'nao-escolhida',
       name: 'A vida não escolhida',
-      position: [78, -8, -78],
+      position: [78, 0, -78],
       depth: 2,   // 2 = memória recente (acessível em certos momentos)
       center: {
         kind: 'star',
@@ -398,7 +406,7 @@ NEXUS.data = {
     {
       id: 'trauma',
       name: 'A perda da mãe',
-      position: [-82, -12, -88],
+      position: [-82, 0, -88],
       depth: 3,   // 3 = inconsciente (profundo, pesado)
       center: {
         kind: 'blackhole',
@@ -425,7 +433,7 @@ NEXUS.data = {
     {
       id: 'nebulosa',
       name: 'O que ainda não tem nome',
-      position: [112, 6, 62],
+      position: [112, 0, 62],
       depth: 3,   // 3 = inconsciente (revelada à noite, não de dia)
       center: {
         kind: 'nebula',
@@ -475,7 +483,7 @@ NEXUS.data = {
       id: 'rafael',
       name: 'Rafael',
       // Posição inicial do path (approach=0.2 no cap. 0)
-      position: [140, 10, -32],
+      position: [140, 0, -32],
       depth: 2,   // 2 = memória recente / presente
       center: {
         kind: 'visitor',
@@ -483,7 +491,7 @@ NEXUS.data = {
         patch: ['#ffe599', '#e6a800', '#fff0b0'],
         params: { mass: 5, approach: 0.2 },
         // Caminho que Rafael percorre (approach 0 = longe, 1 = próximo)
-        path: [[150, 12, -30], [92, 0, -42]],
+        path: [[150, 0, -30], [92, 0, -42]],
         info: {
           label: 'Corpo visitante · Amor como gravidade',
           summary: 'Rafael é um fotógrafo que vive de trabalhos temporários. Não é um planeta nem uma estrela do sistema: é um corpo externo que alterou as órbitas existentes. A presença dele puxa Helena em direção ao exoplaneta da vida criativa.',

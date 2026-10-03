@@ -103,6 +103,32 @@
     var velocidade = el.speed || 0.4;
     var angulo = 0;
 
+    // Linha de órbita da estrela companheira
+    var cPts = [];
+    for (var i = 0; i <= 64; i++) {
+      var a = (i / 64) * Math.PI * 2;
+      cPts.push(new THREE.Vector3(Math.cos(a) * orbitDist, 0, Math.sin(a) * orbitDist));
+    }
+    var cGeo = new THREE.BufferGeometry().setFromPoints(cPts);
+    var cMat = N.createOrbitMaterial ? N.createOrbitMaterial(col.getHex()) : new THREE.LineBasicMaterial({ color: col, transparent: true, opacity: 0.2 });
+    var cOrbitLine = new THREE.Line(cGeo, cMat);
+    pivo.add(cOrbitLine);
+
+    if (N.registerOrbit) {
+      var compWP = new THREE.Vector3();
+      N.registerOrbit({
+        line: cOrbitLine,
+        category: 'major',
+        getBodyPos: function () {
+          corpo.getWorldPosition(compWP);
+          return compWP;
+        },
+        getPhase: function () {
+          return angulo / (Math.PI * 2);
+        }
+      });
+    }
+
     return {
       object: pivo,
       update: function (dt) {

@@ -172,6 +172,17 @@
     var angle = seed * Math.PI * 2;
     var label = N.createLabel(el.title || 'A proposta', id);
 
+    // Linha discreta da órbita do cometa
+    var cPts = [];
+    for (var i = 0; i <= 128; i++) {
+      var ca = (i / 128) * Math.PI * 2;
+      cPts.push(new THREE.Vector3(Math.cos(ca) * DIST_LONGE, 0, Math.sin(ca) * DIST_LONGE));
+    }
+    var cGeo = new THREE.BufferGeometry().setFromPoints(cPts);
+    var cMat = N.createOrbitMaterial ? N.createOrbitMaterial(0xffa07a) : new THREE.LineBasicMaterial({ color: 0xffa07a, transparent: true, opacity: 0.2 });
+    var cometOrbitLine = new THREE.Line(cGeo, cMat);
+    pivo.add(cometOrbitLine);
+
     // Registra no mapa de seleção
     var cometaWP = new THREE.Vector3();
     N.pickRegistry = N.pickRegistry || {};
@@ -182,6 +193,24 @@
       },
       radius: RAIO_NUCLEO * 3.0
     };
+
+    if (N.registerOrbit) {
+      var cWP = new THREE.Vector3();
+      N.registerOrbit({
+        line: cometOrbitLine,
+        category: 'comet',
+        getBodyPos: function () {
+          nucleo.getWorldPosition(cWP);
+          return cWP;
+        },
+        getPhase: function () {
+          return angle / (Math.PI * 2);
+        },
+        getDir: function () {
+          return 1.0;
+        }
+      });
+    }
 
     var qTail = new THREE.Quaternion();
     var eixoX = new THREE.Vector3(1, 0, 0);

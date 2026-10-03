@@ -73,10 +73,9 @@
       const a = (i / 128) * Math.PI * 2;
       pts.push(new THREE.Vector3(Math.cos(a) * d.orbit, 0, Math.sin(a) * d.orbit));
     }
-    const orbit = new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints(pts),
-      new THREE.LineBasicMaterial({ color: 0x8a8fe8, transparent: true, opacity: 0.2 })
-    );
+    const orbitGeo = new THREE.BufferGeometry().setFromPoints(pts);
+    const orbitMat = N.createOrbitMaterial ? N.createOrbitMaterial(0x8a8fe8) : new THREE.LineBasicMaterial({ color: 0x8a8fe8, transparent: true, opacity: 0.2 });
+    const orbit = new THREE.Line(orbitGeo, orbitMat);
     orbitGroup.add(orbit);
 
     // Grupo do planeta (posicionado ao longo da órbita)
@@ -194,17 +193,47 @@
 
       group.add(moonPivot);
 
+      // Linha discreta da órbita da lua
+      const mPts = [];
+      for (let i = 0; i <= 64; i++) {
+        const a = (i / 64) * Math.PI * 2;
+        mPts.push(new THREE.Vector3(Math.cos(a) * m.orbit, 0, Math.sin(a) * m.orbit));
+      }
+      const mGeo = new THREE.BufferGeometry().setFromPoints(mPts);
+      const mMat = N.createOrbitMaterial ? N.createOrbitMaterial(m.color || 0x8a8fe8) : new THREE.LineBasicMaterial({ color: 0x8a8fe8, transparent: true, opacity: 0.2 });
+      const moonOrbitLine = new THREE.Line(mGeo, mMat);
+      moonPivot.add(moonOrbitLine);
+
       const moonLabel = N.createLabel(m.name, m.id);
 
       const mc = {
         data: m,
         pivot: moonPivot,
         moonMesh,
+        moonOrbitLine,
         label: moonLabel,
         angle: rng() * Math.PI * 2
       };
       moonControllers.push(mc);
       moonsById[m.id] = mc;
+
+      if (N.registerOrbit) {
+        const moonWP = new THREE.Vector3();
+        N.registerOrbit({
+          line: moonOrbitLine,
+          category: 'moon',
+          getBodyPos: function () {
+            moonMesh.getWorldPosition(moonWP);
+            return moonWP;
+          },
+          getPhase: function () {
+            return mc.angle / (Math.PI * 2);
+          },
+          getDir: function () {
+            return (m.speed < 0) ? -1.0 : 1.0;
+          }
+        });
+      }
     });
 
     // Elementos em volta do planeta (ex: estrela de conquista / sinal)
@@ -264,6 +293,24 @@
       haloColorFactor: 1.0,
       colorModifier: new THREE.Color(1, 1, 1)
     };
+
+    if (N.registerOrbit) {
+      const pWP = new THREE.Vector3();
+      N.registerOrbit({
+        line: orbit,
+        category: 'planet',
+        getBodyPos: function () {
+          group.getWorldPosition(pWP);
+          return pWP;
+        },
+        getPhase: function () {
+          return planetObj.angle / (Math.PI * 2);
+        },
+        getDir: function () {
+          return (d.speed < 0) ? -1.0 : 1.0;
+        }
+      });
+    }
 
     // Registra no mapa global para fácil acesso por forças
     N.planetsById = N.planetsById || {};
@@ -336,22 +383,26 @@
       }
 
       // 4) Luas: avançam na sua respectiva velocidade orbital
+      // 4) Luas: avançam na sua respectiva velocidade orbital
+      const moonWP = new THREE.Vector3();
       p.moonControllers.forEach(mc => {
         mc.angle += mc.data.speed * dt;
         mc.pivot.rotation.y = mc.angle;
 
-        const isMoonHovered = (N.hoveredId === mc.data.id);
-
-        // Atualiza o rótulo da lua
-        const moonAlpha = isMoonHovered ? 1.0 : (nomes * 0.7);
+        // Atualiza o rótulo da lua com a curva de distância da categoria 'moon'
+        mc.moonMesh.getWorldPosition(moonWP);
+        const moonAlpha = N.getLabelDistFactor ? N.getLabelDistFactor(moonWP, 'moon') : (nomes * 0.7);
         N.updateLabel(mc.label, mc.moonMesh, mc.data.size, moonAlpha);
       });
 
       // 5) Elementos
       p.elementos.forEach(e => e.update(dt, nomes));
 
-      // Rótulo posicionado sobre o planeta
-      N.updateLabel(p.label, p.group, p.d.size * finalScale, nomes);
+      // Rótulo posicionado sobre o planeta com a curva de distância da categoria 'planet'
+      const planetWP = new THREE.Vector3();
+      p.group.getWorldPosition(planetWP);
+      const planetLabelAlpha = N.getLabelDistFactor ? N.getLabelDistFactor(planetWP, 'planet') : nomes;
+      N.updateLabel(p.label, p.group, p.d.size * finalScale, planetLabelAlpha);
     });
   };
 })();

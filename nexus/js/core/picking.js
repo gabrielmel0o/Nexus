@@ -33,8 +33,8 @@
       // Corpo registrado ainda não teve seu objeto montado — ignora voo
       return;
     }
-    // Distância de chegada: 4× o raio do corpo, mínimo 8
-    const arrivalR = Math.max(entry.radius * 4, 8);
+    // Distância de chegada: 4× o raio do corpo, mínimo 0.005
+    const arrivalR = Math.max(entry.radius * 4, 0.005);
     N.controls.flyTo(entry.getPos, arrivalR, entry.radius);
   };
 
@@ -65,12 +65,35 @@
     mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
     mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
     raycaster.setFromCamera(mouse, N.cam);
-    const hits = raycaster.intersectObjects(N.scene.children, true);
-    for (let i = 0; i < hits.length; i++) {
-      const id = findPickId(hits[i].object);
-      if (id) return id;
+    
+    let closestId = null;
+    let closestDist = Infinity;
+    
+    const vFov = N.cam.fov * Math.PI / 180;
+    const clientHeight = rect.height;
+
+    for (let id in N.pickRegistry) {
+      const entry = N.pickRegistry[id];
+      const pos = entry.getPos();
+      const distToCam = N.cam.position.distanceTo(pos);
+      
+      const visibleHeight = 2 * Math.tan(vFov / 2) * distToCam;
+      const pxSize = visibleHeight / clientHeight;
+      const targetRadius = Math.max(entry.radius * 1.35, 14 * pxSize);
+      
+      const sphere = new THREE.Sphere(pos, targetRadius);
+      // Math intersection returns the point (Vector3) or null in r128
+      const intersect = raycaster.ray.intersectSphere(sphere, new THREE.Vector3());
+      
+      if (intersect) {
+        const d = raycaster.ray.origin.distanceTo(intersect);
+        if (d < closestDist) {
+          closestDist = d;
+          closestId = id;
+        }
+      }
     }
-    return null;
+    return closestId;
   }
 
   function updateHover(id) {

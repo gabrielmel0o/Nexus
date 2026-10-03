@@ -40,8 +40,23 @@
     // Registra o CENTRO do sistema no mapa de seleção.
     // getPos: função que devolve a posição ATUAL do centro no mundo (o grupo do sistema).
     // radius: tamanho aproximado do centro — usado pelo flyTo para não entrar dentro.
-    var RAIOS_CENTRO = { star: 4, binary: 10, blackhole: 6, nebula: 9, visitor: 3 };
-    var centroRadius = RAIOS_CENTRO[(systemData.center && systemData.center.kind) || 'star'] || 4;
+    var kindToClass = {
+      'star': (systemData.center && systemData.center.spectral === 'whiteDwarf') ? 'anaBranca' :
+              (systemData.center && systemData.center.spectral === 'brownDwarf') ? 'anaBrancaMarrom' :
+              (systemData.center && systemData.center.spectral === 'redDwarf') ? 'anaVermelha' : 'estrelaPadrao',
+      'binary': 'estrelaBinaria',
+      'blackhole': (systemData.id === 'eu') ? 'eu' : 'buracoNegroEstelar',
+      'nebula': 'estrelaPadrao', // Fallback genérico para nebulosa
+      'visitor': 'rafael'
+    };
+    var classeId = kindToClass[(systemData.center && systemData.center.kind) || 'star'] || 'estrelaPadrao';
+    var centroRadius = N.scale ? N.scale.raio(classeId) : 4.0;
+    
+    // Para binárias, o raio registrado é o da órbita das estrelas, não de uma estrela só
+    if (systemData.center && systemData.center.kind === 'binary') {
+      centroRadius = 8.0; // Usa DIST_MAX do binary.js, mas como as órbitas não foram alteradas, deixo valor fixo
+    }
+    
     var centroWP = new THREE.Vector3();
     N.pickRegistry[systemData.id] = {
       getPos: function () {
@@ -70,6 +85,11 @@
 
         // Registra o orbitante: getPos segue o objeto 3D em movimento
         var orbWP = new THREE.Vector3();
+        var orbRadius = 1.5;
+        if (N.scale) {
+          if (orb.type === 'companion') orbRadius = N.scale.raio('anaVermelha');
+          if (orb.type === 'dream') orbRadius = N.scale.raio('sonhoRecorrente');
+        }
         N.pickRegistry[orb.id] = {
           getPos: (function (obj) {
             return function () {
@@ -77,7 +97,7 @@
               return orbWP;
             };
           })(inst.object),
-          radius: 1.5  // anã vermelha / sonho recorrente são pequenos
+          radius: orbRadius
         };
       } else {
         console.warn('Orbiter type \'' + orb.type + '\' sem builder. Ignorado.');

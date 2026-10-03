@@ -23,7 +23,7 @@
   const T = { ...S };
 
   // Limites de zoom: ajustados dinamicamente ao selecionar um corpo
-  let rMin = 14;
+  let rMin = 0.01;
   let rMax = 260;
   const clampR = r => Math.min(rMax, Math.max(rMin, r));
 
@@ -91,7 +91,7 @@
       lookT.copy(pos);
 
       // Define zoom mínimo como 1.4× o raio do corpo e máximo normal
-      rMin = Math.max(bodyRadius * 1.4, 3);
+      rMin = Math.max(bodyRadius * 1.4, 0.005);
       rMax = 260;
 
       // Distância de chegada confortável
@@ -105,7 +105,7 @@
     flyHome() {
       followFn = null;
       lookT.set(0, 0, 0);
-      rMin = 14;
+      rMin = 0.01;
       rMax = 260;
       T.r = clampR(Math.max(S.r, HOME_R)); // não sai muito perto
       flyProgress = 0;
@@ -141,6 +141,17 @@
       );
       N.cam.position.copy(look).add(camOffset);
       N.cam.lookAt(look);
+
+      // near/far dinâmicos baseados na distância ao alvo (S.r)
+      const newNear = Math.max(0.0005, S.r * 0.02);
+      const newFar = Math.min(Math.max(S.r * 4000, 1000), 2000);
+      
+      // Chama updateProjectionMatrix apenas quando muda muito (evita overhead)
+      if (Math.abs(N.cam.near - newNear) / newNear > 0.01 || Math.abs(N.cam.far - newFar) / newFar > 0.01) {
+        N.cam.near = newNear;
+        N.cam.far = newFar;
+        N.cam.updateProjectionMatrix();
+      }
     }
   };
 })();

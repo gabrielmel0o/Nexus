@@ -104,7 +104,7 @@
         paleta:       [0xFFF3A8, 0xFFD84A, 0xFF9A1F, 0xD9632B, 0x9A3F6E, 0x5B2A9E, 0x3B2478],
         paletaTracos: [0xFFFFFF, 0xFFE9A0, 0xFFB347, 0xB77CF0],
         semente:      systemId,
-        inclinacao:   { rx: Math.PI / 2 - 0.25, ry: 0.1, rz: 0 }
+        inclinacao:   { rx: Math.PI / 2 - 0.16, ry: 0, rz: 0 }
       });
       group.add(disco.object);
 
@@ -147,7 +147,7 @@
       paleta:       [0xFF9A9A, 0xFF7AA8, 0xE0309A, 0xB03BC8, 0x7B3FD0, 0x4A2A9A, 0x2E2070],
       paletaTracos: [0xFFD6E4, 0xFFB5CF, 0xF0A0FF, 0xB89CFF],
       semente:      systemId,
-      inclinacao:   { rx: Math.PI / 2 - 0.35, ry: 0, rz: 0.15 },
+      inclinacao:   { rx: -0.16, ry: Math.PI / 2, rz: 0 },
       velocidades:  [0.08, 0.048, 0.024] // velocidades um pouco maiores que O Eu
     });
     group.add(discoTrauma.object);

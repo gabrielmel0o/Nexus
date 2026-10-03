@@ -48,6 +48,7 @@ NEXUS.data = {
       center: {
         kind: 'blackhole',
         variant: 'self',
+        subtype: 'supermassivo',
         color: '#1a0a2e',       // quase preto; o Eu não emite luz própria
         patch: ['#2a1045', '#150830', '#0d0520'],
         params: { mass: 10 },

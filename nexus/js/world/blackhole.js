@@ -27,6 +27,33 @@
     return diskParticleTex;
   }
 
+  // Textura radial do disco de acreção para O Eu
+  let accretionDiskTex = null;
+  function getAccretionDiskTex() {
+    if (accretionDiskTex) return accretionDiskTex;
+    accretionDiskTex = N.makeTexture(512, 512, (g) => {
+      const cx = 256, cy = 256;
+      const grad = g.createRadialGradient(cx, cy, 0, cx, cy, 256);
+      
+      const rInner = 1.3 / 3.5; // ~0.371
+      
+      grad.addColorStop(0, 'rgba(0,0,0,0)');
+      grad.addColorStop(Math.max(0, rInner - 0.01), 'rgba(0,0,0,0)');
+      // Borda interna: branco quente (bem fino)
+      grad.addColorStop(rInner, 'rgba(255,245,230,1)');
+      // Laranja suave
+      grad.addColorStop(rInner + 0.05, 'rgba(255,160,80,0.8)');
+      // Violeta 0x5B2A9E -> (91, 42, 158)
+      grad.addColorStop(rInner + 0.25, 'rgba(91,42,158,0.5)');
+      // Transparente na borda
+      grad.addColorStop(1, 'rgba(91,42,158,0)');
+      
+      g.fillStyle = grad;
+      g.fillRect(0, 0, 512, 512);
+    });
+    return accretionDiskTex;
+  }
+
   N.centerBuilders.blackhole = function (systemData, parent) {
     const center = systemData.center || {};
     const variant = center.variant || 'self';
@@ -54,12 +81,15 @@
       hitSphere.userData.pickId = systemId;
       group.add(hitSphere);
 
-      // Anel finíssimo e muito sutil (índigo/lilás tênue)
-      const ringGeo = new THREE.RingGeometry(raioEu * 1.05, raioEu * 1.09, 96);
+      // Disco de acreção largo e plano
+      const innerRadius = raioEu * 1.3;
+      const outerRadius = raioEu * 3.5;
+      const ringGeo = new THREE.RingGeometry(innerRadius, outerRadius, 96);
       const ringMat = new THREE.MeshBasicMaterial({
-        color: 0x7b68ee,
+        map: getAccretionDiskTex(),
+        color: 0xffffff, // A cor base é branca para não distorcer a textura do gradiente
         transparent: true,
-        opacity: 0.28,
+        opacity: 0.6,
         side: THREE.DoubleSide,
         blending: THREE.AdditiveBlending,
         depthWrite: false
@@ -73,8 +103,8 @@
       return {
         object: group,
         update(dt) {
-          // Rotação sutil e contemplativa do anel tênue
-          ring.rotation.z += dt * 0.03;
+          // Rotação lenta no próprio plano
+          ring.rotation.z -= dt * 0.02;
         }
       };
     }

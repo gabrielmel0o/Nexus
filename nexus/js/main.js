@@ -4,10 +4,13 @@
   // ROTAÇÃO GALÁCTICA (Extra E4)
   // Com false, o universo volta a ficar parado como era antes.
   // ══════════════════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════════
   const ROTACAO_GALAXIA = true;
+  const VOLTA_GALAXIA_SEGUNDOS = 240;
 
   const N = NEXUS;
   N.ROTACAO_GALAXIA = ROTACAO_GALAXIA;
+  N.VOLTA_GALAXIA_SEGUNDOS = VOLTA_GALAXIA_SEGUNDOS;
   const universe = N.getUniverse();          // 1) pega os dados
 
   N.buildBackground();                       // 2) monta o mundo, peça por peça

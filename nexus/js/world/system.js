@@ -97,7 +97,7 @@
     var z0 = systemData.position[2];
     var rXZ = Math.sqrt(x0 * x0 + z0 * z0);
     var theta0 = Math.atan2(z0, x0);
-    var OMEGA_0 = (2 * Math.PI / 600) * (1 + 51.264 / 40); // ~0.023893 rad/s
+    var OMEGA_0 = (2 * Math.PI / N.VOLTA_GALAXIA_SEGUNDOS) * (1 + 51.264 / 40);
     var omega = (isEu || isRafael || rXZ < 0.001) ? 0 : (OMEGA_0 / (1 + rXZ / 40));
 
     var galaxyOrbit = {

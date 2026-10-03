@@ -13,13 +13,14 @@
   const NUM_PONTOS_TOTAL     = 400;    // Quantidade total de pontos discretos
   const RAIO_INICIAL         = 20;     // Início da espiral próximo ao Eu
   const RAIO_FINAL           = 150;    // Raio máximo dos braços
-  // Velocidade angular alinhada à do sistema mais próximo (criacao, 1 volta em 10 min = 600s)
-  const ROTACAO_VELOCIDADE   = (2 * Math.PI) / 600; // ~0.01047 rad/s
+  // Velocidade angular alinhada à do sistema mais próximo
   const DIST_LABEL_VISIVEL   = 65;     // Distância da câmera onde os rótulos de rotina aparecem
   const OPACIDADE_PONTOS     = 0.38;   // Opacidade sutil dos pontos (não ofusca estrelas)
   // ══════════════════════════════════════════════════════════════════
 
   N.buildArms = function () {
+    const ROTACAO_VELOCIDADE = (2 * Math.PI) / (N.VOLTA_GALAXIA_SEGUNDOS || 240);
+
     const armsGroup = new THREE.Group();
     N.scene.add(armsGroup);
 

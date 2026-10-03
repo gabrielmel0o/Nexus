@@ -88,11 +88,10 @@
     visualGroup.userData.pickId = d.id;
     group.add(visualGroup);
 
-    // Corpo esférico com material toon e textura gerada com semente
+    // Corpo esférico com material lambert para reagir à luz real da estrela
     const bodyTex = createPlanetTexture(d, rng);
     const bodyGeo = new THREE.SphereGeometry(d.size, 48, 32);
-    const bodyMat = new THREE.MeshToonMaterial({
-      gradientMap: N.toon,
+    const bodyMat = new THREE.MeshLambertMaterial({
       map: bodyTex
     });
     const body = new THREE.Mesh(bodyGeo, bodyMat);
@@ -172,9 +171,8 @@
 
       const moonMesh = new THREE.Mesh(
         new THREE.SphereGeometry(m.size, 24, 16),
-        new THREE.MeshToonMaterial({
-          color: m.color || '#e9ecef',
-          gradientMap: N.toon
+        new THREE.MeshLambertMaterial({
+          color: m.color || '#e9ecef'
         })
       );
       moonMesh.userData.pickId = m.id;

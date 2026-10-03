@@ -15,4 +15,7 @@ NEXUS.buildBackground = function () {
   N.scene.add(new THREE.Mesh(
     new THREE.SphereGeometry(1000, 32, 16),
     new THREE.MeshBasicMaterial({ map: texture, side: THREE.BackSide })));
+
+  // Luz ambiente muito fraca para que a face não-iluminada dos planetas não fique 100% preta
+  N.scene.add(new THREE.AmbientLight(0xffffff, 0.15));
 };

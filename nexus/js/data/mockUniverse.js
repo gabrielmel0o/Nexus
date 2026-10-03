@@ -99,7 +99,7 @@ NEXUS.data = {
           kind: 'rocky',
           base: '#c9714a',         // terracota quente — concreto, orgânico
           patch: ['#e8956a', '#a0522d', '#d4895f'],
-          size: 1.0,
+          size: (NEXUS.scale ? NEXUS.scale.raio('rochoso') : 0.045), // 90 UC / 2 * 0.001 = 0.045 u
           orbit: 10,
           speed: 0.13,
           startAngle: 0.8,
@@ -124,7 +124,7 @@ NEXUS.data = {
           kind: 'gas',
           base: '#4a90d9',         // azul médio — vasto, institucional
           patch: ['#7bb3e8', '#2d6ba8', '#a8cff0'],
-          size: 1.8,
+          size: (NEXUS.scale ? NEXUS.scale.raio('gigante') : 0.09), // 180 UC / 2 * 0.001 = 0.09 u
           orbit: 22,
           speed: 0.07,
           startAngle: 2.2,
@@ -133,7 +133,7 @@ NEXUS.data = {
             {
               id: 'aprovacao',
               name: 'Lua da aprovação',
-              size: 0.28,
+              size: (NEXUS.scale ? NEXUS.scale.raio('luaAprovacao') : 0.01), // 20 UC / 2 * 0.001 = 0.01 u
               orbit: 3.2,
               speed: 0.85,
               color: '#f9e4a0',     // dourado quente — aprovação aquecida
@@ -153,7 +153,7 @@ NEXUS.data = {
             {
               id: 'medo',
               name: 'Lua do medo',
-              size: 0.22,
+              size: (NEXUS.scale ? NEXUS.scale.raio('luaMedo') : 0.008), // 16 UC / 2 * 0.001 = 0.008 u
               orbit: 4.6,
               speed: 1.3,
               color: '#8b5cf6',    // violeta escuro — medo como sombra
@@ -210,17 +210,25 @@ NEXUS.data = {
           kind: 'ringed',
           base: '#e8c46a',         // dourado suave — calor, memória
           patch: ['#f5d87a', '#c49a3a', '#ffe8a0'],
-          size: 1.4,
+          size: (NEXUS.scale ? NEXUS.scale.raio('planetaAneis') : 0.055), // 110 UC / 2 * 0.001 = 0.055 u
           orbit: 34,
           speed: 0.048,
           startAngle: 4.5,
-          // Anéis: ~4 camadas de história: quentes (lembranças) e cinza-lilás (pendências)
-          rings: [
-            { inner: 1.45, outer: 1.62, color: '#f5d87a' }, // quente: lembranças
-            { inner: 1.72, outer: 1.88, color: '#b8a5d1' }, // cinza-lilás: pendências
-            { inner: 1.98, outer: 2.16, color: '#ffd56b' }, // quente: lembranças
-            { inner: 2.26, outer: 2.42, color: '#9d8eb5' }  // cinza-lilás: pendências
-          ],
+          // Anéis: raio externo = 120 UC × 0.001 = 0.12 u; interno = 0.12 × (2.03/3.39) ≈ 0.0718 u
+          // As 4 camadas cobrem a largura total dividida em partes iguais.
+          // Usamos uma função para calcular em tempo de execução (scale.js já carregado).
+          rings: (function () {
+            var rExt  = NEXUS.scale ? NEXUS.scale.uc(120) : 0.12;  // raio externo total
+            var rInt  = rExt * (2.03 / 3.39);                       // ≈ 0.0718 u
+            var w     = rExt - rInt;                                 // largura total
+            var step  = w / 4;
+            return [
+              { absolute: true, inner: rInt,               outer: rInt + step,       color: '#f5d87a' }, // quente
+              { absolute: true, inner: rInt + step,        outer: rInt + step * 2,   color: '#b8a5d1' }, // cinza-lilás
+              { absolute: true, inner: rInt + step * 2,    outer: rInt + step * 3,   color: '#ffd56b' }, // quente
+              { absolute: true, inner: rInt + step * 3,    outer: rExt,              color: '#9d8eb5' }  // cinza-lilás
+            ];
+          })(),
           params: { size: 1, mass: 6 },
           moons: [],
           elements: [],
@@ -347,7 +355,7 @@ NEXUS.data = {
           kind: 'exo',
           base: '#3d5a80',         // azul frio e profundo — misterioso, distante
           patch: ['#5b7fa6', '#2a3f5c', '#7aa0c4'],
-          size: 1.1,
+          size: (NEXUS.scale ? NEXUS.scale.raio('exoplaneta') : 0.0375), // 75 UC / 2 * 0.001 = 0.0375 u
           orbit: 14,
           speed: 0.09,
           startAngle: 1.0,

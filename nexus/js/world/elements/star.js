@@ -10,12 +10,15 @@
   N.elementBuilders = N.elementBuilders || {};
 
   // ====================== AJUSTES (mexa só aqui) ======================
-  const TAMANHO   = { low: 1.0, medium: 1.5, high: 2.1 }; // tamanho conforme a importância
-  const DISTANCIA = 2.7;   // distância do centro do planeta (em múltiplos do tamanho dele)
-  const VEL_ORBITA = .2;   // velocidade de girar em volta do planeta (bem devagar)
-  const VEL_PISCAR = 1.6;  // velocidade do piscar
-  const COR_NUCLEO = 0xfff1b8; // centro: dourado bem claro
-  const COR_BRILHO = 0xffc23d; // brilho em volta: dourado médio
+  // Raio base: 27 UC / 2 * 0.001 = 0.0135 u  (N.scale.raio('sinal'))
+  // Proporções low/medium/high mantidas (0.67×, 1×, 1.4×).
+  var _rSinal = (NEXUS.scale ? NEXUS.scale.raio('sinal') : 0.0135);
+  var TAMANHO   = { low: _rSinal * 0.67, medium: _rSinal, high: _rSinal * 1.4 }; // tamanho conforme a importância
+  var DISTANCIA = 2.7;   // distância do centro do planeta (em múltiplos do tamanho dele)
+  var VEL_ORBITA = .2;   // velocidade de girar em volta do planeta (bem devagar)
+  var VEL_PISCAR = 1.6;  // velocidade do piscar
+  var COR_NUCLEO = 0xfff1b8; // centro: dourado bem claro
+  var COR_BRILHO = 0xffc23d; // brilho em volta: dourado médio
   // ====================================================================
 
   // Transforma o id do elemento em um número fixo de 0 a 1.

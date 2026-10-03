@@ -13,7 +13,8 @@
   N.centerBuilders = N.centerBuilders || {};
 
   // ── Ajustes ────────────────────────────────────────────────────────────────
-  var RAIO_ESTRELA = 2.2;       // cada estrela tem esse raio
+  // Raio calculado a partir da tabela de diâmetros em UC (js/core/scale.js).
+  var RAIO_ESTRELA = (NEXUS.scale ? NEXUS.scale.raio('estrelaBinaria') : 2.2); // 1.0 u (= 2000 UC / 2 * 0.001)
   var DIST_MIN     = 3.2;       // distância mínima do centro (tension=1, quase se tocam)
   var DIST_MAX     = 8.0;       // distância máxima do centro (tension=0, afastadas)
   var VEL_MIN      = 0.15;      // velocidade angular mínima (rad/s, tension=0)

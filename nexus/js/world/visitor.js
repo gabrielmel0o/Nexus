@@ -25,7 +25,9 @@
     group.add(hitSphere);
 
     // 2) Núcleo estelar dourado quente (#ffd166)
-    const coreGeo = new THREE.SphereGeometry(0.75, 32, 24);
+    // Raio: classe 'anaBranca' = 480 UC / 2 * 0.001 = 0.24 u  (N.scale.raio('rafael'))
+    const coreRadius = N.scale ? N.scale.raio('rafael') : 0.24;
+    const coreGeo = new THREE.SphereGeometry(coreRadius, 32, 24);
     const coreMat = new THREE.MeshToonMaterial({
       color: 0xffd166,
       gradientMap: N.toon

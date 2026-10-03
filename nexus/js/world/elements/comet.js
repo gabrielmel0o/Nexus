@@ -22,7 +22,10 @@
   // ─── Constantes visuais ───────────────────────────────────────────────────
   var COR_NUCLEO   = '#b8a090'; // cinza-alaranjado: rocha fria com toque quente
   var COR_CAUDA    = 0xaae8ff;  // azul-gelo claro: cauda de gás e poeira
-  var RAIO_NUCLEO  = 0.38;      // raio da rocha (pequeno em relação ao planeta)
+  // Raio do núcleo: 8 UC / 2 * 0.001 = 0.004 u (N.scale.raio('nucleoCometa'))
+  var RAIO_NUCLEO  = (NEXUS.scale ? NEXUS.scale.raio('nucleoCometa') : 0.004);
+  // Comprimento da cauda: fixo em 1.0 unidade do mundo (desvinculado do raio do núcleo)
+  var CAUDA_COMPRIMENTO = 1.0;
 
   // Órbita: distância em relação ao centro do planeta conforme approach
   // approach=0 → órbita ampla (longe), approach=1 → órbita apertada (perto)
@@ -84,8 +87,8 @@
       });
       var caudaSprite = new THREE.Sprite(caudaMat);
       
-      // Cauda 7.5x o tamanho do núcleo
-      var maxTailLength = RAIO_NUCLEO * 7.5; 
+      // Cauda: comprimento fixo de 1.0 unidade do mundo (desvinculado do raio do núcleo)
+      var maxTailLength = CAUDA_COMPRIMENTO; 
       caudaSprite.position.x = RAIO_NUCLEO * 0.8 + frac * maxTailLength;
       caudaSprite.scale.set(tam, tam, 1);
       grupo.add(caudaSprite);

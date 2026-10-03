@@ -17,12 +17,24 @@
   N.centerBuilders = N.centerBuilders || {};
 
   // ── Configurações por variante ────────────────────────────────────────────
-  var VARIANTES = {
-    sun:        { raio: 4,   glow1: 24,  glow2: 48,  opac1: .95, opac2: .4, manchas: 40 },
-    redDwarf:   { raio: 1.4, glow1: 8,   glow2: 16,  opac1: .7,  opac2: .25, manchas: 20 },
-    whiteDwarf: { raio: 1.0, glow1: 5,   glow2: 9,   opac1: .85, opac2: .3,  manchas: 12 },
-    brownDwarf: { raio: 1.4, glow1: 5,   glow2: 10,  opac1: .35, opac2: .12, manchas: 15 }
-  };
+  // Raios calculados a partir da tabela de diâmetros em UC (js/core/scale.js).
+  // glow1 e glow2 são múltiplos do raio para manter proporções; os valores absolutos
+  // eram hardcoded nas unidades antigas — agora escalam juntos.
+  function variantesSun() {
+    var N = NEXUS;
+    var rSun  = N.scale ? N.scale.raio('estrelaPadrao')  : 4.0;   // 1.2 u
+    var rRed  = N.scale ? N.scale.raio('anaVermelha')    : 1.4;   // 0.6 u
+    var rWhite= N.scale ? N.scale.raio('anaBranca')      : 1.0;   // 0.24 u
+    var rBrown= N.scale ? N.scale.raio('anaBrancaMarrom'): 1.4;   // 0.6 u (= anaVermelha)
+    return {
+      sun:        { raio: rSun,   glow1: rSun*6,    glow2: rSun*12,   opac1: .95, opac2: .4,  manchas: 40 },
+      redDwarf:   { raio: rRed,   glow1: rRed*5.7,  glow2: rRed*11.4, opac1: .7,  opac2: .25, manchas: 20 },
+      whiteDwarf: { raio: rWhite, glow1: rWhite*5,  glow2: rWhite*9,  opac1: .85, opac2: .3,  manchas: 12 },
+      brownDwarf: { raio: rBrown, glow1: rBrown*3.6,glow2: rBrown*7.1,opac1: .35, opac2: .12, manchas: 15 }
+    };
+  }
+  var VARIANTES = variantesSun();
+
 
   // Mistura duas cores por um fator t (0 a 1)
   function lerpColor(hexA, hexB, t) {

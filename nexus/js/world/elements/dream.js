@@ -52,7 +52,9 @@
     // Leve inclinação orbital
     group.rotation.set(0.22, 0.35, -0.15);
 
-    const bodyGeo = new THREE.SphereGeometry(0.42, 24, 16);
+    // Raio: classe 'lua' = 18 UC / 2 * 0.001 = 0.009 u  (N.scale.raio('sonhoRecorrente'))
+    const dreamRadius = N.scale ? N.scale.raio('sonhoRecorrente') : 0.009;
+    const bodyGeo = new THREE.SphereGeometry(dreamRadius, 24, 16);
     const bodyMat = new THREE.MeshToonMaterial({
       color: 0xc8b6ff,
       gradientMap: N.toon
@@ -62,9 +64,9 @@
     dreamPivot.userData.pickId = orbiterId;
     dreamPivot.add(bodyMesh);
 
-    // Alvo invisível para clique no sonho
+    // Alvo invisível para clique no sonho (proporcional ao raio)
     const hitSphere = new THREE.Mesh(
-      new THREE.SphereGeometry(1.8, 16, 12),
+      new THREE.SphereGeometry(dreamRadius * 4.3, 16, 12),
       new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
     );
     hitSphere.userData.pickId = orbiterId;
@@ -80,7 +82,8 @@
       depthWrite: false
     });
     const glowSprite = new THREE.Sprite(glowMat);
-    glowSprite.scale.set(2.4, 2.4, 1);
+    const glowSize = dreamRadius * 5.7;
+    glowSprite.scale.set(glowSize, glowSize, 1);
     dreamPivot.add(glowSprite);
 
     group.add(dreamPivot);

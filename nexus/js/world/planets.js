@@ -142,8 +142,10 @@
         : [{ inner: 1.5, outer: 2.0, color: d.rings }, { inner: 2.15, outer: 2.3, color: d.rings }];
 
       ringList.forEach(r => {
-        const innerRadius = d.size * (r.inner || 1.4);
-        const outerRadius = d.size * (r.outer || 1.6);
+        // Se r.absolute == true os valores já estão em unidades do mundo (raios absolutos).
+        // Caso contrário, são múltiplos de d.size (comportamento legado).
+        const innerRadius = r.absolute ? r.inner : d.size * (r.inner || 1.4);
+        const outerRadius = r.absolute ? r.outer : d.size * (r.outer || 1.6);
         const ringGeo = new THREE.RingGeometry(innerRadius, outerRadius, 64);
         const ringMat = new THREE.MeshBasicMaterial({
           color: r.color || 0xffffff,

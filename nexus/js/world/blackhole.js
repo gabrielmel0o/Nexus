@@ -75,8 +75,9 @@
     if (variant === 'self') {
       // ═════════════════════════════════════════════════════════════════
       // 1. O EU (supermassivo, escuro, inalcançável)
+      // Raio: 8000 UC / 2 * 0.001 = 4.0 u  (N.scale.raio('eu'))
       // ═════════════════════════════════════════════════════════════════
-      const raioEu = 4.2;
+      const raioEu = N.scale ? N.scale.raio('eu') : 4.0; // 4.0 u
       group.userData.pickId = systemId;
       // Esfera preta pura, sem reflexo nem brilho
       const blackGeo = new THREE.SphereGeometry(raioEu, 48, 32);
@@ -120,8 +121,9 @@
 
     // ═════════════════════════════════════════════════════════════════
     // 2. TRAUMA (estelar, A perda da mãe)
+    // Raio: 700 UC / 2 * 0.001 = 0.35 u  (N.scale.raio('buracoNegroEstelar'))
     // ═════════════════════════════════════════════════════════════════
-    const raioTrauma = 2.4;
+    const raioTrauma = N.scale ? N.scale.raio('buracoNegroEstelar') : 0.35; // 0.35 u
     group.userData.pickId = systemId;
 
     // Esfera preta central

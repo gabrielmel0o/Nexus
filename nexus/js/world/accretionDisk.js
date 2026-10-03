@@ -22,10 +22,14 @@
   var N = NEXUS;
 
   // ══════════════════════════════════════════════════════════════════
+  // SENTIDO DE GIRO DOS DISCOS (1 ou -1)
+  // Usada por todos os discos de acreção.
+  // 1 = Giro HORÁRIO visto de cima (olhando de +Y para -Y), igual aos sistemas.
+  // ══════════════════════════════════════════════════════════════════
+  var SENTIDO_GIRO_DISCOS = 1;
+
   // Velocidades padrão de rotação dos 3 anéis (rad/s)
   // O interno mais rápido, o do meio médio, o externo mais lento.
-  // Sentido: o mesmo dos sistemas em torno do Eu (P22) e dos braços.
-  // ══════════════════════════════════════════════════════════════════
   var VELOCIDADE_INTERNO = 0.055;
   var VELOCIDADE_MEDIO   = 0.032;
   var VELOCIDADE_EXTERNO = 0.016;
@@ -154,6 +158,16 @@
     // Grupo raiz: mantém a rotação / inclinação do plano fixa
     var rootGroup = new THREE.Group();
     rootGroup.rotation.set(inclinacao.rx, inclinacao.ry, inclinacao.rz);
+    rootGroup.updateMatrixWorld(true);
+
+    // Avalia o vetor normal do plano no mundo (Z local transformado)
+    var normalMundo = new THREE.Vector3(0, 0, 1);
+    normalMundo.applyQuaternion(rootGroup.quaternion);
+
+    // Se a normal aponta para baixo (y < 0), rotação +Z local gira no sentido HORÁRIO visto de cima.
+    // Se a normal aponta para cima (y >= 0), rotação -Z local gira no sentido HORÁRIO visto de cima.
+    var sinalInclinacao = normalMundo.y < 0 ? 1 : -1;
+    var fatorSentido = SENTIDO_GIRO_DISCOS * sinalInclinacao;
 
     var aneis = [];
 
@@ -194,9 +208,9 @@
     return {
       object: rootGroup,
       update: function (dt) {
-        // Giro no próprio plano: rotação em Z no sentido anti-horário (mesmo dos sistemas em P22)
+        // Giro no próprio plano: sentido HORÁRIO garantido visto de cima (+Y para -Y)
         for (var k = 0; k < aneis.length; k++) {
-          aneis[k].pivot.rotation.z -= aneis[k].speed * dt;
+          aneis[k].pivot.rotation.z += aneis[k].speed * dt * fatorSentido;
         }
       }
     };

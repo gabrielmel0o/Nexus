@@ -162,14 +162,14 @@
 
           // Ponto médio no corredor entre os dois sistemas (destino máximo approach = 1)
           const midPoint = new THREE.Vector3().addVectors(vCriacao, vNao).multiplyScalar(0.5);
-          midPoint.y += 2.0;
+          midPoint.y = N.ALIGN_Y || 0;
 
           // Direção radial externa a partir do centro da galáxia
           const dirOut = new THREE.Vector3(midPoint.x, 0, midPoint.z).normalize();
 
           // Ponto de entrada externo (vindo de fora da galáxia, approach = 0)
           const startPoint = midPoint.clone().addScaledVector(dirOut, 60);
-          startPoint.y += 8.0;
+          startPoint.y = N.ALIGN_Y || 0;
 
           pStart = [startPoint.x, startPoint.y, startPoint.z];
           pEnd = [midPoint.x, midPoint.y, midPoint.z];

@@ -93,30 +93,27 @@
       hitSphere.userData.pickId = systemId;
       group.add(hitSphere);
 
-      // Disco de acreção largo e plano
-      const innerRadius = raioEu * 1.3;
-      const outerRadius = raioEu * EU_DISCO_RAIO_EXTERNO;
-      const ringGeo = new THREE.RingGeometry(innerRadius, outerRadius, 128);
-      const ringMat = new THREE.MeshBasicMaterial({
-        map: getAccretionDiskTex(),
-        color: 0xffffff, // A cor base é branca para não distorcer a textura do gradiente
-        transparent: true,
-        opacity: 0.9,
-        side: THREE.DoubleSide,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false
+      // Disco de acreção estilizado em faixas com traços em arco
+      const menorDistanciaSistema = 51.35; // distância ao sistema 'criacao' [48,3,18]
+      const raioMaximoSeguro = menorDistanciaSistema * 0.7; // ~35.94
+      const raioExt = Math.min(raioEu * 4.4, raioMaximoSeguro);
+
+      const disco = N.buildAccretionDisk({
+        raioInterno:  raioEu * 1.25,
+        raioExterno:  raioExt,
+        paleta:       [0xFFF3A8, 0xFFD84A, 0xFF9A1F, 0xD9632B, 0x9A3F6E, 0x5B2A9E, 0x3B2478],
+        paletaTracos: [0xFFFFFF, 0xFFE9A0, 0xFFB347, 0xB77CF0],
+        semente:      systemId,
+        inclinacao:   { rx: Math.PI / 2 - 0.25, ry: 0.1, rz: 0 }
       });
-      const ring = new THREE.Mesh(ringGeo, ringMat);
-      ring.rotation.set(Math.PI / 2 - 0.25, 0.1, 0);
-      group.add(ring);
+      group.add(disco.object);
 
       parent.add(group);
 
       return {
         object: group,
         update(dt) {
-          // Rotação lenta no próprio plano
-          ring.rotation.z -= dt * 0.02;
+          disco.update(dt);
         }
       };
     }

@@ -106,29 +106,32 @@
     hitSphere.userData.pickId = d.id;
     visualGroup.add(hitSphere);
 
+    // corDaNevoa: deriva da cor base, mais clara e menos saturada
+    const baseCol = new THREE.Color(d.base);
+    const hsl = {};
+    baseCol.getHSL(hsl);
+    const mistColor = new THREE.Color().setHSL(hsl.h, Math.max(0, hsl.s * 0.7), Math.min(1.0, hsl.l + 0.2));
+
     // Névoa da superfície para simular atmosfera espessa (oculta o contraste das manchas)
-    // Usa AdditiveBlending: quando atmosphere é baixo, a cor vai para preto (invisível);
-    // quando alto, clareia e unifica a superfície.
-    const mistColor = new THREE.Color(d.patch && d.patch[0] ? d.patch[0] : d.base);
     const mistMat = new THREE.MeshBasicMaterial({
       color: 0x000000,
       transparent: true,
-      opacity: 0.85,
-      blending: THREE.AdditiveBlending
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
     });
-    const mistMesh = new THREE.Mesh(new THREE.SphereGeometry(d.size * 1.002, 32, 24), mistMat);
+    const mistMesh = new THREE.Mesh(new THREE.SphereGeometry(d.size * 1.02, 32, 24), mistMat);
     visualGroup.add(mistMesh);
 
     // Halo atmosférico externo: visto por dentro (BackSide)
-    const baseHaloColor = new THREE.Color(d.patch && d.patch[0] ? d.patch[0] : d.base);
     const haloMat = new THREE.MeshBasicMaterial({
-      color: baseHaloColor.clone(),
+      color: 0x000000,
       transparent: true,
-      opacity: 0.45,
       side: THREE.BackSide,
-      blending: THREE.AdditiveBlending
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
     });
-    const halo = new THREE.Mesh(new THREE.SphereGeometry(d.size * 1.1, 32, 16), haloMat);
+    // Escala inicial base da esfera é igual ao raio; fator (1.05 + 0.35 * curAtmo) é aplicado no scale
+    const halo = new THREE.Mesh(new THREE.SphereGeometry(d.size, 32, 16), haloMat);
     visualGroup.add(halo);
 
     // Anéis: aceita array de anéis finos ou valor único
@@ -245,7 +248,6 @@
       mistMesh,
       mistColor,
       halo,
-      baseHaloColor,
       ringsGroup,
       moonControllers,
       moonsById,
@@ -253,6 +255,9 @@
       label: N.createLabel(d.name, d.id),
       angle,
       elementos,
+      // Valores atuais para interpolação suave
+      curSize: (d.params && d.params.size !== undefined) ? d.params.size : 1.0,
+      curAtmo: (d.params && d.params.atmosphere !== undefined) ? d.params.atmosphere : 0.4,
       // Modificadores dinâmicos de forças
       scaleModifier: 1.0,
       haloModifier: 1.0,
@@ -286,29 +291,39 @@
       p.body.rotation.y += dt * 0.25;
 
       // 2) Parâmetros dinâmicos via state
-      // Escala 'size': afeta corpo, halo e anéis (visualGroup), preservando o raio orbital
-      const sizeParam = (N.state && N.state.get(id, 'size')) || (p.d.params && p.d.params.size) || 1.0;
-      const scaleMod = (p.scaleModifier !== undefined) ? p.scaleModifier : 1.0;
-      const finalScale = sizeParam * scaleMod;
-      p.visualGroup.scale.set(finalScale, finalScale, finalScale);
+      let targetSize = (p.d.params && p.d.params.size !== undefined) ? p.d.params.size : 1.0;
+      let targetAtmo = (p.d.params && p.d.params.atmosphere !== undefined) ? p.d.params.atmosphere : 0.4;
 
-      // 'atmosphere' (0 a 1): controla tamanho e intensidade do halo e a névoa
-      let atmoParam = (N.state && N.state.get(id, 'atmosphere'));
-      if (atmoParam === undefined || atmoParam === null) {
-        atmoParam = (p.d.params && p.d.params.atmosphere !== undefined) ? p.d.params.atmosphere : 0.4;
+      if (N.state) {
+        const s = N.state.get(id, 'size');
+        if (s !== undefined && s !== null) targetSize = s;
+        const a = N.state.get(id, 'atmosphere');
+        if (a !== undefined && a !== null) targetAtmo = a;
       }
 
-      // Halo: ajusta escala e escurece a cor aditiva (sem alterar opacity)
-      // Quando atmosphere é 0.1 = halo quase imperceptível; quando 0.95 = halo espesso
-      const haloMod = (p.haloModifier !== undefined) ? p.haloModifier : 1.0;
-      const haloScale = (1.02 + atmoParam * 0.22) * haloMod;
-      p.halo.scale.set(haloScale, haloScale, haloScale);
-      const haloColFactor = (p.haloColorFactor !== undefined) ? p.haloColorFactor : 1.0;
-      p.halo.material.color.copy(p.baseHaloColor).multiplyScalar(Math.max(0.04, atmoParam * 0.9 * haloColFactor));
+      // Aproxima os valores atuais dos alvos suavemente
+      const lerpFactor = 1 - Math.exp(-dt * 4);
+      p.curSize += (targetSize - p.curSize) * lerpFactor;
+      p.curAtmo += (targetAtmo - p.curAtmo) * lerpFactor;
 
-      // Névoa da superfície: oculta o contraste das manchas quando a atmosfera é densa
-      const mistIntensity = Math.max(0.0, (atmoParam - 0.15) * 0.7);
-      p.mistMesh.material.color.copy(p.mistColor).multiplyScalar(mistIntensity);
+      // Escala 'size': afeta corpo, halo e anéis (visualGroup), preservando o raio orbital
+      const scaleMod = (p.scaleModifier !== undefined) ? p.scaleModifier : 1.0;
+      const finalScale = p.curSize * scaleMod;
+      p.visualGroup.scale.set(finalScale, finalScale, finalScale);
+
+      // 'atmosphere' (0 a 1): controla halo e névoa
+      // Halo: Escala = 1.05 + 0.35 * curAtmo
+      const haloMod = (p.haloModifier !== undefined) ? p.haloModifier : 1.0;
+      const haloScale = (1.05 + 0.35 * p.curAtmo) * haloMod;
+      p.halo.scale.set(haloScale, haloScale, haloScale);
+      
+      // Halo cor = corDaNevoa * (curAtmo ^ 1.5)
+      const haloColFactor = (p.haloColorFactor !== undefined) ? p.haloColorFactor : 1.0;
+      const haloIntensity = Math.pow(Math.max(0, p.curAtmo), 1.5) * haloColFactor;
+      p.halo.material.color.copy(p.mistColor).multiplyScalar(haloIntensity);
+
+      // Névoa da superfície: cor = corDaNevoa * (curAtmo * 0.5)
+      p.mistMesh.material.color.copy(p.mistColor).multiplyScalar(p.curAtmo * 0.5);
 
       // Modificador de cor do corpo do planeta (forças como eclipse escurecem o material, NUNCA opacity)
       if (p.colorModifier) {

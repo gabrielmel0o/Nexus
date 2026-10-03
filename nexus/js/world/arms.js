@@ -166,7 +166,7 @@
       update(dt) {
         // Rotação lentíssima dos braços da galáxia (sincronizada com a galáxia)
         if (N.ROTACAO_GALAXIA !== false) {
-          armsGroup.rotation.y += dt * ROTACAO_VELOCIDADE;
+          armsGroup.rotation.y -= dt * ROTACAO_VELOCIDADE;
         }
 
         // Atualização dos rótulos das rotinas com a câmera perto

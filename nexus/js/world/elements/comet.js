@@ -21,7 +21,7 @@
 
   // ─── Constantes visuais ───────────────────────────────────────────────────
   var COR_NUCLEO   = '#b8a090'; // cinza-alaranjado: rocha fria com toque quente
-  var COR_CAUDA    = 0x88ddff;  // azul-claro: cauda de gás e poeira estilo Outer Wilds
+  var COR_CAUDA    = 0xaae8ff;  // azul-gelo claro: cauda de gás e poeira
   var RAIO_NUCLEO  = 0.38;      // raio da rocha (pequeno em relação ao planeta)
 
   // Órbita: distância em relação ao centro do planeta conforme approach
@@ -67,25 +67,26 @@
     // Rótulo com o nome do cometa (vinculado ao id para highlight e picking)
     var label = N.createLabel(el.title || 'A proposta', id);
 
-    // ── 2. Cauda: sprites aditivos azul-claro ─────────────────────────────
-    // Cada sprite é colocado ATRÁS do núcleo (direção +X no espaço local do grupo).
-    // Ao apontar o grupo para longe do planeta (updateTail), a cauda fica oposta.
+    // ── 2. Cauda: sprites aditivos azul-gelo claro ─────────────────────────────
     var caudaSprites = [];
-    var NUM_SPRITES = 5;
+    var NUM_SPRITES = 8;
     for (var s = 0; s < NUM_SPRITES; s++) {
-      var frac = (s + 1) / NUM_SPRITES;  // 0.2 a 1.0 — posição ao longo da cauda
-      var tam  = RAIO_NUCLEO * (1.6 - frac * 0.9); // encolhe ao longo da cauda
+      var frac = s / (NUM_SPRITES - 1);  // 0.0 a 1.0 — posição ao longo da cauda
+      // Afinando até o fim: larga perto do núcleo, quase zero no fim
+      var tam  = RAIO_NUCLEO * (3.0 - frac * 2.8);
       var caudaMat = new THREE.SpriteMaterial({
         map: N.sparkTexture(),
         color: COR_CAUDA,
         transparent: true,
-        opacity: 0.72 - frac * 0.55, // mais opaco perto do núcleo, quase invisível na ponta
+        opacity: 0.85 * Math.pow(1 - frac, 1.2), // opacidade desaparecendo
         blending: THREE.AdditiveBlending,
         depthWrite: false
       });
       var caudaSprite = new THREE.Sprite(caudaMat);
-      // Posição ao longo do eixo local +X (a cauda cresce nessa direção; depois invertemos)
-      caudaSprite.position.x = RAIO_NUCLEO * 0.6 + frac * 2.0;
+      
+      // Cauda 7.5x o tamanho do núcleo
+      var maxTailLength = RAIO_NUCLEO * 7.5; 
+      caudaSprite.position.x = RAIO_NUCLEO * 0.8 + frac * maxTailLength;
       caudaSprite.scale.set(tam, tam, 1);
       grupo.add(caudaSprite);
       caudaSprites.push({ sprite: caudaSprite, mat: caudaMat, tamBase: tam, posBase: caudaSprite.position.x });
@@ -113,16 +114,49 @@
       radius: RAIO_NUCLEO * 1.5
     };
 
-    // Vetores temporários reutilizados para calcular a direção planetocêntrica
-    var dirLocal = new THREE.Vector3();
-    var eixoX    = new THREE.Vector3(1, 0, 0);
-    var qTail    = new THREE.Quaternion();
+    // Vetores temporários reutilizados para calcular a direção estelar
+    var dirLocal  = new THREE.Vector3();
+    var eixoX     = new THREE.Vector3(1, 0, 0);
+    var qTail     = new THREE.Quaternion();
+    var wpCometa  = new THREE.Vector3();
+    var wpEstrela = new THREE.Vector3();
+    var dirCauda  = new THREE.Vector3();
+    var pivoWorldQuat = new THREE.Quaternion();
 
-    // ── Atualiza a cauda para apontar sempre para longe do planeta ────────
+    // ── Atualiza a cauda para apontar sempre para o lado oposto da estrela mais próxima
     function atualizaTail() {
-      // No espaço local do pivô (centro do planeta), a direção para longe do planeta
-      // é exatamente o vetor radial (cos(angle), 0, sin(angle)).
-      dirLocal.set(Math.cos(angle), 0, Math.sin(angle));
+      var estrelaGrupo = null;
+      if (N.systemsById) {
+        var distMin = Infinity;
+        for (var sid in N.systemsById) {
+          var sys = N.systemsById[sid];
+          if (sys.centerObj && sys.data && sys.data.center && sys.data.center.kind === 'star') {
+            sys.group.getWorldPosition(wpEstrela);
+            grupo.getWorldPosition(wpCometa);
+            var dist = wpEstrela.distanceTo(wpCometa);
+            if (dist < distMin) {
+              distMin = dist;
+              estrelaGrupo = sys.group;
+            }
+          }
+        }
+      }
+
+      if (estrelaGrupo) {
+        estrelaGrupo.getWorldPosition(wpEstrela);
+        grupo.getWorldPosition(wpCometa);
+        // dirCauda vai do cometa para a direção oposta da estrela
+        dirCauda.subVectors(wpCometa, wpEstrela).normalize();
+      } else {
+        // Fallback: radial para longe da origem local
+        dirCauda.set(Math.cos(angle), 0, Math.sin(angle));
+      }
+
+      // Converte a direção do mundo para o espaço local do pivô
+      pivo.getWorldQuaternion(pivoWorldQuat);
+      var pivoInverseQuat = pivoWorldQuat.invert();
+
+      dirLocal.copy(dirCauda).applyQuaternion(pivoInverseQuat).normalize();
       qTail.setFromUnitVectors(eixoX, dirLocal);
       grupo.quaternion.copy(qTail);
     }
@@ -179,15 +213,16 @@
         var pulso = 1.0 + 0.08 * Math.sin(t * 1.8);
         for (var s = 0; s < caudaSprites.length; s++) {
           var c = caudaSprites[s];
-          var frac2 = (s + 1) / NUM_SPRITES;
+          var frac2 = s / (caudaSprites.length - 1);
 
           // Comprimento proporcional a approach (quando longe, cauda menor)
           var compFator = 0.5 + approach * 0.5; // 0.5 a 1.0
           var novaTam = c.tamBase * appear * pulso;
           c.sprite.scale.set(novaTam, novaTam, 1);
 
-          // Reposiciona ao longo do eixo +X com variação de approach
-          c.sprite.position.x = RAIO_NUCLEO * 0.6 + frac2 * 2.0 * compFator;
+          // Reposiciona ao longo do eixo +X com variação de approach (7.5x o núcleo)
+          var maxTailLength = RAIO_NUCLEO * 7.5;
+          c.sprite.position.x = RAIO_NUCLEO * 0.8 + frac2 * maxTailLength * compFator;
 
           // Cor: escurece quando aparecer é < 1 (sem mexer em opacity — LOD controla)
           c.mat.color.setHex(COR_CAUDA);

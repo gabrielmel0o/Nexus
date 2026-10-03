@@ -12,6 +12,13 @@
   const N = NEXUS;
   N.centerBuilders = N.centerBuilders || {};
 
+  // ══════════════════════════════════════════════════════════════════
+  // DISCO DE O EU — mude aqui para testar outros tamanhos.
+  // Sistema mais próximo: "criacao" dist ≈ 51.35 → 70% ≈ 35.9 u.
+  // raioEu = 4.2, então máx seguro ≈ 8.5×. Valor atual: 6× = 25.2 ✓
+  // ══════════════════════════════════════════════════════════════════
+  const EU_DISCO_RAIO_EXTERNO = 6; // múltiplo do raio do buraco negro
+
   // Textura suave circular compartilhada para as partículas do disco
   let diskParticleTex = null;
   function getParticleTex() {
@@ -34,20 +41,25 @@
     accretionDiskTex = N.makeTexture(512, 512, (g) => {
       const cx = 256, cy = 256;
       const grad = g.createRadialGradient(cx, cy, 0, cx, cy, 256);
-      
-      const rInner = 1.3 / 3.5; // ~0.371
-      
+
+      const rInner = 1.3 / EU_DISCO_RAIO_EXTERNO; // posição normalizada da borda interna
+
       grad.addColorStop(0, 'rgba(0,0,0,0)');
-      grad.addColorStop(Math.max(0, rInner - 0.01), 'rgba(0,0,0,0)');
-      // Borda interna: branco quente (bem fino)
-      grad.addColorStop(rInner, 'rgba(255,245,230,1)');
-      // Laranja suave
-      grad.addColorStop(rInner + 0.05, 'rgba(255,160,80,0.8)');
-      // Violeta 0x5B2A9E -> (91, 42, 158)
-      grad.addColorStop(rInner + 0.25, 'rgba(91,42,158,0.5)');
+      grad.addColorStop(Math.max(0, rInner - 0.008), 'rgba(0,0,0,0)');
+      // Borda interna: branco-quente (faixa fina e intensa)
+      grad.addColorStop(rInner,          'rgba(255,250,235,1)');
+      grad.addColorStop(rInner + 0.025,  'rgba(255,220,100,1)');
+      // Amarelo-laranja
+      grad.addColorStop(rInner + 0.07,   'rgba(255,140,40,0.95)');
+      // Laranja avermelhado
+      grad.addColorStop(rInner + 0.15,   'rgba(220,60,20,0.85)');
+      // Magenta
+      grad.addColorStop(rInner + 0.30,   'rgba(200,30,160,0.65)');
+      // Violeta largo e suave
+      grad.addColorStop(rInner + 0.52,   'rgba(80,20,160,0.35)');
       // Transparente na borda
-      grad.addColorStop(1, 'rgba(91,42,158,0)');
-      
+      grad.addColorStop(1, 'rgba(40,0,80,0)');
+
       g.fillStyle = grad;
       g.fillRect(0, 0, 512, 512);
     });
@@ -83,13 +95,13 @@
 
       // Disco de acreção largo e plano
       const innerRadius = raioEu * 1.3;
-      const outerRadius = raioEu * 3.5;
-      const ringGeo = new THREE.RingGeometry(innerRadius, outerRadius, 96);
+      const outerRadius = raioEu * EU_DISCO_RAIO_EXTERNO;
+      const ringGeo = new THREE.RingGeometry(innerRadius, outerRadius, 128);
       const ringMat = new THREE.MeshBasicMaterial({
         map: getAccretionDiskTex(),
         color: 0xffffff, // A cor base é branca para não distorcer a textura do gradiente
         transparent: true,
-        opacity: 0.6,
+        opacity: 0.9,
         side: THREE.DoubleSide,
         blending: THREE.AdditiveBlending,
         depthWrite: false

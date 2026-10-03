@@ -348,7 +348,7 @@
       });
 
       // 5) Elementos
-      p.elementos.forEach(e => e.update(dt));
+      p.elementos.forEach(e => e.update(dt, nomes));
 
       // Rótulo posicionado sobre o planeta
       N.updateLabel(p.label, p.group, p.d.size * finalScale, nomes);

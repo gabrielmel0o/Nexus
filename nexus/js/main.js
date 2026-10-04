@@ -21,46 +21,46 @@
   // Cria um sistema para cada item dos dados
   const systems = universe.systems.map(s => N.buildSystem(s));
 
-  // Verificação de alinhamento vertical Y (Requisito 5)
-  (function verificarAlinhamentoY() {
-    const tempWP = new THREE.Vector3();
-    const carreiraWP = new THREE.Vector3();
-    const tabelaAlinhamento = [];
+  // // Verificação de alinhamento vertical Y (Requisito 5)
+  // (function verificarAlinhamentoY() {
+  //   const tempWP = new THREE.Vector3();
+  //   const carreiraWP = new THREE.Vector3();
+  //   const tabelaAlinhamento = [];
 
-    const idsParaVerificar = [
-      'eu', 'criacao', 'desejo-seguranca', 'mae',
-      'nao-escolhida', 'trauma', 'nebulosa', 'rafael'
-    ];
+  //   const idsParaVerificar = [
+  //     'eu', 'criacao', 'desejo-seguranca', 'mae',
+  //     'nao-escolhida', 'trauma', 'nebulosa', 'rafael'
+  //   ];
 
-    idsParaVerificar.forEach(id => {
-      if (N.systemsById[id]) {
-        N.systemsById[id].group.getWorldPosition(tempWP);
-        tabelaAlinhamento.push({ id: id, 'Y Mundial (centro)': tempWP.y.toFixed(6) });
-      }
-    });
+  //   idsParaVerificar.forEach(id => {
+  //     if (N.systemsById[id]) {
+  //       N.systemsById[id].group.getWorldPosition(tempWP);
+  //       tabelaAlinhamento.push({ id: id, 'Y Mundial (centro)': tempWP.y.toFixed(6) });
+  //     }
+  //   });
 
-    console.log('=== VERIFICAÇÃO DE ALINHAMENTO VERTICAL Y (ALIGN_Y = ' + N.ALIGN_Y + ') ===');
-    console.table(tabelaAlinhamento);
+  //   console.log('=== VERIFICAÇÃO DE ALINHAMENTO VERTICAL Y (ALIGN_Y = ' + N.ALIGN_Y + ') ===');
+  //   console.table(tabelaAlinhamento);
 
-    // Posições relativas das luas e cometa em relação ao grupo de A Carreira
-    if (N.planetsById['carreira']) {
-      const pCarreira = N.planetsById['carreira'];
-      pCarreira.group.getWorldPosition(carreiraWP);
+  //   // Posições relativas das luas e cometa em relação ao grupo de A Carreira
+  //   if (N.planetsById['carreira']) {
+  //     const pCarreira = N.planetsById['carreira'];
+  //     pCarreira.group.getWorldPosition(carreiraWP);
 
-      console.log('=== POSIÇÕES RELATIVAS AO CENTRO DE A CARREIRA ===');
-      ['aprovacao', 'medo', 'proposta'].forEach(childId => {
-        if (N.pickRegistry[childId]) {
-          const posChild = N.pickRegistry[childId].getPos();
-          const relPos = posChild.clone().sub(carreiraWP);
-          console.log(`Relativo a Carreira -> ${childId}:`, {
-            x: relPos.x.toFixed(4),
-            y: relPos.y.toFixed(4),
-            z: relPos.z.toFixed(4)
-          });
-        }
-      });
-    }
-  })();   
+  //     console.log('=== POSIÇÕES RELATIVAS AO CENTRO DE A CARREIRA ===');
+  //     ['aprovacao', 'medo', 'proposta'].forEach(childId => {
+  //       if (N.pickRegistry[childId]) {
+  //         const posChild = N.pickRegistry[childId].getPos();
+  //         const relPos = posChild.clone().sub(carreiraWP);
+  //         console.log(`Relativo a Carreira -> ${childId}:`, {
+  //           x: relPos.x.toFixed(4),
+  //           y: relPos.y.toFixed(4),
+  //           z: relPos.z.toFixed(4)
+  //         });
+  //       }
+  //     });
+  //   }
+  // })();   
 
   let last = performance.now();
   function loop(now) {                       // 3) a cada quadro (~60x por segundo):

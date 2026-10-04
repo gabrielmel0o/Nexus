@@ -1,5 +1,5 @@
 /* panel.js — painel de informações dos corpos celestes do universo de Helena.
-   Integrado visualmente ao universo: translúcido escuro, tipografia Nunito branca,
+   Integrado visualmente ao universo: translúcido escuro, tipografia do projeto branca,
    sem estilo de dashboard corporativo.
    Aberto ao selecionar um corpo (NEXUS.selectBody), fechado ao desmarcar ou apertar Esc/×.
    Atualiza-se automaticamente se o capítulo mudar enquanto aberto. */

@@ -1,12 +1,41 @@
 /* style.css — a APARÊNCIA da parte "de tela" (logo, dica, nomes). O universo em si é desenhado pelo JavaScript. */
-:root{--deep:#100819;--lit:#111450;--ink:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+
+/* ─── FONTES DO PROJETO (NEXUS Titulo e NEXUS Texto) ───────────────────────── */
+@font-face {
+  font-family: 'NEXUS Titulo';
+  src: url('../assets/fonts/ClimateCrisis-Regular-VariableFont_YEAR.ttf') format('truetype'),
+       url('assets/fonts/ClimateCrisis-Regular-VariableFont_YEAR.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'NEXUS Texto';
+  src: url('../assets/fonts/HiburMono-Regular.ttf') format('truetype'),
+       url('assets/fonts/HiburMono-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root{
+  --fonte-titulo:'NEXUS Titulo',sans-serif;
+  --fonte-texto:'NEXUS Texto',sans-serif;
+  --deep:#100819;
+  --lit:#111450;
+  --ink:#fff;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
-html,body{height:100%;margin:0;background:var(--deep);color:var(--ink);font-family:"Nunito","Trebuchet MS",system-ui,sans-serif;overflow:hidden}
+html,body{height:100%;margin:0;background:var(--deep);color:var(--ink);font-family:var(--fonte-texto);overflow:hidden}
 canvas{position:fixed;inset:0;display:block;touch-action:none;cursor:grab}
 canvas:active{cursor:grabbing}
 .logo{position:fixed;top:calc(env(safe-area-inset-top,0px) + 16px);left:16px;width:124px;height:38px;border:1px dashed rgba(255,255,255,.35);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;letter-spacing:.18em;opacity:.7}
 .hint{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 84px);left:0;right:0;text-align:center;font-size:11.5px;opacity:.45;pointer-events:none;text-shadow:0 1px 8px var(--deep)}
-.lb{position:fixed;left:0;top:0;font-size:12px;font-weight:800;letter-spacing:.06em;pointer-events:none;white-space:nowrap;text-shadow:0 1px 8px var(--deep),0 0 2px var(--deep);transition:opacity .4s}
+.lb{position:fixed;left:0;top:0;font-family:var(--fonte-titulo);font-weight:normal;font-synthesis:none;font-size:12px;letter-spacing:.06em;pointer-events:none;white-space:nowrap;text-shadow:0 1px 8px var(--deep),0 0 2px var(--deep);transition:opacity .4s}
 .lb.highlight{color:#fff;text-shadow:0 0 8px #c8b6ff,0 0 16px #9b5de5,0 1px 8px var(--deep);font-size:13px;letter-spacing:.08em}
 
 /* ─── PAINEL CONTEXTUAL (NEXUS.panel) ──────────────────────────────────────── */
@@ -19,7 +48,8 @@ canvas:active{cursor:grabbing}
 .nexus-panel-close:hover{color:#fff;background:rgba(255,255,255,.1)}
 
 .nexus-panel-label{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.48);margin-bottom:6px;padding-right:26px}
-.nexus-panel-title{font-size:22px;font-weight:800;letter-spacing:-.01em;margin:0 0 10px 0;color:#fff;line-height:1.2;padding-right:24px}
+.nexus-panel-title{font-family:var(--fonte-titulo);font-weight:normal;font-synthesis:none;font-size:22px;letter-spacing:-.01em;margin:0 0 10px 0;color:#fff;line-height:1.2;padding-right:24px}
+.nexus-legend-title{font-family:var(--fonte-titulo);font-weight:normal;font-synthesis:none}
 .nexus-panel-summary{font-size:13px;line-height:1.5;color:rgba(255,255,255,.85);margin:0 0 16px 0}
 
 .nexus-panel-section{margin-bottom:16px}
@@ -44,7 +74,7 @@ canvas:active{cursor:grabbing}
 .nexus-time-control{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;max-width:580px;width:calc(100vw - 32px);pointer-events:auto;z-index:90;text-align:center}
 .nexus-time-caption{font-size:13px;line-height:1.45;color:rgba(255,255,255,.92);text-shadow:0 1px 8px var(--deep),0 0 2px var(--deep);padding:0 10px;font-weight:600;min-height:38px;display:flex;align-items:center;justify-content:center}
 .nexus-time-actions{display:flex;align-items:center;justify-content:center;gap:8px}
-.nexus-time-btn{font-family:"Nunito","Trebuchet MS",system-ui,sans-serif;cursor:pointer;outline:none;border-radius:20px;transition:background .2s,border-color .2s,color .2s,opacity .2s}
+.nexus-time-btn{font-family:var(--fonte-texto);cursor:pointer;outline:none;border-radius:20px;transition:background .2s,border-color .2s,color .2s,opacity .2s}
 .nexus-time-btn-primary{background:rgba(16,8,25,.75);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:12.5px;font-weight:800;letter-spacing:.04em;padding:8px 20px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 4px 16px rgba(0,0,0,.35)}
 .nexus-time-btn-primary:hover:not(:disabled){background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.45)}
 .nexus-time-btn-primary:disabled,.nexus-time-btn-primary.is-disabled{opacity:.35;cursor:not-allowed;border-color:rgba(255,255,255,.1)}

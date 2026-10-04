@@ -63,7 +63,7 @@ canvas:active{cursor:grabbing}
 body.painel-aberto .logo{opacity:1}
 body.modo-start .logo{opacity:1}
 /* A imagem do logo: altura fixa, largura automática para preservar a proporção do viewBox. object-fit:contain garante que nunca distorça. */
-.logo img{display:block;height:38px;width:auto;object-fit:contain}
+.logo img{display:block;height:150px;width:auto;object-fit:contain}
 /* Placeholder do onerror (quando logo.svg não existe): segue a mesma regra de visibilidade. */
 .logo[data-fallback]{opacity:0;transition:opacity .4s ease}
 body.painel-aberto .logo[data-fallback]{opacity:1}
@@ -81,10 +81,10 @@ body.modo-start canvas{cursor:default}
 
 /* Variáveis de layout do modo-start (ajuste olhando o resultado) */
 body.modo-start{
-  --start-logo-x:4vw;
-  --start-logo-y:14vh;
+  --start-logo-x:3vw;
+  --start-logo-y:10vh;
   --start-botao-x:5vw;
-  --start-botao-y:40vh;
+  --start-botao-y:37vh;
   --start-botao-tamanho:clamp(20px,4.5vh,60px)
 }
 

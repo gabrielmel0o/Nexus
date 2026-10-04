@@ -47,8 +47,11 @@
     const START_ELEV_RAD = START_ELEV_DEG * (Math.PI / 180);
     const START_AZIM_RAD = START_AZIM_DEG * (Math.PI / 180);
 
+    // S = estado atual (onde a câmera está)
     const S = N.controls.state;
-    const T = N.controls.state; // controls.js usa S e T separados, mas aqui igualamos
+    // T = alvo da câmera (para onde ela vai). PRECISA ser o T real do controls.js,
+    // exposto via N.controls.target. Sem isso, o update() puxaria S de volta para HOME.
+    const T = N.controls.target;
 
     // Posição de ombro: perto, baixa, descentrada (usa valores convertidos para radianos)
     S.th = START_AZIM_RAD;
@@ -95,9 +98,9 @@
       startBtn.style.opacity = '0';
     }
 
-    // Câmera voa até visão geral (reaproveitando flyHome com duração maior)
+    // Câmera voa até visão geral
     if (N.controls) {
-      // Guarda valores originais da visão geral (em radianos)
+      // Valores da visão geral (em radianos)
       const HOME_R = 52;
       const HOME_TH_RAD = 0.5;
       const HOME_PH_RAD = 1.12;
@@ -105,9 +108,9 @@
       // Alvo volta para origem
       N.controls.lookT.set(0, 0, 0);
 
-      // Ângulos e raio para visão geral (usa radianos como a câmera espera)
+      // S = estado atual; T = alvo real da câmera (deve ser N.controls.target, não .state)
       const S = N.controls.state;
-      const T = N.controls.state;
+      const T = N.controls.target;
       T.th = HOME_TH_RAD;
       T.ph = HOME_PH_RAD;
       T.r = HOME_R;
@@ -120,14 +123,14 @@
       function monitorFlightProgress() {
         if (!isStartMode || !startTransitionInProgress) return;
 
-        // Calcula o progresso atual (0 a 1) baseado na diferença entre S e T
+        // Calcula a diferença entre onde a câmera está e onde quer chegar
         const thDiff = Math.abs(T.th - S.th);
         const phDiff = Math.abs(T.ph - S.ph);
         const rDiff = Math.abs(T.r - S.r);
-        const maxDiff = 0.1; // quando a diferença for menor que isso, consideramos chegou
+        const maxDiff = 0.1; // diferença pequena o suficiente para considerar "chegou"
         const targetReached = thDiff < maxDiff && phDiff < maxDiff && rDiff < maxDiff;
 
-        // Ou libera quando o progresso passar de 85%
+        // Também libera se já passou de 85% do voo (pelo flyProgress do controls.js)
         const progress85 = N.controls.flyProgress > 0.85;
 
         if (targetReached || progress85) {
@@ -136,7 +139,7 @@
           startTransitionInProgress = false;
           N.travado = false;
 
-          // Encaixe a câmera na visão geral para evitar briga com arrasto
+          // Encaixa S na posição HOME para evitar briga com o arrasto logo depois
           S.th = HOME_TH_RAD;
           S.ph = HOME_PH_RAD;
           S.r = HOME_R;

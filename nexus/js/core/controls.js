@@ -17,11 +17,11 @@
 
   // ── Constantes da tela de START (ajuste olhando o resultado) ─────────────
   // Distância do "ombro" da câmera ao Eu (unidades do mundo)
-  const START_DIST = 17.7;
+  const START_DIST = 20.1;
   // Altura em GRAUS acima do plano horizontal (0 = olhando de lado, 90 = olhando de cima)
-  const START_ELEV = 80.2;
+  const START_ELEV = 80.4;
   // Ângulo horizontal em GRAUS ao redor do eixo Y
-  const START_AZIM = 213.7; // -2.50 radianos em graus
+  const START_AZIM = -130.6; // -2.50 radianos em graus
   // Deslocamento lateral do alvo em unidades do mundo (positivo = direita da tela)
   const START_OFFSET_X = 8.0;
   // Modo ajuste: se true, trava desligada no start, tecla C imprime valores atuais
@@ -110,6 +110,8 @@
   // ── API pública ───────────────────────────────────────────────────────────
   N.controls = {
     state: S,
+    // T é o ALVO da câmera (para onde ela vai). start.js precisa disso para definir a pose inicial.
+    target: T,
     START_AJUSTE: START_AJUSTE, // Exposto para start.js decidir se trava
     START_DIST: START_DIST, // Exposto para start.js usar
     START_ELEV: START_ELEV, // Exposto para start.js usar (em graus)

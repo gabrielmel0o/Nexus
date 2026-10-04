@@ -66,6 +66,29 @@ body.painel-aberto .logo{opacity:1}
 .logo[data-fallback]{opacity:0;transition:opacity .4s ease}
 body.painel-aberto .logo[data-fallback]{opacity:1}
 .hint{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 84px);left:0;right:0;text-align:center;font-size:11.5px;opacity:.45;pointer-events:none;text-shadow:0 1px 8px var(--deep)}
+
+/* ─── BOTÃO DE LEGENDA (?) ─────────────────────────────────────────────────── */
+/* Só visível quando body.painel-aberto (mecanismo reutilizável do logo). */
+.nexus-legend-btn{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);right:20px;width:32px;height:32px;background:rgba(16,8,25,.7);border:1px solid rgba(255,255,255,.18);border-radius:50%;color:var(--cor-texto-corrido);font-family:var(--fonte-titulo);font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .4s ease,background .2s,border-color .2s;color .2s;z-index:95}
+body.painel-aberto .nexus-legend-btn{pointer-events:auto;opacity:1}
+.nexus-legend-btn:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.4);color:var(--cor-texto-astro)}
+
+/* ─── LEGENDA CONTEXTUAL (NEXUS.legend) ────────────────────────────────────── */
+.nexus-legend{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 60px);right:20px;width:300px;max-width:calc(100vw - 40px);max-height:calc(100vh - 100px);overflow-y:auto;background:rgba(16,8,25,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.08);border-radius:14px;box-shadow:0 16px 40px rgba(0,0,0,.45);padding:20px;box-sizing:border-box;color:var(--cor-texto-astro);pointer-events:none;opacity:0;transform:translateY(-8px);transition:opacity .32s cubic-bezier(.16,1,.3,1),transform .32s cubic-bezier(.16,1,.3,1);z-index:96;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
+.nexus-legend::-webkit-scrollbar{width:4px}
+.nexus-legend::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:2px}
+.nexus-legend.is-visible{opacity:1;pointer-events:auto;transform:translateY(0)}
+
+.nexus-legend-title{font-family:var(--fonte-titulo);font-weight:normal;font-synthesis:none;font-size:18px;letter-spacing:-.01em;margin:0 0 14px 0;color:var(--cor-texto-titulo);line-height:1.2}
+
+.nexus-legend-section{margin-bottom:14px}
+.nexus-legend-section-title{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--cor-texto-rotulo);margin-bottom:6px}
+.nexus-legend-content{font-size:12.5px;line-height:1.5;color:var(--cor-texto-corrido);margin:0}
+
+.nexus-legend-item{margin-bottom:10px}
+.nexus-legend-item:last-child{margin-bottom:0}
+.nexus-legend-item-name{font-family:var(--fonte-texto);font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--cor-texto-rotulo);margin-bottom:2px}
+.nexus-legend-item-desc{font-family:var(--fonte-texto);font-size:12px;line-height:1.4;color:var(--cor-texto-corrido);margin:0;max-width:260px}
 .lb{position:fixed;left:0;top:0;font-family:var(--fonte-titulo);font-weight:normal;font-synthesis:none;font-size:12px;letter-spacing:.06em;pointer-events:none;white-space:nowrap;text-shadow:0 1px 8px var(--deep),0 0 2px var(--deep);transition:opacity .4s;color:var(--cor-texto-astro)}
 .lb.highlight{color:var(--cor-texto-astro);text-shadow:0 0 8px #c8b6ff,0 0 16px #9b5de5,0 1px 8px var(--deep);font-size:13px;letter-spacing:.08em}
 

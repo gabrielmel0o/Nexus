@@ -116,9 +116,10 @@
       }
     });
 
-    // Tecla Esc: se o painel estiver aberto, fecha apenas a UI sem resetar a câmera
+    // Tecla Esc: se o painel estiver aberto e a legenda fechada, fecha o painel
+    // Se a legenda estiver aberta, o Esc é tratado pela legenda (stopImmediatePropagation)
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && N.panel && N.panel.isOpen()) {
+      if (e.key === 'Escape' && N.panel && N.panel.isOpen() && !N.legendaAberta) {
         N.panel.close();
         e.stopImmediatePropagation();
       }

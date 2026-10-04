@@ -13,6 +13,8 @@
        onerror="this.style.display='none';this.parentElement.dataset.fallback='LOGO';">
 </div>
 <div class="hint">arraste para girar · role ou pince para aproximar</div>
+<!-- Botão de legenda: só visível quando painel-aberto está no body -->
+<button class="nexus-legend-btn" aria-label="Legenda">?</button>
 
 <!-- 1) Biblioteca de 3D (vem da internet) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -36,6 +38,7 @@
 <script src="js/world/visitor.js"></script>
 <script src="js/ui/labels.js"></script>
 <script src="js/ui/panel.js"></script>
+<script src="js/ui/legend.js"></script>
 <script src="js/ui/time.js"></script>
 <script src="js/world/arms.js"></script>
 <script src="js/world/halo.js"></script>

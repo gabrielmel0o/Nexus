@@ -220,6 +220,8 @@
       const el = ensureElement();
       el.classList.add('is-visible');
       el.setAttribute('aria-hidden', 'false');
+      // Liga classe no body para mostrar logo (reutilizável para legenda e start)
+      document.body.classList.add('painel-aberto');
     },
 
     close() {
@@ -228,6 +230,8 @@
         panelEl.classList.remove('is-visible');
         panelEl.setAttribute('aria-hidden', 'true');
       }
+      // Remove classe do body para esconder logo
+      document.body.classList.remove('painel-aberto');
     },
 
     refresh() {

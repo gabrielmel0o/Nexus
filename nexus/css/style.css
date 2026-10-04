@@ -57,9 +57,14 @@ canvas{position:fixed;inset:0;display:block;touch-action:none;cursor:grab}
 canvas:active{cursor:grabbing}
 /* .logo: posição fixa no canto superior esquerdo, sem fundo nem borda. pointer-events:none para não bloquear o arrasto da câmera. */
 /* z-index:10 — fica acima do canvas e dos rótulos (.lb, sem z-index), mas abaixo do controle de tempo (90), painel (100) e flash da supernova (999). */
-.logo{position:fixed;top:calc(env(safe-area-inset-top,0px) + 16px);left:16px;pointer-events:none;line-height:0;z-index:10}
+/* Logo fica oculto por padrão e visível quando body.painel-aberto (mecanismo reutilizável para legenda e start). */
+.logo{position:fixed;top:calc(env(safe-area-inset-top,0px) + 16px);left:16px;pointer-events:none;line-height:0;z-index:10;opacity:0;transition:opacity .4s ease}
+body.painel-aberto .logo{opacity:1}
 /* A imagem do logo: altura fixa, largura automática para preservar a proporção do viewBox. object-fit:contain garante que nunca distorça. */
 .logo img{display:block;height:38px;width:auto;object-fit:contain}
+/* Placeholder do onerror (quando logo.svg não existe): segue a mesma regra de visibilidade. */
+.logo[data-fallback]{opacity:0;transition:opacity .4s ease}
+body.painel-aberto .logo[data-fallback]{opacity:1}
 .hint{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 84px);left:0;right:0;text-align:center;font-size:11.5px;opacity:.45;pointer-events:none;text-shadow:0 1px 8px var(--deep)}
 .lb{position:fixed;left:0;top:0;font-family:var(--fonte-titulo);font-weight:normal;font-synthesis:none;font-size:12px;letter-spacing:.06em;pointer-events:none;white-space:nowrap;text-shadow:0 1px 8px var(--deep),0 0 2px var(--deep);transition:opacity .4s;color:var(--cor-texto-astro)}
 .lb.highlight{color:var(--cor-texto-astro);text-shadow:0 0 8px #c8b6ff,0 0 16px #9b5de5,0 1px 8px var(--deep);font-size:13px;letter-spacing:.08em}

@@ -55,18 +55,13 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
 html,body{height:100%;margin:0;background:var(--deep);color:var(--ink);font-family:var(--fonte-texto);overflow:hidden}
 canvas{position:fixed;inset:0;display:block;touch-action:none;cursor:grab}
 canvas:active{cursor:grabbing}
-/* .logo: posição fixa no canto superior esquerdo, sem fundo nem borda. pointer-events:none para não bloquear o arrasto da câmera. */
-/* z-index:10 — fica acima do canvas e dos rótulos (.lb, sem z-index), mas abaixo do controle de tempo (90), painel (100) e flash da supernova (999). */
-/* Logo fica oculto por padrão e visível quando body.painel-aberto (mecanismo reutilizável para legenda e start). */
-/* No modo-start, o logo também fica visível. */
+/* Logo: visível SOMENTE no modo-start. Com astro selecionado, o logo NÃO aparece. */
 .logo{position:fixed;top:calc(env(safe-area-inset-top,0px) + 16px);left:16px;pointer-events:none;line-height:0;z-index:10;opacity:0;transition:opacity .4s ease}
-body.painel-aberto .logo{opacity:1}
 body.modo-start .logo{opacity:1}
-/* A imagem do logo: altura fixa, largura automática para preservar a proporção do viewBox. object-fit:contain garante que nunca distorça. */
+/* A imagem do logo: altura fixa, largura automática para preservar a proporção do viewBox. */
 .logo img{display:block;height:150px;width:auto;object-fit:contain}
-/* Placeholder do onerror (quando logo.svg não existe): segue a mesma regra de visibilidade. */
+/* Placeholder do onerror: mesma regra de visibilidade. */
 .logo[data-fallback]{opacity:0;transition:opacity .4s ease}
-body.painel-aberto .logo[data-fallback]{opacity:1}
 body.modo-start .logo[data-fallback]{opacity:1}
 .hint{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 84px);left:0;right:0;text-align:center;font-size:11.5px;opacity:.45;pointer-events:none;text-shadow:0 1px 8px var(--deep)}
 
@@ -99,13 +94,16 @@ body.modo-start .logo{left:var(--start-logo-x);top:calc(env(safe-area-inset-top,
 body:not(.modo-start) .nexus-start-container{display:none}
 
 /* ─── BOTÃO DE LEGENDA (?) ─────────────────────────────────────────────────── */
-/* Só visível quando body.painel-aberto (mecanismo reutilizável do logo). */
-.nexus-legend-btn{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);right:20px;width:32px;height:32px;background:rgba(16,8,25,.7);border:1px solid rgba(255,255,255,.18);border-radius:50%;color:var(--cor-texto-corrido);font-family:var(--fonte-titulo);font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .4s ease,background .2s,border-color .2s;color .2s;z-index:95}
+/* Só visível quando body.painel-aberto (astro selecionado). */
+/* Posição: canto inferior ESQUERDO — espelho da posição anterior (direita), mesma distância das bordas. */
+.nexus-legend-btn{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);left:20px;width:32px;height:32px;background:rgba(16,8,25,.7);border:1px solid rgba(255,255,255,.18);border-radius:50%;color:var(--cor-texto-corrido);font-family:var(--fonte-titulo);font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .4s ease,background .2s,border-color .2s,color .2s;z-index:95}
 body.painel-aberto .nexus-legend-btn{pointer-events:auto;opacity:1}
 .nexus-legend-btn:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.4);color:var(--cor-texto-astro)}
 
 /* ─── LEGENDA CONTEXTUAL (NEXUS.legend) ────────────────────────────────────── */
-.nexus-legend{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 60px);right:20px;width:300px;max-width:calc(100vw - 40px);max-height:calc(100vh - 100px);overflow-y:auto;background:rgba(16,8,25,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.08);border-radius:14px;box-shadow:0 16px 40px rgba(0,0,0,.45);padding:20px;box-sizing:border-box;color:var(--cor-texto-astro);pointer-events:none;opacity:0;transform:translateY(-8px);transition:opacity .32s cubic-bezier(.16,1,.3,1),transform .32s cubic-bezier(.16,1,.3,1);z-index:96;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
+/* Ancorada à ESQUERDA, acima do botão "?". */
+/* max-width limitado a ~35vw para não encostar no painel do lado direito em telas largas. */
+.nexus-legend{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 60px);left:20px;width:300px;max-width:min(300px,35vw);max-height:calc(100vh - 100px);overflow-y:auto;background:rgba(16,8,25,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.08);border-radius:14px;box-shadow:0 16px 40px rgba(0,0,0,.45);padding:20px;box-sizing:border-box;color:var(--cor-texto-astro);pointer-events:none;opacity:0;transform:translateY(-8px);transition:opacity .32s cubic-bezier(.16,1,.3,1),transform .32s cubic-bezier(.16,1,.3,1);z-index:96;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
 .nexus-legend::-webkit-scrollbar{width:4px}
 .nexus-legend::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:2px}
 .nexus-legend.is-visible{opacity:1;pointer-events:auto;transform:translateY(0)}
@@ -156,22 +154,34 @@ body.painel-aberto .nexus-legend-btn{pointer-events:auto;opacity:1}
 .nexus-panel-depth{font-size:12.5px;font-weight:800;color:var(--cor-texto-corrido);letter-spacing:.02em}
 
 /* ─── CONTROLE DE TEMPO (NEXUS.time) ───────────────────────────────────────── */
-.nexus-time-control{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;max-width:580px;width:calc(100vw - 32px);pointer-events:auto;z-index:90;text-align:center}
-.nexus-time-caption{font-size:13px;line-height:1.45;color:var(--cor-texto-corrido);text-shadow:0 1px 8px var(--deep),0 0 2px var(--deep);padding:0 10px;font-weight:600;min-height:38px;display:flex;align-items:center;justify-content:center}
-.nexus-time-actions{display:flex;align-items:center;justify-content:center;gap:8px}
-.nexus-time-btn{font-family:var(--fonte-texto);cursor:pointer;outline:none;border-radius:20px;transition:background .2s,border-color .2s,color .2s,opacity .2s}
-.nexus-time-btn-primary{background:rgba(16,8,25,.75);border:1px solid rgba(255,255,255,.22);color:var(--cor-texto-corrido);font-size:12.5px;font-weight:800;letter-spacing:.04em;padding:8px 20px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 4px 16px rgba(0,0,0,.35)}
-.nexus-time-btn-primary:hover:not(:disabled){background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.45)}
-.nexus-time-btn-primary:disabled,.nexus-time-btn-primary.is-disabled{opacity:.35;cursor:not-allowed;border-color:rgba(255,255,255,.1)}
-.nexus-time-btn-secondary{background:none;border:none;color:var(--cor-texto-pendente-6);font-size:11.5px;font-weight:700;padding:6px 12px;border-radius:12px}
-.nexus-time-btn-secondary:hover:not(:disabled){color:var(--cor-texto-corrido);background:rgba(255,255,255,.08)}
-.nexus-time-btn-secondary:disabled,.nexus-time-btn-secondary.is-disabled{opacity:.3;cursor:not-allowed}
+/* Container centralizado no fundo; flex vertical para empilhar legenda (cima) e linha de botões (baixo) */
+.nexus-time-control{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;max-width:640px;width:calc(100vw - 32px);pointer-events:auto;z-index:90;text-align:center}
+
+/* Legenda do capítulo: oculta por padrão, aparece com fade quando .is-visible */
+.nexus-time-caption{font-size:13px;line-height:1.45;color:var(--cor-texto-corrido);text-shadow:0 1px 8px var(--deep),0 0 2px var(--deep);padding:0 10px;font-weight:600;opacity:0;transition:opacity .35s ease;pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.nexus-time-caption.is-visible{opacity:1}
+
+/* Linha horizontal de ações: "Avançar no tempo. | ícone | Voltar ao início" */
+.nexus-time-actions{display:flex;align-items:center;justify-content:center;gap:0}
+
+/* Ícone separador (pipe + SVG + pipe) */
+.nexus-time-icon{display:inline-flex;align-items:center;color:var(--cor-texto-corrido);opacity:.5;font-size:13px;padding:0 10px;user-select:none;gap:8px}
+
+/* Botões do controle de tempo — sem borda/fundo, texto simples como na referência */
+.nexus-time-btn{font-family:var(--fonte-texto);cursor:pointer;outline:none;background:none;border:none;border-radius:4px;transition:color .2s,opacity .2s;color:var(--cor-texto-corrido);font-size:13px;font-weight:600;letter-spacing:.01em;padding:6px 4px}
+.nexus-time-btn:hover:not(:disabled){color:var(--cor-texto-astro)}
+.nexus-time-btn:disabled,.nexus-time-btn.is-disabled{opacity:.3;cursor:not-allowed}
+
+/* Aliases mantidos para compatibilidade (time.js pode usar qualquer uma das duas classes) */
+.nexus-time-btn-primary{color:var(--cor-texto-corrido)}
+.nexus-time-btn-secondary{color:var(--cor-texto-corrido)}
 
 @media(max-width:600px){
   .hint{bottom:calc(env(safe-area-inset-bottom,0px) + 98px)}
-  .nexus-time-control{bottom:calc(env(safe-area-inset-bottom,0px) + 12px);gap:8px}
-  .nexus-time-caption{font-size:12px;min-height:34px}
-  .nexus-time-btn-primary{font-size:12px;padding:7px 14px}
+  .nexus-time-control{bottom:calc(env(safe-area-inset-bottom,0px) + 12px);gap:4px}
+  .nexus-time-caption{font-size:12px}
+  .nexus-time-btn{font-size:12px}
+  /* Em telas pequenas, o painel vira sheet deslizante de baixo para cima */
   .nexus-panel{top:auto;bottom:0;left:0;right:0;width:100%;max-width:100%;max-height:75vh;border-radius:18px 18px 0 0;padding:20px 18px calc(env(safe-area-inset-bottom,0px) + 16px) 18px;transform:translateY(100%)}
   .nexus-panel.is-visible{transform:translateY(0)}
 }

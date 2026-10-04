@@ -25,6 +25,28 @@
   --deep:#100819;
   --lit:#111450;
   --ink:#fff;
+
+  /* ─── CORES DE TIPOGRAFIA ─────────────────────────────────────────────────── */
+  /* Títulos da interface: nome do corpo no painel, título da legenda */
+  --cor-texto-titulo:#FF8900;
+  /* Nomes de astros e sistemas nos rótulos flutuantes do universo */
+  --cor-texto-astro:#FFFFFF;
+  /* Conteúdo textual: resumo, fase, notas, legenda do capítulo, botões, texto da legenda */
+  --cor-texto-corrido:#E2E3E4;
+  /* Rótulos do painel em caixa-alta: "Por quê?", "Peso emocional", "Profundidade", "Fase"
+     e o pipe (borda vertical) do bloco "Por quê?" */
+  --cor-texto-rotulo:#D47300;
+
+  /* ─── AGUARDANDO DEFINIÇÃO ────────────────────────────────────────────────── */
+  /* Botão de fechar (×) no painel — ícone de interface, não tipografia de conteúdo */
+  --cor-texto-pendente-1:rgba(255,255,255,.5);
+  /* Badge do tipo do corpo (ex: "ESTRELA", "PLANETA") — linha em caixa-alta acima do título */
+  --cor-texto-pendente-2:rgba(255,255,255,.48);
+  /* Nota de capítulo — cor especial âmbar, destaque narrativo */
+  --cor-texto-pendente-4:#ffe7b0;
+  /* Botão secundário desabilitado / em repouso */
+  --cor-texto-pendente-6:rgba(255,255,255,.55);
+
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
@@ -35,51 +57,51 @@ canvas{position:fixed;inset:0;display:block;touch-action:none;cursor:grab}
 canvas:active{cursor:grabbing}
 .logo{position:fixed;top:calc(env(safe-area-inset-top,0px) + 16px);left:16px;width:124px;height:38px;border:1px dashed rgba(255,255,255,.35);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;letter-spacing:.18em;opacity:.7}
 .hint{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 84px);left:0;right:0;text-align:center;font-size:11.5px;opacity:.45;pointer-events:none;text-shadow:0 1px 8px var(--deep)}
-.lb{position:fixed;left:0;top:0;font-family:var(--fonte-titulo);font-weight:normal;font-synthesis:none;font-size:12px;letter-spacing:.06em;pointer-events:none;white-space:nowrap;text-shadow:0 1px 8px var(--deep),0 0 2px var(--deep);transition:opacity .4s}
-.lb.highlight{color:#fff;text-shadow:0 0 8px #c8b6ff,0 0 16px #9b5de5,0 1px 8px var(--deep);font-size:13px;letter-spacing:.08em}
+.lb{position:fixed;left:0;top:0;font-family:var(--fonte-titulo);font-weight:normal;font-synthesis:none;font-size:12px;letter-spacing:.06em;pointer-events:none;white-space:nowrap;text-shadow:0 1px 8px var(--deep),0 0 2px var(--deep);transition:opacity .4s;color:var(--cor-texto-astro)}
+.lb.highlight{color:var(--cor-texto-astro);text-shadow:0 0 8px #c8b6ff,0 0 16px #9b5de5,0 1px 8px var(--deep);font-size:13px;letter-spacing:.08em}
 
 /* ─── PAINEL CONTEXTUAL (NEXUS.panel) ──────────────────────────────────────── */
-.nexus-panel{position:fixed;top:calc(env(safe-area-inset-top,0px) + 20px);right:20px;width:330px;max-width:calc(100vw - 40px);max-height:calc(100vh - 40px);overflow-y:auto;background:rgba(16,8,25,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.08);border-radius:14px;box-shadow:0 16px 40px rgba(0,0,0,.45);padding:22px 20px 20px 20px;box-sizing:border-box;color:#fff;pointer-events:none;opacity:0;transform:translateY(-8px);transition:opacity .32s cubic-bezier(.16,1,.3,1),transform .32s cubic-bezier(.16,1,.3,1);z-index:100;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
+.nexus-panel{position:fixed;top:calc(env(safe-area-inset-top,0px) + 20px);right:20px;width:330px;max-width:calc(100vw - 40px);max-height:calc(100vh - 40px);overflow-y:auto;background:rgba(16,8,25,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.08);border-radius:14px;box-shadow:0 16px 40px rgba(0,0,0,.45);padding:22px 20px 20px 20px;box-sizing:border-box;color:var(--cor-texto-astro);pointer-events:none;opacity:0;transform:translateY(-8px);transition:opacity .32s cubic-bezier(.16,1,.3,1),transform .32s cubic-bezier(.16,1,.3,1);z-index:100;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
 .nexus-panel::-webkit-scrollbar{width:4px}
 .nexus-panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:2px}
 .nexus-panel.is-visible{opacity:1;pointer-events:auto;transform:translateY(0)}
 
-.nexus-panel-close{position:absolute;top:14px;right:14px;width:28px;height:28px;background:none;border:none;color:rgba(255,255,255,.5);font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:50%;padding:0;transition:color .2s,background .2s}
-.nexus-panel-close:hover{color:#fff;background:rgba(255,255,255,.1)}
+.nexus-panel-close{position:absolute;top:14px;right:14px;width:28px;height:28px;background:none;border:none;color:var(--cor-texto-pendente-1);font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:50%;padding:0;transition:color .2s,background .2s}
+.nexus-panel-close:hover{color:var(--cor-texto-astro);background:rgba(255,255,255,.1)}
 
-.nexus-panel-label{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.48);margin-bottom:6px;padding-right:26px}
-.nexus-panel-title{font-family:var(--fonte-titulo);font-weight:normal;font-synthesis:none;font-size:22px;letter-spacing:-.01em;margin:0 0 10px 0;color:#fff;line-height:1.2;padding-right:24px}
-.nexus-legend-title{font-family:var(--fonte-titulo);font-weight:normal;font-synthesis:none}
-.nexus-panel-summary{font-size:13px;line-height:1.5;color:rgba(255,255,255,.85);margin:0 0 16px 0}
+.nexus-panel-label{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--cor-texto-pendente-2);margin-bottom:6px;padding-right:26px}
+.nexus-panel-title{font-family:var(--fonte-titulo);font-weight:normal;font-synthesis:none;font-size:22px;letter-spacing:-.01em;margin:0 0 10px 0;color:var(--cor-texto-titulo);line-height:1.2;padding-right:24px}
+.nexus-legend-title{font-family:var(--fonte-titulo);font-weight:normal;font-synthesis:none;color:var(--cor-texto-titulo)}
+.nexus-panel-summary{font-size:13px;line-height:1.5;color:var(--cor-texto-corrido);margin:0 0 16px 0}
 
 .nexus-panel-section{margin-bottom:16px}
-.nexus-panel-section-title{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(200,182,255,.85);margin-bottom:6px}
-.nexus-panel-law{font-size:12px;font-style:italic;line-height:1.45;color:rgba(255,255,255,.7);margin:0 0 6px 0;padding-left:8px;border-left:2px solid rgba(155,93,229,.45)}
-.nexus-panel-why{font-size:12.5px;line-height:1.45;color:rgba(255,255,255,.85);margin:0}
+.nexus-panel-section-title{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--cor-texto-rotulo);margin-bottom:6px}
+.nexus-panel-law{font-size:12px;font-style:italic;line-height:1.45;color:var(--cor-texto-corrido);margin:0 0 6px 0;padding-left:8px;border-left:2px solid var(--cor-texto-rotulo)}
+.nexus-panel-why{font-size:12.5px;line-height:1.45;color:var(--cor-texto-corrido);margin:0}
 
 .nexus-panel-phase-row{display:flex;align-items:baseline;gap:8px;margin-bottom:6px;font-size:12.5px}
-.nexus-panel-phase-badge{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.5)}
-.nexus-panel-phase-text{color:rgba(255,255,255,.9);font-style:italic}
-.nexus-panel-note{font-size:12px;line-height:1.45;color:#ffe7b0;background:rgba(255,231,176,.08);padding:8px 10px;border-radius:6px;border-left:2px solid #ffd166;margin-top:6px}
+.nexus-panel-phase-badge{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--cor-texto-rotulo)}
+.nexus-panel-phase-text{color:var(--cor-texto-corrido);font-style:italic}
+.nexus-panel-note{font-size:12px;line-height:1.45;color:var(--cor-texto-pendente-4);background:rgba(255,231,176,.08);padding:8px 10px;border-radius:6px;border-left:2px solid #ffd166;margin-top:6px}
 
 .nexus-panel-meta{display:flex;justify-content:space-between;align-items:flex-end;padding-top:14px;border-top:1px solid rgba(255,255,255,.07);margin-top:6px}
 .nexus-panel-meta-item{display:flex;flex-direction:column;gap:6px}
-.nexus-panel-meta-title{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+.nexus-panel-meta-title{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--cor-texto-rotulo)}
 .nexus-panel-dots{display:flex;align-items:center;gap:5px;height:16px}
 .nexus-panel-dot{width:7px;height:7px;border-radius:50%;border:1px solid rgba(255,255,255,.3);box-sizing:border-box;transition:background .2s,border-color .2s}
 .nexus-panel-dot.is-filled{background:#fff;border-color:#fff;box-shadow:0 0 6px rgba(255,255,255,.6)}
-.nexus-panel-depth{font-size:12.5px;font-weight:800;color:#fff;letter-spacing:.02em}
+.nexus-panel-depth{font-size:12.5px;font-weight:800;color:var(--cor-texto-corrido);letter-spacing:.02em}
 
 /* ─── CONTROLE DE TEMPO (NEXUS.time) ───────────────────────────────────────── */
 .nexus-time-control{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;max-width:580px;width:calc(100vw - 32px);pointer-events:auto;z-index:90;text-align:center}
-.nexus-time-caption{font-size:13px;line-height:1.45;color:rgba(255,255,255,.92);text-shadow:0 1px 8px var(--deep),0 0 2px var(--deep);padding:0 10px;font-weight:600;min-height:38px;display:flex;align-items:center;justify-content:center}
+.nexus-time-caption{font-size:13px;line-height:1.45;color:var(--cor-texto-corrido);text-shadow:0 1px 8px var(--deep),0 0 2px var(--deep);padding:0 10px;font-weight:600;min-height:38px;display:flex;align-items:center;justify-content:center}
 .nexus-time-actions{display:flex;align-items:center;justify-content:center;gap:8px}
 .nexus-time-btn{font-family:var(--fonte-texto);cursor:pointer;outline:none;border-radius:20px;transition:background .2s,border-color .2s,color .2s,opacity .2s}
-.nexus-time-btn-primary{background:rgba(16,8,25,.75);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:12.5px;font-weight:800;letter-spacing:.04em;padding:8px 20px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 4px 16px rgba(0,0,0,.35)}
+.nexus-time-btn-primary{background:rgba(16,8,25,.75);border:1px solid rgba(255,255,255,.22);color:var(--cor-texto-corrido);font-size:12.5px;font-weight:800;letter-spacing:.04em;padding:8px 20px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 4px 16px rgba(0,0,0,.35)}
 .nexus-time-btn-primary:hover:not(:disabled){background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.45)}
 .nexus-time-btn-primary:disabled,.nexus-time-btn-primary.is-disabled{opacity:.35;cursor:not-allowed;border-color:rgba(255,255,255,.1)}
-.nexus-time-btn-secondary{background:none;border:none;color:rgba(255,255,255,.55);font-size:11.5px;font-weight:700;padding:6px 12px;border-radius:12px}
-.nexus-time-btn-secondary:hover:not(:disabled){color:#fff;background:rgba(255,255,255,.08)}
+.nexus-time-btn-secondary{background:none;border:none;color:var(--cor-texto-pendente-6);font-size:11.5px;font-weight:700;padding:6px 12px;border-radius:12px}
+.nexus-time-btn-secondary:hover:not(:disabled){color:var(--cor-texto-corrido);background:rgba(255,255,255,.08)}
 .nexus-time-btn-secondary:disabled,.nexus-time-btn-secondary.is-disabled{opacity:.3;cursor:not-allowed}
 
 @media(max-width:600px){

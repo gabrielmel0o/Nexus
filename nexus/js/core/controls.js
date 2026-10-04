@@ -15,6 +15,18 @@
   const N = NEXUS;
   const canvas = N.renderer.domElement;
 
+  // ── Constantes da tela de START (ajuste olhando o resultado) ─────────────
+  // Distância do "ombro" da câmera ao Eu (perto do zoom mínimo)
+  const START_DIST = 26;
+  // Altura em graus acima do plano (elevação)
+  const START_ELEV = 12;
+  // Ângulo horizontal (azimute)
+  const START_AZIM = 0.5;
+  // Deslocamento lateral do alvo para o Eu ficar à direita da tela (negativo = direita)
+  const START_OFFSET_X = -8;
+  // Modo ajuste: se true, trava desligada no start, tecla C imprime valores atuais
+  const START_AJUSTE = false;
+
   // ── Estado esférico da câmera ─────────────────────────────────────────────
   // S = onde a câmera ESTÁ (suavizado)
   // T = para onde ela QUER ir
@@ -42,6 +54,7 @@
   let dragging = false, pinch = 0;
 
   canvas.addEventListener('pointerdown', e => {
+    if (N.travado) return;
     try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
     pointers.set(e.pointerId, e);
     dragging = true;
@@ -49,6 +62,7 @@
   });
 
   canvas.addEventListener('pointermove', e => {
+    if (N.travado) return;
     const old = pointers.get(e.pointerId);
     if (!old) return;
     if (pointers.size === 1) {                // um dedo/mouse: girar
@@ -65,6 +79,7 @@
   });
 
   const release = e => {
+    if (N.travado) return;
     try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
     pointers.delete(e.pointerId);
     dragging = pointers.size > 0;
@@ -74,12 +89,28 @@
   canvas.addEventListener('pointerup', release);
   canvas.addEventListener('pointercancel', release);
   canvas.addEventListener('wheel', e => {
+    if (N.travado) return;
     T.r = clampR(T.r * Math.exp(e.deltaY * .0012));
   }, { passive: true });
+
+  // Modo ajuste: tecla C imprime valores atuais da câmera para copiar
+  if (START_AJUSTE) {
+    window.addEventListener('keydown', e => {
+      if (e.key === 'c' || e.key === 'C') {
+        const elevDeg = (S.ph * 180 / Math.PI).toFixed(1);
+        console.log(`START_DIST = ${S.r.toFixed(1)}; START_ELEV = ${elevDeg}; START_AZIM = ${S.th.toFixed(2)}; START_OFFSET_X = ${lookT.x.toFixed(1)};`);
+      }
+    });
+  }
 
   // ── API pública ───────────────────────────────────────────────────────────
   N.controls = {
     state: S,
+    START_AJUSTE: START_AJUSTE, // Exposto para start.js decidir se trava
+    look: look,    // Exposto para start.js manipular
+    lookT: lookT,   // Exposto para start.js manipular
+    flyProgress: flyProgress, // Exposto para start.js manipular
+    flyDuration: flyDuration, // Exposto para start.js manipular
 
     // Voa até uma posição no mundo, ajustando o raio mínimo e de chegada.
     // getPosFn = função que devolve o Vector3 ATUAL do objeto (para seguir)

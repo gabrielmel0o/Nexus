@@ -1,6 +1,8 @@
 /* utils.js — ferramentas pequenas usadas por vários arquivos.
    Aqui nasce o "NEXUS": uma caixa onde cada arquivo guarda o que oferece aos outros. */
 window.NEXUS = {};
+// Flag central de trava: true durante modo-start e voo do START
+NEXUS.travado = false;
 
 // Sorteia um número entre a e b (usado para espalhar estrelas e elementos aleatórios).
 NEXUS.rand = (a, b) => a + Math.random() * (b - a);

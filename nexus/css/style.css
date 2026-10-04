@@ -58,14 +58,45 @@ canvas:active{cursor:grabbing}
 /* .logo: posição fixa no canto superior esquerdo, sem fundo nem borda. pointer-events:none para não bloquear o arrasto da câmera. */
 /* z-index:10 — fica acima do canvas e dos rótulos (.lb, sem z-index), mas abaixo do controle de tempo (90), painel (100) e flash da supernova (999). */
 /* Logo fica oculto por padrão e visível quando body.painel-aberto (mecanismo reutilizável para legenda e start). */
+/* No modo-start, o logo também fica visível. */
 .logo{position:fixed;top:calc(env(safe-area-inset-top,0px) + 16px);left:16px;pointer-events:none;line-height:0;z-index:10;opacity:0;transition:opacity .4s ease}
 body.painel-aberto .logo{opacity:1}
+body.modo-start .logo{opacity:1}
 /* A imagem do logo: altura fixa, largura automática para preservar a proporção do viewBox. object-fit:contain garante que nunca distorça. */
 .logo img{display:block;height:38px;width:auto;object-fit:contain}
 /* Placeholder do onerror (quando logo.svg não existe): segue a mesma regra de visibilidade. */
 .logo[data-fallback]{opacity:0;transition:opacity .4s ease}
 body.painel-aberto .logo[data-fallback]{opacity:1}
+body.modo-start .logo[data-fallback]{opacity:1}
 .hint{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 84px);left:0;right:0;text-align:center;font-size:11.5px;opacity:.45;pointer-events:none;text-shadow:0 1px 8px var(--deep)}
+
+/* ─── MODO START (tela inicial) ───────────────────────────────────────────── */
+/* Enquanto body.modo-start existir, esconde: controle de tempo, legenda, painel, botão ?, rótulos e hover */
+body.modo-start .nexus-time-control{display:none}
+body.modo-start .nexus-legend-btn{display:none}
+body.modo-start .nexus-panel{display:none}
+body.modo-start .nexus-legend{display:none}
+body.modo-start .lb{display:none}
+body.modo-start canvas{cursor:default}
+
+/* Variáveis de layout do modo-start (ajuste olhando o resultado) */
+body.modo-start{
+  --start-logo-x:4vw;
+  --start-logo-y:14vh;
+  --start-botao-x:5vw;
+  --start-botao-y:40vh;
+  --start-botao-tamanho:clamp(20px,4.5vh,60px)
+}
+
+/* Logo no modo-start: usa variáveis de posição */
+body.modo-start .logo{left:var(--start-logo-x);top:calc(env(safe-area-inset-top,0px) + var(--start-logo-y))}
+
+/* ─── BOTÃO START ─────────────────────────────────────────────────────────── */
+/* Só visível no modo-start, no lado esquerdo abaixo do logo */
+.nexus-start-container{position:fixed;left:var(--start-botao-x);top:var(--start-botao-y);pointer-events:none;z-index:10}
+.nexus-start-btn{font-family:var(--fonte-titulo);font-weight:normal;font-synthesis:none;font-size:var(--start-botao-tamanho);letter-spacing:.08em;color:var(--cor-texto-titulo);background:none;border:none;cursor:pointer;padding:0;pointer-events:auto;opacity:1;transition:opacity .4s ease,color .2s}
+.nexus-start-btn:hover{color:var(--cor-texto-astro)}
+body:not(.modo-start) .nexus-start-container{display:none}
 
 /* ─── BOTÃO DE LEGENDA (?) ─────────────────────────────────────────────────── */
 /* Só visível quando body.painel-aberto (mecanismo reutilizável do logo). */

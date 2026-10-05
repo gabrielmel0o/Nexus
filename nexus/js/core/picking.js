@@ -89,6 +89,7 @@
 
   // ── Eventos ───────────────────────────────────────────────────────────────
   canvas.addEventListener('pointerdown', e => {
+    if (N.travado) return;
     isPointerDown = true;
     isDragging = false;
     downPos.x = e.clientX;
@@ -96,6 +97,7 @@
   });
 
   canvas.addEventListener('pointermove', e => {
+    if (N.travado) return;
     // Se o botão do mouse está pressionado, verifica se iniciou arrasto da câmera
     if (isPointerDown) {
       if (!isDragging) {
@@ -113,6 +115,7 @@
   });
 
   const cancelPointer = () => {
+    if (N.travado) return;
     isPointerDown = false;
     isDragging = false;
     updateHover(null);
@@ -122,6 +125,7 @@
   canvas.addEventListener('pointercancel', cancelPointer);
 
   canvas.addEventListener('pointerup', e => {
+    if (N.travado) return;
     const dist = Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y);
     const wasDragging = isDragging || dist > 5;
 
@@ -149,6 +153,7 @@
   // Esc já está tratado em controls.js (chama flyHome),
   // mas também limpa N.selected aqui para manter consistência
   window.addEventListener('keydown', e => {
+    if (N.travado) return;
     if (e.key === 'Escape') {
       if (N.panel && N.panel.isOpen()) {
         N.panel.close();

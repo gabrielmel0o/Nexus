@@ -15,6 +15,18 @@
   const N = NEXUS;
   const canvas = N.renderer.domElement;
 
+  // ── Constantes da tela de START (ajuste olhando o resultado) ─────────────
+  // Distância do "ombro" da câmera ao Eu (unidades do mundo)
+  const START_DIST = 20.1;
+  // Altura em GRAUS acima do plano horizontal (0 = olhando de lado, 90 = olhando de cima)
+  const START_ELEV = 80.4;
+  // Ângulo horizontal em GRAUS ao redor do eixo Y
+  const START_AZIM = -130.6; // -2.50 radianos em graus
+  // Deslocamento lateral do alvo em unidades do mundo (positivo = direita da tela)
+  const START_OFFSET_X = 8.0;
+  // Modo ajuste: se true, trava desligada no start, tecla C imprime valores atuais
+  const START_AJUSTE = false;
+
   // ── Estado esférico da câmera ─────────────────────────────────────────────
   // S = onde a câmera ESTÁ (suavizado)
   // T = para onde ela QUER ir
@@ -42,6 +54,7 @@
   let dragging = false, pinch = 0;
 
   canvas.addEventListener('pointerdown', e => {
+    if (N.travado) return;
     try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
     pointers.set(e.pointerId, e);
     dragging = true;
@@ -49,6 +62,7 @@
   });
 
   canvas.addEventListener('pointermove', e => {
+    if (N.travado) return;
     const old = pointers.get(e.pointerId);
     if (!old) return;
     if (pointers.size === 1) {                // um dedo/mouse: girar
@@ -65,6 +79,7 @@
   });
 
   const release = e => {
+    if (N.travado) return;
     try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
     pointers.delete(e.pointerId);
     dragging = pointers.size > 0;
@@ -74,12 +89,38 @@
   canvas.addEventListener('pointerup', release);
   canvas.addEventListener('pointercancel', release);
   canvas.addEventListener('wheel', e => {
+    if (N.travado) return;
     T.r = clampR(T.r * Math.exp(e.deltaY * .0012));
   }, { passive: true });
+
+  // Modo ajuste: tecla C imprime valores atuais da câmera para copiar
+  if (START_AJUSTE) {
+    window.addEventListener('keydown', e => {
+      if (e.key === 'c' || e.key === 'C') {
+        const elevDeg = (S.ph * 180 / Math.PI).toFixed(1);
+        const azimDeg = (S.th * 180 / Math.PI).toFixed(1);
+        console.log(`START_DIST = ${S.r.toFixed(1)}; // unidades do mundo`);
+        console.log(`START_ELEV = ${elevDeg}; // graus acima do plano horizontal`);
+        console.log(`START_AZIM = ${azimDeg}; // graus ao redor do eixo Y`);
+        console.log(`START_OFFSET_X = ${lookT.x.toFixed(1)}; // unidades do mundo (positivo = direita)`);
+      }
+    });
+  }
 
   // ── API pública ───────────────────────────────────────────────────────────
   N.controls = {
     state: S,
+    // T é o ALVO da câmera (para onde ela vai). start.js precisa disso para definir a pose inicial.
+    target: T,
+    START_AJUSTE: START_AJUSTE, // Exposto para start.js decidir se trava
+    START_DIST: START_DIST, // Exposto para start.js usar
+    START_ELEV: START_ELEV, // Exposto para start.js usar (em graus)
+    START_AZIM: START_AZIM, // Exposto para start.js usar (em graus)
+    START_OFFSET_X: START_OFFSET_X, // Exposto para start.js usar
+    look: look,    // Exposto para start.js manipular
+    lookT: lookT,   // Exposto para start.js manipular
+    flyProgress: flyProgress, // Exposto para start.js manipular
+    flyDuration: flyDuration, // Exposto para start.js manipular
 
     // Voa até uma posição no mundo, ajustando o raio mínimo e de chegada.
     // getPosFn = função que devolve o Vector3 ATUAL do objeto (para seguir)

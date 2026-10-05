@@ -157,8 +157,8 @@ body.painel-aberto .nexus-legend-btn{pointer-events:auto;opacity:1}
 /* Container centralizado no fundo; flex vertical para empilhar legenda (cima) e linha de botões (baixo) */
 .nexus-time-control{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;max-width:640px;width:calc(100vw - 32px);pointer-events:auto;z-index:90;text-align:center}
 
-/* Legenda do capítulo: oculta por padrão, aparece com fade quando .is-visible */
-.nexus-time-caption{font-size:13px;line-height:1.45;color:var(--cor-texto-corrido);text-shadow:0 1px 8px var(--deep),0 0 2px var(--deep);padding:0 10px;font-weight:600;opacity:0;transition:opacity .35s ease;pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+/* Legenda do capítulo: deixa o texto quebrar e crescer para cima, sem reticências. */
+.nexus-time-caption{font-size:13px;line-height:1.45;color:var(--cor-texto-corrido);text-shadow:0 1px 8px var(--deep),0 0 2px var(--deep);padding:0 10px;font-weight:600;opacity:0;transition:opacity .35s ease;pointer-events:none;white-space:normal;overflow-wrap:break-word;text-align:center;max-width:min(90vw,560px)}
 .nexus-time-caption.is-visible{opacity:1}
 
 /* Linha horizontal de ações: "Avançar no tempo. | ícone | Voltar ao início" */

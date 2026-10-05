@@ -28,6 +28,36 @@
   // Estado interno do start
   let isStartMode = true;
   let startTransitionInProgress = false;
+  let orbitFadeFrame = null;
+
+  function setOrbitFade(value) {
+    N.orbitStartFade = Math.max(0, Math.min(1, value));
+  }
+
+  function animateOrbitFade(targetValue, durationMs) {
+    if (orbitFadeFrame !== null) {
+      cancelAnimationFrame(orbitFadeFrame);
+      orbitFadeFrame = null;
+    }
+
+    const startValue = (typeof N.orbitStartFade === 'number') ? N.orbitStartFade : 1;
+    const startTime = performance.now();
+
+    function step(now) {
+      const t = Math.min(1, (now - startTime) / durationMs);
+      // Curva suave para não parecer um degrau na tela
+      const eased = t * t * (3 - 2 * t);
+      setOrbitFade(startValue + (targetValue - startValue) * eased);
+
+      if (t < 1) {
+        orbitFadeFrame = requestAnimationFrame(step);
+      } else {
+        orbitFadeFrame = null;
+      }
+    }
+
+    orbitFadeFrame = requestAnimationFrame(step);
+  }
 
   // ── Posiciona a câmera na posição de ombro ao carregar ────────────────────
   function setStartCamera() {
@@ -76,6 +106,8 @@
     }
 
     isStartMode = true;
+    // No Start, as órbitas ficam escondidas até o clique em COMEÇAR.
+    setOrbitFade(0);
     setStartCamera();
 
     // Se START_AJUSTE for true, não trava (permite girar e dar zoom livremente)
@@ -97,6 +129,9 @@
     if (startBtn) {
       startBtn.style.opacity = '0';
     }
+
+    // As órbitas voltam enquanto a câmera voa, com um fade curto e suave.
+    animateOrbitFade(1, 1200);
 
     // Câmera voa até visão geral
     if (N.controls) {

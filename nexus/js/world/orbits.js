@@ -142,6 +142,8 @@
 
   // Lista global de órbitas registradas para atualização por frame
   N.registeredOrbits = [];
+  // Fator global usado pela tela de Start para esconder/mostrar as órbitas sem brigar com o loop
+  N.orbitStartFade = (N.orbitStartFade === undefined) ? 1.0 : N.orbitStartFade;
 
   N.registerOrbit = function (config) {
     // config: { line, category, getBodyPos, getPhase, baseOpacity }
@@ -152,6 +154,8 @@
 
   // Atualização a cada frame: visibilidade por distância e rastro invertido
   N.updateOrbitsFX = function () {
+    var startFade = (typeof N.orbitStartFade === 'number') ? Math.max(0, Math.min(1, N.orbitStartFade)) : 1.0;
+
     for (var i = 0; i < N.registeredOrbits.length; i++) {
       var item = N.registeredOrbits[i];
       var line = item.line;
@@ -162,14 +166,14 @@
 
       var distFactor = N.getOrbitDistFactor(bodyPos, category);
 
-      if (distFactor <= 0.0001) {
+      if (distFactor <= 0.0001 || startFade <= 0.0001) {
         line.visible = false;
         continue;
       }
 
       line.visible = true;
       var baseOpacity = item.baseOpacity !== undefined ? item.baseOpacity : ORBIT_FX.maxOpacity;
-      var orbitMaxOpacity = baseOpacity * distFactor;
+      var orbitMaxOpacity = baseOpacity * distFactor * startFade;
 
       var phase = item.getPhase ? item.getPhase() : 0.0;
       var bodyPhase = (phase % 1.0 + 1.0) % 1.0;

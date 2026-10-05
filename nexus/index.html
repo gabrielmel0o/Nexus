@@ -3,14 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>NEXUS · base do universo</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<title>NEXUS · O Universo da Sua Mente</title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 </head>
-<body>
+<body class="modo-start">
 <!-- Área reservada ao logo definitivo (feito no Affinity). NÃO desenhar logo aqui. -->
-<div class="logo">LOGO</div>
+<div class="logo">
+  <img src="assets/logo.svg" alt="NEXUS"
+       onerror="this.style.display='none';this.parentElement.dataset.fallback='LOGO';">
+</div>
 <div class="hint">arraste para girar · role ou pince para aproximar</div>
+<!-- Botão de legenda: só visível quando painel-aberto está no body -->
+<button class="nexus-legend-btn" aria-label="Legenda">?</button>
+<!-- Container do botão START (só visível no modo-start) -->
+<div class="nexus-start-container">
+  <button class="nexus-start-btn">START</button>
+</div>
 
 <!-- 1) Biblioteca de 3D (vem da internet) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -34,6 +43,8 @@
 <script src="js/world/visitor.js"></script>
 <script src="js/ui/labels.js"></script>
 <script src="js/ui/panel.js"></script>
+<script src="js/ui/legend.js"></script>
+<script src="js/ui/start.js"></script>
 <script src="js/ui/time.js"></script>
 <script src="js/world/arms.js"></script>
 <script src="js/world/halo.js"></script>

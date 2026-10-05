@@ -1,5 +1,5 @@
 /* panel.js — painel de informações dos corpos celestes do universo de Helena.
-   Integrado visualmente ao universo: translúcido escuro, tipografia Nunito branca,
+   Integrado visualmente ao universo: translúcido escuro, tipografia do projeto branca,
    sem estilo de dashboard corporativo.
    Aberto ao selecionar um corpo (NEXUS.selectBody), fechado ao desmarcar ou apertar Esc/×.
    Atualiza-se automaticamente se o capítulo mudar enquanto aberto. */
@@ -116,9 +116,10 @@
       }
     });
 
-    // Tecla Esc: se o painel estiver aberto, fecha apenas a UI sem resetar a câmera
+    // Tecla Esc: se o painel estiver aberto e a legenda fechada, fecha o painel
+    // Se a legenda estiver aberta, o Esc é tratado pela legenda (stopImmediatePropagation)
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && N.panel && N.panel.isOpen()) {
+      if (e.key === 'Escape' && N.panel && N.panel.isOpen() && !N.legendaAberta) {
         N.panel.close();
         e.stopImmediatePropagation();
       }
@@ -220,6 +221,8 @@
       const el = ensureElement();
       el.classList.add('is-visible');
       el.setAttribute('aria-hidden', 'false');
+      // Liga classe no body para mostrar logo (reutilizável para legenda e start)
+      document.body.classList.add('painel-aberto');
     },
 
     close() {
@@ -228,6 +231,8 @@
         panelEl.classList.remove('is-visible');
         panelEl.setAttribute('aria-hidden', 'true');
       }
+      // Remove classe do body para esconder logo
+      document.body.classList.remove('painel-aberto');
     },
 
     refresh() {

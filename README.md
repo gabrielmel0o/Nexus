@@ -81,6 +81,17 @@ O projeto está atualmente focado na construção da primeira aplicação concre
 
 NEXUS é um projeto desenvolvido durante uma imersão em tecnologia, explorando a combinação entre desenvolvimento web, inteligência artificial, design e experimentação de interfaces.
 
+## Como rodar
+
+O NEXUS roda direto no navegador, sem instalar nada.
+
+1. Baixe ou clone este repositório.
+2. Abra o arquivo `index.html` no navegador (Chrome ou Edge).
+3. Clique em COMEÇAR.
+
+> Requer internet, porque o Three.js é carregado por CDN.
+> Se algo não carregar ao abrir o arquivo direto, use o Live Server do VS Code
+> (botão direito no `index.html` > "Open with Live Server").
 ---
 
 **NEXUS — O universo da sua mente.**

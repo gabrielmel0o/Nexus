@@ -20,11 +20,14 @@
     jaFezBoot = true;
 
     // Define o universo ativo e inicializa os parâmetros no state
-    const universe = universoRecebido || N.getUniverse();
+    const source = universoRecebido || N.getUniverse();
+    // Completa apenas os dados dos sinais, preservando o universo original.
+    const universe = N.prepareUniverseForDisplay ? N.prepareUniverseForDisplay(source) : source;
     N.currentUniverse = universe;
     if (N.state && typeof N.state.init === 'function') {
       N.state.init(universe);
     }
+    if (N.time && N.time.refresh) N.time.refresh();
 
     N.buildBackground();                       // 2) monta o mundo, peça por peça
     N.buildStarfield();

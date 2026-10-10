@@ -3,7 +3,7 @@
    O objeto original do mock NUNCA é alterado. */
 (function() {
   const N = NEXUS;
-  const data = N.getUniverse();
+  let data = N.getUniverse();
 
   const state = {
     chapter: data.chapter || 0,
@@ -68,7 +68,9 @@
 
   // Inicialização: carrega os params do cap. 0 de todos os itens do universo
   function initParams(universo) {
-    const src = universo || data;
+    // Os capítulos e os parâmetros precisam vir do mesmo universo recebido.
+    const src = universo || N.currentUniverse || N.getUniverse();
+    data = src;
     state.chapter = src.chapter || 0;
     state.current = {};
     state.target = {};

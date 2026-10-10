@@ -141,33 +141,13 @@ verificar(
 // -----------------------------------------------------------------
 let cOk = true;
 let cDetalhes = '';
-const FAIXAS = {
-  0: { rMin: 0, rMax: 0 },
-  1: { rMin: 45, rMax: 70 },
-  2: { rMin: 75, rMax: 115 },
-  3: { rMin: 95, rMax: 135 },
-  4: { rMin: 140, rMax: 170 }
-};
-
-compiled.systems.forEach(s => {
-  const d = Math.hypot(s.position[0], s.position[2]);
-  const f = FAIXAS[s.depth];
-  if (d < f.rMin || d > f.rMax) {
-    cOk = false;
-    cDetalhes += `Sistema ${s.id} (depth ${s.depth}) com dist ${d.toFixed(1)} fora da faixa [${f.rMin}, ${f.rMax}]; `;
-  }
-});
-
-// Checar sobreposição entre pares
-for (let i = 0; i < compiled.systems.length; i++) {
-  for (let j = i + 1; j < compiled.systems.length; j++) {
-    const s1 = compiled.systems[i], s2 = compiled.systems[j];
-    const distPares = Math.hypot(s1.position[0] - s2.position[0], s1.position[2] - s2.position[2]);
-    if (distPares < 45) { // Distância mínima estrita
-      cOk = false;
-      cDetalhes += `Sobreposição entre ${s1.id} e ${s2.id} (dist ${distPares.toFixed(1)} < 45); `;
-    }
-  }
+// As faixas antigas ignoravam o tamanho do sistema. Agora verificamos suas
+// bordas e a ordem das profundidades, com a mesma checagem da suíte ampliada.
+try {
+  require('./testLayout.js').checkLayout(compiled);
+} catch (error) {
+  cOk = false;
+  cDetalhes = error.message;
 }
 
 verificar(
@@ -308,6 +288,34 @@ const specDepois = clonar(helenaSpec);
 verificar(
   'compileSpec é puro e não altera a especificação de entrada',
   JSON.stringify(specAntes) === JSON.stringify(specDepois)
+);
+
+// Todos os corpos, incluindo sinais, precisam oferecer os dados do painel.
+const corposCompilados = compiled.systems.flatMap(s => [
+  s.center,
+  ...(s.planets || []).flatMap(p => [p, ...(p.moons || []), ...(p.elements || [])]),
+  ...(s.orbiters || [])
+]);
+verificar(
+  'Todo astro compilado tem info completo e uma chave de lei existente',
+  corposCompilados.every(c => c.info
+    && ['label', 'summary', 'law', 'why', 'phase'].every(k => typeof c.info[k] === 'string' && c.info[k].length > 0)
+    && c.info.notes && typeof c.info.notes === 'object'
+    && compiled.laws[c.info.law])
+);
+verificar(
+  'As cinco leis compiladas são exatamente os textos fixos da Helena',
+  Object.keys(mock.laws).every(k => mock.laws[k] === compiled.laws[k])
+);
+const mockAntesDosSinais = JSON.stringify(mock);
+const mockPreparado = compileSpec.prepareUniverseForDisplay(mock);
+const sinaisPreparados = mockPreparado.systems.flatMap(s => s.planets || [])
+  .flatMap(p => p.elements || []).filter(e => e.type === 'star');
+verificar(
+  'Preparar os sinais da Helena não altera o mock nem seus capítulos',
+  JSON.stringify(mock) === mockAntesDosSinais
+    && sinaisPreparados.length === 3 && sinaisPreparados.every(e => e.info && e.info.phase)
+    && JSON.stringify(mockPreparado.chapters) === JSON.stringify(mock.chapters)
 );
 
 console.log('\n====================================================');

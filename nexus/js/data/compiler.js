@@ -65,16 +65,98 @@
     lua_escura: { color: '#8b5cf6' }
   };
 
-  // Faixas radiais de distância por profundidade (escala UC baseada no mockUniverse)
-  var FAIXAS_PROFUNDIDADE = {
-    0: { rMin: 0,   rMax: 0 },
-    1: { rMin: 45,  rMax: 70 },
-    2: { rMin: 75,  rMax: 115 },
-    3: { rMin: 95,  rMax: 135 },
-    4: { rMin: 140, rMax: 170 }
+  // O motor não exporta estes tamanhos. Valores copiados de world/blackhole.js:
+  // raioEu = 4.2; disco externo = min(raioEu * 4.4, 51.35 * 0.7).
+  var RAIO_EU = 4.2;
+  var RAIO_DISCO_EU = Math.min(RAIO_EU * 4.4, 51.35 * 0.7);
+  var FOLGA_EU = 5;
+  var RAIO_PROIBIDO_EU = RAIO_DISCO_EU + FOLGA_EU;
+  var FOLGA_SISTEMAS = 5;
+  var FOLGA_PROFUNDIDADE = 10;
+  var VARIACAO_RADIAL = 4;
+  var DESLOCAMENTO_VISITANTE = 5;
+
+  // Limites visuais conservadores dos construtores, em unidades do motor.
+  // Para sprites quadrados, a meia diagonal cobre qualquer direção da câmera.
+  var VISUAL = {
+    // world/sun.js: raio do corpo e largura do maior glow.
+    sun: { raio: 4, glow: 48 },
+    whiteDwarf: { raio: 1, glow: 9 },
+    brownDwarf: { raio: 1.4, glow: 10 },
+    // world/binary.js: afastamento máximo 8 e sprite de largura 12.
+    binaria: 8 + 12 / Math.SQRT2,
+    // world/blackhole.js: disco 2.4 * 4.4, pulsação máxima 1.03.
+    buracoNegro: 2.4 * 4.4 * 1.03,
+    // world/nebula.js: inclui nuvens, deslocamentos e estrelas de fundo.
+    nebulosa: 21,
+    // world/visitor.js: ondas 1.04 * 5.8, maiores que o glow.
+    visitante: 1.04 * 5.8,
+    // elements/companion.js e dream.js: maior sprite de cada objeto.
+    companheira: 16 / Math.SQRT2,
+    sonho: 2.4 / Math.SQRT2,
+    // elements/comet.js: órbita 7, cauda/pulsação/hover contidos em 6.
+    passageiro: 7 + 6,
+    // elements/star.js: sinal médio 1.5 * 1.9; posição size * 2.7.
+    sinal: 2.85 / Math.SQRT2,
+    // forces.js: maré aumenta o corpo 4% e o halo 10%.
+    mareCorpo: 1.04,
+    mareHalo: 1.1
   };
 
-  var DISTANCIA_MINIMA_SISTEMAS = 55; // Garante sem sobreposição visual entre sistemas
+  // Envolve todos os corpos e todas as fases das órbitas, não só seus centros.
+  function getSystemRadius(system) {
+    var c = system.center;
+    var radius = 0;
+    if (c.kind === 'star') {
+      var visual = VISUAL[c.spectral] || VISUAL.sun;
+      radius = Math.max(visual.raio, visual.glow * Math.max(c.params.brightness, 0.04) / Math.SQRT2);
+      if (c.spectral === 'whiteDwarf') radius = Math.max(radius, 2 * 4 / 1.9);
+    } else if (c.kind === 'binary') radius = VISUAL.binaria;
+    else if (c.kind === 'blackhole') radius = c.variant === 'self' ? RAIO_DISCO_EU : VISUAL.buracoNegro;
+    else if (c.kind === 'nebula') radius = VISUAL.nebulosa;
+    else if (c.kind === 'visitor') radius = VISUAL.visitante + DESLOCAMENTO_VISITANTE;
+
+    (system.planets || []).forEach(function (p) {
+      var local = p.size * Math.max(1.02, (1.05 + 0.35 * (p.params.atmosphere || 0)) * VISUAL.mareHalo);
+      (p.rings || []).forEach(function (ring) { local = Math.max(local, p.size * ring.outer); });
+      local *= (p.params.size || 1) * VISUAL.mareCorpo;
+      (p.moons || []).forEach(function (m) { local = Math.max(local, m.orbit + m.size); });
+      (p.elements || []).forEach(function (e) {
+        if (e.type === 'comet') local = Math.max(local, VISUAL.passageiro);
+        if (e.type === 'star') local = Math.max(local, p.size * 2.7 + VISUAL.sinal);
+      });
+      radius = Math.max(radius, p.orbit + local);
+    });
+    (system.orbiters || []).forEach(function (o) {
+      radius = Math.max(radius, o.orbit + (o.type === 'companion' ? VISUAL.companheira : VISUAL.sonho));
+    });
+    return radius;
+  }
+
+  // Faixas adaptáveis: cada profundidade começa depois da faixa anterior.
+  // Cada sistema ocupa um anel próprio. Assim a rotação diferencial não faz
+  // sistemas que estavam separados no início colidirem mais tarde.
+  function positionSystems(entries) {
+    var cursor = RAIO_PROIBIDO_EU;
+    for (var depth = 0; depth <= 4; depth++) {
+      if (depth > 0) cursor += FOLGA_PROFUNDIDADE;
+      entries.filter(function (entry) { return entry.system.depth === depth; }).forEach(function (entry) {
+        var system = entry.system;
+        var radius = getSystemRadius(system);
+        var distance = cursor + radius + entry.radial * VARIACAO_RADIAL;
+        var x = distance * Math.cos(entry.angle);
+        var z = distance * Math.sin(entry.angle);
+        system.position = [x, 0, z];
+        if (system.center.kind === 'visitor') {
+          // Aproximação inteira contida no anel reservado ao visitante.
+          system.center.path = [DESLOCAMENTO_VISITANTE, -DESLOCAMENTO_VISITANTE].map(function (delta) {
+            return [(distance + delta) * Math.cos(entry.angle), 0, (distance + delta) * Math.sin(entry.angle)];
+          });
+        }
+        cursor = distance + radius + FOLGA_SISTEMAS;
+      });
+    }
+  }
 
   function compileSpec(spec) {
     if (!spec || typeof spec !== 'object') {
@@ -150,47 +232,21 @@
     });
 
     // 4. Posicionamento determinístico dos sistemas sem sobreposição
-    var posicoesOcupadas = [[0, 0, 0]]; // O Eu já ocupa a origem
     var sistemasEntrada = spec.sistemas || [];
+    var entries = [];
 
     sistemasEntrada.forEach(function (sis, sisIdx) {
       var rng = createRNG(sis.id || ('sys_' + sisIdx));
       var depth = (sis.profundidade !== undefined && sis.profundidade !== null) ? sis.profundidade : 1;
-      var faixa = FAIXAS_PROFUNDIDADE[depth] || FAIXAS_PROFUNDIDADE[1];
-
-      var raio = faixa.rMin + rng() * (faixa.rMax - faixa.rMin);
-      // Espalhar uniformemente ao redor do círculo + variação da semente
+      // Mantém os dois sorteios anteriores às órbitas: a semente não muda os parâmetros.
+      var radial = rng();
       var anguloBase = (sisIdx / Math.max(1, sistemasEntrada.length)) * (Math.PI * 2);
       var angulo = anguloBase + (rng() - 0.5) * 0.5;
-
-      var x = Math.round(raio * Math.cos(angulo));
-      var z = Math.round(raio * Math.sin(angulo));
-
-      // Verificação de distância mínima contra posições já existentes
-      var tentativas = 0;
-      var conflito = true;
-      while (conflito && tentativas < 20) {
-        conflito = false;
-        for (var p = 0; p < posicoesOcupadas.length; p++) {
-          var op = posicoesOcupadas[p];
-          var dist = Math.hypot(x - op[0], z - op[2]);
-          if (dist < DISTANCIA_MINIMA_SISTEMAS) {
-            conflito = true;
-            angulo += 0.45;
-            x = Math.round(raio * Math.cos(angulo));
-            z = Math.round(raio * Math.sin(angulo));
-            break;
-          }
-        }
-        tentativas++;
-      }
-
-      var posFinal = [x, 0, z];
-      posicoesOcupadas.push(posFinal);
+      var posFinal = [0, 0, 0];
 
       // Compilar Centro do Sistema
       var cSrc = sis.centro || {};
-      var cCompiled = compileCenter(sis.id, cSrc, rng, posFinal);
+      var cCompiled = compileCenter(cSrc);
 
       // Compilar Planetas
       var compiledPlanets = [];
@@ -211,7 +267,7 @@
         compiledOrbiters.push(oCompiled);
       });
 
-      universe.systems.push({
+      var system = {
         id: sis.id,
         name: sis.nome,
         position: posFinal,
@@ -219,8 +275,11 @@
         center: cCompiled,
         planets: compiledPlanets,
         orbiters: compiledOrbiters
-      });
+      };
+      universe.systems.push(system);
+      entries.push({ system: system, radial: radial, angle: angulo });
     });
+    positionSystems(entries);
 
     // 5. Compilar Forças
     if (Array.isArray(spec.forcas)) {
@@ -249,11 +308,44 @@
       });
     }
 
-    return universe;
+    return prepareUniverseForDisplay(universe);
+  }
+
+  // Sinais antigos não têm info. Preenche a descrição do marcador nos dados,
+  // nunca no painel, sem alterar o mock ou inventar uma história da pessoa.
+  function prepareUniverseForDisplay(universe) {
+    return Object.assign({}, universe, {
+      systems: universe.systems.map(function (system) {
+        return Object.assign({}, system, {
+          planets: (system.planets || []).map(function (planet) {
+            if (planet.kind !== 'exo') return planet;
+            return Object.assign({}, planet, {
+              elements: (planet.elements || []).map(function (element) {
+                if (element.type !== 'star') return element;
+                var original = element.info || {};
+                var defaults = {
+                  label: 'Sinal · Exoplaneta',
+                  summary: 'Marcador ligado ao exoplaneta “' + planet.name + '”. Acende conforme os sinais deste planeta são ativados.',
+                  law: 'distancia',
+                  why: 'O sinal destaca um caminho fora do sistema principal. A distância indica acesso à consciência, não importância.',
+                  phase: 'marcador de um caminho possível',
+                  notes: {}
+                };
+                var info = {};
+                Object.keys(defaults).forEach(function (key) {
+                  info[key] = original[key] || defaults[key];
+                });
+                return Object.assign({}, element, { info: info });
+              })
+            });
+          })
+        });
+      })
+    });
   }
 
   // Compilação do Centro
-  function compileCenter(sisId, cSrc, rng, posFinal) {
+  function compileCenter(cSrc) {
     var c = {
       info: {
         label: cSrc.rotulo || cSrc.label || '',
@@ -323,11 +415,7 @@
       c.patch = PALETAS.visitante.patch.slice();
       var aprox = cSrc.aproximacao !== undefined ? cSrc.aproximacao : 2;
       c.params.approach = Math.round((aprox / 10) * 100) / 100;
-      // Caminho de aproximação
-      c.path = [
-        [posFinal[0] + 10, 0, posFinal[2] + 2],
-        [Math.round(posFinal[0] * 0.65), 0, Math.round(posFinal[2] * 0.65)]
-      ];
+      // O caminho será calculado depois, dentro do espaço reservado ao sistema.
     }
 
     return c;
@@ -439,7 +527,8 @@
           el.params.appear = Math.round((app / 10) * 100) / 100;
         }
 
-        if (eSrc.rotulo || eSrc.summary || eSrc.resumo) {
+        if (eSrc.rotulo || eSrc.label || eSrc.summary || eSrc.resumo
+          || eSrc.porque || eSrc.why || eSrc.fase || eSrc.phase || eSrc.lei || eSrc.law) {
           el.info = {
             label: eSrc.rotulo || eSrc.label || '',
             summary: eSrc.resumo || eSrc.summary || '',
@@ -491,12 +580,24 @@
     return o;
   }
 
+  // Medidas para conferir a geometria no Node e no navegador, sem duplicar cálculos.
+  compileSpec.geometry = Object.freeze({
+    selfRadius: RAIO_EU,
+    diskRadius: RAIO_DISCO_EU,
+    forbiddenRadius: RAIO_PROIBIDO_EU,
+    systemGap: FOLGA_SISTEMAS,
+    depthGap: FOLGA_PROFUNDIDADE,
+    systemRadius: getSystemRadius
+  });
+
   // Exportação compatível
   if (typeof NEXUS !== 'undefined') {
     NEXUS.compileSpec = compileSpec;
+    NEXUS.prepareUniverseForDisplay = prepareUniverseForDisplay;
   }
 
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = compileSpec;
+    module.exports.prepareUniverseForDisplay = prepareUniverseForDisplay;
   }
 })();

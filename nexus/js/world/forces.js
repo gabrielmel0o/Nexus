@@ -26,16 +26,18 @@
   let eclipseFactor = 0;
 
   N.updateForces = function (dt) {
-    const universe = N.getUniverse();
+    const universe = N.currentUniverse || N.getUniverse();
     if (!universe || !universe.forces) return;
 
     universe.forces.forEach(force => {
       // Lê a intensidade dinâmica da força via state (com fallback para params)
       let strength = 0;
-      if (N.state && typeof N.state.get === 'function') {
+      const temIntensidade = N.state && N.state.current && N.state.current[force.id]
+        && N.state.current[force.id].strength !== undefined;
+      if (temIntensidade && typeof N.state.get === 'function') {
         strength = N.state.get(force.id, 'strength');
-      }
-      if ((strength === undefined || strength === 0) && force.params && force.params.strength !== undefined) {
+      } else if (force.params && force.params.strength !== undefined) {
+        // Zero no estado é uma força desligada, não ausência de parâmetro.
         strength = force.params.strength;
       }
 

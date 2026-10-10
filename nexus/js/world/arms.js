@@ -31,7 +31,7 @@
       };
     }
 
-    const universe = N.getUniverse();
+    const universe = N.currentUniverse || N.getUniverse();
     const routinesData = (universe.galaxy && universe.galaxy.arms && universe.galaxy.arms.routines)
       ? universe.galaxy.arms.routines
       : [];

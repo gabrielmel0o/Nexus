@@ -54,9 +54,10 @@ const geminiResponseSchema = prepararSchemaParaGemini(originalSchema);
  * @param {Array<string>} [errosAnteriores] Erros do validador para a IA corrigir
  * @param {string} [respostaAnterior] Resposta anterior da IA que falhou
  * @param {string} [modelOverride] Modelo específico a ser chamado
+ * @param {Array<string>} [respostas] Respostas da única rodada de dúvidas, ou [] para pular
  * @returns {Promise<object>} Objeto parsed e rawText
  */
-async function chamarTentativaGemini(texto, errosAnteriores = null, respostaAnterior = null, modelOverride = null) {
+async function chamarTentativaGemini(texto, errosAnteriores = null, respostaAnterior = null, modelOverride = null, respostas) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey === 'cole_sua_chave_aqui' || apiKey.trim() === '') {
     const err = new Error('Chave da API do Gemini não configurada em backend/.env');
@@ -74,7 +75,7 @@ async function chamarTentativaGemini(texto, errosAnteriores = null, respostaAnte
     role: 'user',
     parts: [
       {
-        text: `Abaixo está o relato reflexivo da pessoa sobre sua vida atual. Interprete-o segundo as Leis do NEXUS e gere a especificação semântica da mente dela:\n\n"""\n${texto}\n"""`
+        text: JSON.stringify({ texto, ...(respostas !== undefined ? { respostas } : {}) })
       }
     ]
   });
@@ -96,14 +97,26 @@ async function chamarTentativaGemini(texto, errosAnteriores = null, respostaAnte
     });
   }
 
+  // O formato semântico original continua intacto. Só o envelope da API muda.
+  const permiteDuvidas = respostas === undefined && !errosAnteriores;
+  const alternativas = [geminiResponseSchema, {
+    type: 'object', properties: { alerta_cuidado: { type: 'boolean' } }, required: ['alerta_cuidado']
+  }];
+  if (permiteDuvidas) alternativas.push({
+    type: 'object',
+    properties: { duvidas: { type: 'array', minItems: 1, maxItems: 5, items: { type: 'string', maxLength: 200 } } },
+    required: ['duvidas']
+  });
+  const etapa = permiteDuvidas ? 'PRIMEIRO PEDIDO: perguntas opcionais apenas se necessárias.'
+    : 'SEGUNDO PEDIDO OU CORREÇÃO: não faça perguntas; gere a especificação, ou acione cuidado.';
   const body = {
     contents: contents,
     systemInstruction: {
-      parts: [{ text: SYSTEM_INSTRUCTION }]
+      parts: [{ text: SYSTEM_INSTRUCTION + '\n\n' + etapa }]
     },
     generationConfig: {
       responseMimeType: 'application/json',
-      responseSchema: geminiResponseSchema,
+      responseSchema: { anyOf: alternativas },
       temperature: 0.3,
       // Nível mínimo de raciocínio no Gemini 3.8 Flash para resposta mais rápida
       thinkingConfig: {
@@ -194,7 +207,7 @@ function esperar(ms) {
  * - Pausa de ~3 segundos entre tentativas.
  * - Na 2ª tentativa (1º retry), passa a usar GEMINI_MODEL_RESERVA se configurado.
  */
-async function chamarGemini(texto, errosAnteriores = null, respostaAnterior = null, onRetryLog = null) {
+async function chamarGemini(texto, errosAnteriores = null, respostaAnterior = null, onRetryLog = null, respostas) {
   const modelPrincipal = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
   const modelReserva = process.env.GEMINI_MODEL_RESERVA && process.env.GEMINI_MODEL_RESERVA.trim() !== ''
     ? process.env.GEMINI_MODEL_RESERVA.trim()
@@ -208,7 +221,7 @@ async function chamarGemini(texto, errosAnteriores = null, respostaAnterior = nu
     const inicioTentativa = Date.now();
 
     try {
-      const resultado = await chamarTentativaGemini(texto, errosAnteriores, respostaAnterior, modeloAtual);
+      const resultado = await chamarTentativaGemini(texto, errosAnteriores, respostaAnterior, modeloAtual, respostas);
       return resultado;
     } catch (err) {
       ultimoErro = err;

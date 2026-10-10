@@ -211,6 +211,7 @@
     // Caminho padrão da Helena: clica em COMEÇAR
     startBtn.addEventListener('click', (e) => {
       e.stopPropagation();
+      limparPerguntas();
       if (typeof N.boot === 'function') {
         N.boot(N.getUniverse());
       }
@@ -220,6 +221,7 @@
     startBtn.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
+        limparPerguntas();
         if (typeof N.boot === 'function') {
           N.boot(N.getUniverse());
         }
@@ -240,6 +242,12 @@
         <p class="nexus-start-privacy" id="nexus-start-privacy">Seu texto é enviado ao Google (Gemini) para ser interpretado. O NEXUS não guarda seu texto. Na camada gratuita, o Google pode usá-lo para melhorar produtos, e revisores humanos podem lê-lo. Evite nomes reais e dados que identifiquem pessoas; use apelidos.</p>
       </div>
       <button class="nexus-start-gen-btn" disabled>Gerar meu universo</button>
+      <div class="nexus-start-questions" hidden>
+        <p class="nexus-start-privacy">Se quiser, esclareça estes pontos. As respostas também são enviadas ao Google; evite dados que identifiquem pessoas. Você pode deixar campos vazios ou pular.</p>
+        <div class="nexus-start-question-fields"></div>
+        <button class="nexus-start-gen-btn nexus-start-continue">Continuar</button>
+        <button class="nexus-start-gen-btn nexus-start-skip">Pular perguntas</button>
+      </div>
       <div class="nexus-start-status" role="status" aria-live="polite" aria-atomic="true" style="display:none;"></div>
     `;
 
@@ -249,8 +257,49 @@
     const counter = formEl.querySelector('.nexus-start-counter');
     const genBtn = formEl.querySelector('.nexus-start-gen-btn');
     const statusEl = formEl.querySelector('.nexus-start-status');
+    const questionsEl = formEl.querySelector('.nexus-start-questions');
+    const fieldsEl = formEl.querySelector('.nexus-start-question-fields');
+    const continueBtn = formEl.querySelector('.nexus-start-continue');
+    const skipBtn = formEl.querySelector('.nexus-start-skip');
+    let camposRespostas = [];
+    let textoDaRodada = null;
+    let ocupado = false;
+
+    // Nada vai para armazenamento: perguntas e respostas existem somente nesta tela.
+    function limparPerguntas() {
+      questionsEl.hidden = true;
+      fieldsEl.replaceChildren();
+      camposRespostas = [];
+      textoDaRodada = null;
+      genBtn.hidden = false;
+    }
+
+    function mostrarPerguntas(perguntas, texto) {
+      limparPerguntas();
+      textoDaRodada = texto;
+      camposRespostas = perguntas.map((pergunta) => {
+        const label = document.createElement('label');
+        label.className = 'nexus-start-question';
+        const caption = document.createElement('span');
+        caption.textContent = pergunta; // Texto da IA nunca é inserido como HTML.
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.maxLength = 280;
+        input.autocomplete = 'off';
+        input.className = 'nexus-start-textarea';
+        input.setAttribute('aria-label', pergunta);
+        label.append(caption, input);
+        fieldsEl.appendChild(label);
+        return { pergunta, input };
+      });
+      questionsEl.hidden = false;
+      genBtn.hidden = true;
+      camposRespostas[0].input.focus();
+    }
 
     textarea.addEventListener('input', () => {
+      // Editar o relato inicia um novo pedido, sem misturar respostas do texto anterior.
+      if (textoDaRodada !== null) limparPerguntas();
       const len = textarea.value.trim().length;
       if (len < 500) {
         counter.textContent = `${len} / 500 caracteres (mínimo 500)`;
@@ -267,16 +316,21 @@
       }
     });
 
-    genBtn.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      const texto = textarea.value.trim();
+    async function gerar(respostas) {
+      if (ocupado) return;
+      const texto = respostas !== undefined ? textoDaRodada : textarea.value.trim();
+      if (typeof texto !== 'string') return;
       if (texto.length < 500 || texto.length > 3000) return;
+      ocupado = true;
 
       // Estado de carregamento
       formEl.setAttribute('aria-busy', 'true');
       textarea.disabled = true;
       genBtn.disabled = true;
       startBtn.disabled = true;
+      continueBtn.disabled = true;
+      skipBtn.disabled = true;
+      camposRespostas.forEach(c => { c.input.disabled = true; });
       statusEl.style.display = 'block';
       statusEl.className = 'nexus-start-status is-loading';
       statusEl.textContent = 'Interpretando o seu texto segundo as Leis do NEXUS...';
@@ -286,12 +340,18 @@
           throw { tipo: 'servidor' };
         }
 
-        const universoGerado = await N.universeSource.fromBackend(texto);
+        const universoGerado = await N.universeSource.fromBackend(texto, respostas);
+        if (universoGerado.duvidas) {
+          mostrarPerguntas(universoGerado.duvidas, texto);
+          statusEl.style.display = 'none';
+          return;
+        }
 
         // Inicializa o motor com o universo recebido
         if (typeof N.boot === 'function') {
           N.boot(universoGerado);
         }
+        limparPerguntas();
 
         // Sucesso: inicia o mesmo voo suave do COMEÇAR
         exitStartMode();
@@ -301,11 +361,33 @@
         genBtn.disabled = false;
         startBtn.disabled = false;
         const tipo = err && err.tipo;
+        if (tipo === 'cuidado') limparPerguntas();
         statusEl.className = 'nexus-start-status ' + (tipo === 'cuidado' ? 'is-care' : 'is-error');
         statusEl.textContent = MENSAGENS[tipo] || MENSAGENS.servidor;
       } finally {
+        ocupado = false;
+        textarea.disabled = false;
+        startBtn.disabled = false;
+        genBtn.disabled = textarea.value.trim().length < 500 || textarea.value.trim().length > 3000;
+        continueBtn.disabled = false;
+        skipBtn.disabled = false;
+        camposRespostas.forEach(c => { c.input.disabled = false; });
         formEl.setAttribute('aria-busy', 'false');
       }
+    }
+
+    genBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      return gerar();
+    });
+    continueBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      // Reenvia o contexto de cada resposta, pois o servidor não guarda as perguntas.
+      return gerar(camposRespostas.map(c => c.pergunta + '\nResposta: ' + (c.input.value.trim() || '(não informada)')));
+    });
+    skipBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      return gerar([]);
     });
   }
 

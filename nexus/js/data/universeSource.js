@@ -2,7 +2,7 @@
    Permite carregar o universo tanto do backend quanto localmente.
    
    Disponibiliza:
-     NEXUS.universeSource.fromBackend(texto)
+     NEXUS.universeSource.fromBackend(texto, respostas)
      NEXUS.universeSource.fromHelenaCompilada()
 */
 
@@ -21,9 +21,10 @@
     /**
      * Envia o texto da pessoa para o backend local, valida e compila o universo.
      * @param {string} texto Relato em primeira pessoa (500 a 3000 caracteres)
-     * @returns {Promise<object>} Objeto no formato do mockUniverse compilado
+     * @param {Array<string>} [respostas] Segunda rodada; [] significa pular perguntas
+     * @returns {Promise<object>} Universo compilado ou { duvidas: [...] }
      */
-    async fromBackend(texto) {
+    async fromBackend(texto, respostas) {
       let response;
       try {
         response = await fetch(BACKEND_URL, {
@@ -31,7 +32,7 @@
           headers: {
             'Content-Type': 'application/json; charset=utf-8'
           },
-          body: JSON.stringify({ texto: texto })
+          body: JSON.stringify({ texto: texto, ...(respostas !== undefined ? { respostas: respostas } : {}) })
         });
       } catch (err) {
         throw { tipo: 'rede' };
@@ -55,6 +56,16 @@
         }
 
         throw { tipo: tipoDoErro(response.status) };
+      }
+
+      if (Object.prototype.hasOwnProperty.call(data, 'duvidas')) {
+        const duvidas = data.duvidas;
+        if (respostas !== undefined || data.spec || !Array.isArray(duvidas)
+          || duvidas.length < 1 || duvidas.length > 5
+          || duvidas.some(q => typeof q !== 'string' || !q.trim() || q.length > 200)) {
+          throw { tipo: 'validacao' };
+        }
+        return { duvidas: duvidas.map(q => q.trim()) };
       }
 
       if (!data.spec) {

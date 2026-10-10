@@ -105,6 +105,10 @@ body.modo-start .logo{left:var(--start-logo-x);top:calc(env(safe-area-inset-top,
 .nexus-start-counter{font-size:10.5px;color:var(--cor-texto-pendente-2);font-weight:600}
 .nexus-start-counter.is-valid{color:var(--cor-texto-corrido)}
 .nexus-start-privacy{font-family:var(--fonte-texto);font-size:11.5px;line-height:1.45;color:var(--cor-texto-corrido);margin:4px 0 0}
+.nexus-start-questions{display:flex;flex-direction:column;gap:10px}
+.nexus-start-questions[hidden],.nexus-start-gen-btn[hidden]{display:none}
+.nexus-start-question-fields{display:flex;flex-direction:column;gap:10px}
+.nexus-start-question{display:flex;flex-direction:column;gap:6px;font-family:var(--fonte-texto);font-size:12px;line-height:1.45;color:var(--cor-texto-corrido)}
 
 .nexus-start-gen-btn{font-family:var(--fonte-texto);font-size:12.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--cor-texto-corrido);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:10px 14px;cursor:pointer;transition:background .2s,border-color .2s,color .2s;text-align:center}
 .nexus-start-gen-btn:hover:not(:disabled){background:rgba(255,255,255,.16);border-color:var(--cor-texto-astro);color:var(--cor-texto-astro)}

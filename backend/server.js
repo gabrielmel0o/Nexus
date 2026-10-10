@@ -112,6 +112,14 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
+      // A presença do campo, inclusive [], indica a segunda e última rodada.
+      const segundaRodada = Object.prototype.hasOwnProperty.call(payload, 'respostas');
+      if (segundaRodada && (!Array.isArray(payload.respostas) || payload.respostas.length > 5
+        || payload.respostas.some(r => typeof r !== 'string' || r.length > 500))) {
+        responderJson(res, 400, { erro: 'Envie até 5 respostas, com até 500 caracteres cada.' });
+        return;
+      }
+      const respostas = segundaRodada ? payload.respostas.map(r => r.trim()) : undefined;
       // (b) MODO_SIMULADO=1: Devolve a Helena sem chamar a API externa
       const modoSimulado = process.env.MODO_SIMULADO === '1' || process.env.MODO_SIMULADO === 'true';
       if (modoSimulado) {
@@ -143,20 +151,35 @@ const server = http.createServer(async (req, res) => {
             respostaAnterior,
             infoRetry => {
               // Log conciso e seguro da tentativa de conexão (sem texto nem corpo)
-              console.log(`[${new Date().toISOString()}] Falha na tentativa ${infoRetry.tentativa} (modelo: ${infoRetry.modelo}) | Status ${infoRetry.status} (${infoRetry.mensagem}) | Duração: ${infoRetry.duracao}ms`);
-            }
+              console.log(`[${new Date().toISOString()}] Falha na tentativa ${infoRetry.tentativa} | Status ${infoRetry.status} | Duração: ${infoRetry.duracao}ms`);
+            },
+            respostas
           );
           const specCandidata = resultadoGemini.parsed;
 
           // Verificação da Regra de Segurança e Cuidado
-          if (specCandidata && specCandidata.alerta_cuidado === true) {
+          if (specCandidata && (specCandidata.alerta_cuidado === true || specCandidata.erro === 'cuidado')) {
             console.log(`[${new Date().toISOString()}] Status 200 (Alerta de cuidado acionado) | Duração: ${Date.now() - inicioTempo}ms`);
             responderJson(res, 200, { erro: 'cuidado' });
             return;
           }
 
           // Validação segundo as Leis do NEXUS
-          const validacao = validateSpec(specCandidata);
+          let errosDuvidas = null;
+          if (specCandidata && Object.prototype.hasOwnProperty.call(specCandidata, 'duvidas')) {
+            const duvidas = specCandidata.duvidas;
+            const formatoValido = Object.keys(specCandidata).length === 1 && Array.isArray(duvidas)
+              && duvidas.length >= 1 && duvidas.length <= 5
+              && duvidas.every(q => typeof q === 'string' && q.trim().length > 0 && q.length <= 200)
+              && new Set(duvidas.map(q => q.trim().toLowerCase())).size === duvidas.length;
+            if (!segundaRodada && !errosAnteriores && formatoValido) {
+              console.log(`[${new Date().toISOString()}] Status 200 (Dúvidas) | Duração: ${Date.now() - inicioTempo}ms`);
+              responderJson(res, 200, { duvidas: duvidas.map(q => q.trim()) });
+              return;
+            }
+            errosDuvidas = ['Não faça novas perguntas. Gere a especificação com os dados disponíveis, ou acione cuidado.'];
+          }
+          const validacao = errosDuvidas ? { ok: false, erros: errosDuvidas } : validateSpec(specCandidata);
 
           if (validacao.ok) {
             specFinal = specCandidata;
@@ -192,16 +215,10 @@ const server = http.createServer(async (req, res) => {
           // Se tudo falhar em relação à IA ou timeout, responde 502 com a mensagem solicitada
           status = 502;
           mensagemAmigavel = 'O serviço está ocupado ou demorou demais para responder. Tente de novo em instantes ou explore a galáxia de Helena.';
-        } else if (err.message) {
-          mensagemAmigavel = err.message;
         }
 
-        // Registra SÓ o código HTTP e a mensagem de erro do Google (até 300 caracteres), sem texto nem corpo
-        const logMsg = err.googleMessage
-          ? `[HTTP ${err.httpStatusOriginal || status}] ${err.googleMessage}`
-          : (err.message || 'Erro desconhecido');
-
-        console.log(`[${new Date().toISOString()}] Status ${status} (${logMsg.slice(0, 300)}) | Duração: ${Date.now() - inicioTempo}ms`);
+        // Mensagens externas podem repetir dados pessoais: registra somente status e tempo.
+        console.log(`[${new Date().toISOString()}] Status ${status} | Duração: ${Date.now() - inicioTempo}ms`);
         responderJson(res, status, { erro: mensagemAmigavel });
       }
     });

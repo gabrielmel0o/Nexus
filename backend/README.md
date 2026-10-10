@@ -36,6 +36,11 @@ npm start
 ```
 *O que esperar:* Mensagem informando que o servidor está rodando em `http://127.0.0.1:3000` (com indicação se o modo simulado está ativo ou se usará o Gemini).
 
+Na raiz, ao lado de `nexus/` e `backend/`, dê duplo clique em `iniciar.bat`.
+Ele confere Node e `backend/.env`, abre o servidor em outra janela e, após três segundos, abre o navegador.
+Em `backend/.env`, use `MODO_SIMULADO=1` para testar com Helena sem gastar cota; `0` usa o Gemini.
+Para encerrar, feche a janela “NEXUS backend”; o botão COMEÇAR continua funcionando sem servidor.
+
 ---
 
 ## 4. Como Testar

@@ -1,4 +1,4 @@
-/* panel.js — painel de informações dos corpos celestes do universo de Helena.
+/* panel.js — painel de informações dos corpos celestes do universo ativo.
    Integrado visualmente ao universo: translúcido escuro, tipografia do projeto branca,
    sem estilo de dashboard corporativo.
    Aberto ao selecionar um corpo (NEXUS.selectBody), fechado ao desmarcar ou apertar Esc/×.
@@ -19,9 +19,9 @@
   let currentBodyId = null;
   let lastKnownChapter = null;
 
-  // Busca recursiva dos dados do corpo no mockUniverse
+  // Busca os dados no universo recebido pelo boot; antes dele, usa a Helena.
   function findBodyData(id) {
-    const u = N.getUniverse();
+    const u = N.currentUniverse || N.getUniverse();
     if (!u || !id) return null;
 
     // 1. Centros dos sistemas
@@ -131,7 +131,8 @@
   // Renderiza o conteúdo do corpo selecionado
   function render(body) {
     const el = ensureElement();
-    const u = N.getUniverse() || {};
+    // As leis e o corpo selecionado vêm do mesmo universo, sem copiar dados.
+    const u = N.currentUniverse || N.getUniverse() || {};
     const info = body.info || {};
 
     const label = info.label || '';

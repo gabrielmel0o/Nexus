@@ -58,6 +58,17 @@
   function updateUI() {
     if (!containerEl) return;
     const chapters  = getChapters();
+
+    // Se o universo tiver menos de 2 capítulos, oculta o controle e a legenda
+    if (!chapters || chapters.length < 2) {
+      containerEl.style.display = 'none';
+      if (captionEl) captionEl.style.display = 'none';
+      return;
+    } else {
+      containerEl.style.display = '';
+      if (captionEl) captionEl.style.display = '';
+    }
+
     const curIndex  = getCurrentChapter();
     const currentCap = chapters.find(c => c.id === curIndex) || chapters[0] || {};
 

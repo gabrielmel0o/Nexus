@@ -67,26 +67,40 @@
   };
 
   // Inicialização: carrega os params do cap. 0 de todos os itens do universo
-  const loadParams = (obj, id) => {
-    if (obj && obj.params) {
-      state.current[id] = { ...obj.params };
-      state.target[id] = { ...obj.params };
-      state.initial[id] = { ...obj.params };
-    }
-  };
+  function initParams(universo) {
+    const src = universo || data;
+    state.chapter = src.chapter || 0;
+    state.current = {};
+    state.target = {};
+    state.initial = {};
 
-  data.systems.forEach(sys => {
-    // O centro do sistema usa o próprio ID do sistema como chave
-    loadParams(sys.center, sys.id);
-    
-    (sys.planets || []).forEach(p => {
-      loadParams(p, p.id);
-      (p.elements || []).forEach(el => loadParams(el, el.id));
+    const loadParams = (obj, id) => {
+      if (obj && obj.params) {
+        state.current[id] = { ...obj.params };
+        state.target[id] = { ...obj.params };
+        state.initial[id] = { ...obj.params };
+      }
+    };
+
+    (src.systems || []).forEach(sys => {
+      // O centro do sistema usa o próprio ID do sistema como chave
+      loadParams(sys.center, sys.id);
+
+      (sys.planets || []).forEach(p => {
+        loadParams(p, p.id);
+        (p.elements || []).forEach(el => loadParams(el, el.id));
+      });
+      (sys.orbiters || []).forEach(o => loadParams(o, o.id));
     });
-    (sys.orbiters || []).forEach(o => loadParams(o, o.id));
-  });
 
-  (data.forces || []).forEach(f => loadParams(f, f.id));
+    (src.forces || []).forEach(f => loadParams(f, f.id));
+  }
+
+  state.init = initParams;
+
+  // Carrega inicialmente com o universo padrão
+  initParams(data);
 
   N.state = state;
 })();
+

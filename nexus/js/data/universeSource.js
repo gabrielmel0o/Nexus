@@ -10,6 +10,13 @@
   const N = NEXUS;
   const BACKEND_URL = 'http://127.0.0.1:3000/api/universo';
 
+  // O código HTTP escolhe o estado da Start; detalhes técnicos ficam fora da tela.
+  function tipoDoErro(status) {
+    if (status === 429) return 'limite';
+    if (status === 400 || status === 413 || status === 422) return 'validacao';
+    return 'servidor';
+  }
+
   N.universeSource = {
     /**
      * Envia o texto da pessoa para o backend local, valida e compila o universo.
@@ -27,75 +34,45 @@
           body: JSON.stringify({ texto: texto })
         });
       } catch (err) {
-        throw {
-          tipo: 'rede',
-          mensagem: 'Não foi possível conectar ao servidor local (127.0.0.1:3000). Verifique se o backend está rodando com npm start.'
-        };
+        throw { tipo: 'rede' };
       }
 
       let data;
       try {
         data = await response.json();
       } catch (err) {
-        throw {
-          tipo: 'servidor',
-          mensagem: 'O servidor retornou uma resposta que não é um JSON válido.'
-        };
+        throw { tipo: tipoDoErro(response.status) };
+      }
+
+      if (!data || typeof data !== 'object' || Array.isArray(data)) {
+        throw { tipo: tipoDoErro(response.status) };
       }
 
       // Verificação de erro retornado pelo servidor
       if (!response.ok || data.erro) {
         if (data.erro === 'cuidado') {
-          throw {
-            tipo: 'cuidado',
-            mensagem: 'Se você estiver passando por um momento difícil ou pensando em se machucar, procure apoio. No Brasil, ligue 188 (CVV). Você não está sozinho.'
-          };
+          throw { tipo: 'cuidado' };
         }
 
-        if (response.status === 429) {
-          throw {
-            tipo: 'limite',
-            mensagem: data.erro || 'Limite de requisições temporariamente excedido. Aguarde alguns instantes.'
-          };
-        }
-
-        if (response.status === 400) {
-          throw {
-            tipo: 'limite',
-            mensagem: data.erro || 'O texto enviado não atende aos requisitos de tamanho.'
-          };
-        }
-
-        throw {
-          tipo: 'servidor',
-          mensagem: data.erro || 'Ocorreu uma falha no servidor ao processar o seu universo.'
-        };
+        throw { tipo: tipoDoErro(response.status) };
       }
 
       if (!data.spec) {
-        throw {
-          tipo: 'servidor',
-          mensagem: 'O servidor não devolveu uma especificação válida.'
-        };
+        throw { tipo: 'servidor' };
       }
 
       // Validação semântica no navegador segundo as Leis do NEXUS
-      if (typeof N.validateSpec === 'function') {
-        const validacao = N.validateSpec(data.spec);
-        if (!validacao.ok) {
-          throw {
-            tipo: 'validacao',
-            mensagem: 'A especificação gerada não passou na validação das Leis do NEXUS: ' + validacao.erros.join('; ')
-          };
-        }
+      if (typeof N.validateSpec !== 'function') {
+        throw { tipo: 'servidor' };
+      }
+      const validacao = N.validateSpec(data.spec);
+      if (!validacao.ok) {
+        throw { tipo: 'validacao' };
       }
 
       // Compilação determinística para o formato do motor 3D
       if (typeof N.compileSpec !== 'function') {
-        throw {
-          tipo: 'servidor',
-          mensagem: 'Compilador do NEXUS não encontrado no navegador.'
-        };
+        throw { tipo: 'servidor' };
       }
 
       const universoCompilado = N.compileSpec(data.spec);

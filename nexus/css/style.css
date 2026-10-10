@@ -94,7 +94,8 @@ body.modo-start .logo{left:var(--start-logo-x);top:calc(env(safe-area-inset-top,
 .nexus-start-btn:disabled{opacity:.4;cursor:not-allowed}
 
 /* Formulário de texto da mente */
-.nexus-start-form{pointer-events:auto;display:flex;flex-direction:column;gap:10px}
+.nexus-start-form{pointer-events:auto;display:flex;flex-direction:column;gap:10px;max-height:calc(100vh - var(--start-botao-y) - 80px);overflow-y:auto}
+.nexus-start-form>*{flex-shrink:0}
 .nexus-start-divisor{display:flex;align-items:center;font-size:11px;letter-spacing:.05em;color:var(--cor-texto-rotulo);font-weight:600;text-transform:uppercase}
 .nexus-start-field{position:relative;display:flex;flex-direction:column;gap:4px}
 .nexus-start-textarea{font-family:var(--fonte-texto);font-size:12.5px;line-height:1.45;color:var(--cor-texto-corrido);background:rgba(16,8,25,.75);border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:12px;resize:none;outline:none;box-sizing:border-box;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:border-color .2s,background .2s}
@@ -103,14 +104,16 @@ body.modo-start .logo{left:var(--start-logo-x);top:calc(env(safe-area-inset-top,
 .nexus-start-meta{display:flex;justify-content:flex-end}
 .nexus-start-counter{font-size:10.5px;color:var(--cor-texto-pendente-2);font-weight:600}
 .nexus-start-counter.is-valid{color:var(--cor-texto-corrido)}
+.nexus-start-privacy{font-family:var(--fonte-texto);font-size:11.5px;line-height:1.45;color:var(--cor-texto-corrido);margin:4px 0 0}
 
 .nexus-start-gen-btn{font-family:var(--fonte-texto);font-size:12.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--cor-texto-corrido);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:10px 14px;cursor:pointer;transition:background .2s,border-color .2s,color .2s;text-align:center}
 .nexus-start-gen-btn:hover:not(:disabled){background:rgba(255,255,255,.16);border-color:var(--cor-texto-astro);color:var(--cor-texto-astro)}
 .nexus-start-gen-btn:disabled{opacity:.35;cursor:not-allowed}
 
-.nexus-start-status{font-size:11.5px;line-height:1.4;padding:8px 10px;border-radius:6px;background:rgba(16,8,25,.85);border:1px solid rgba(255,255,255,.1)}
+.nexus-start-status{font-family:var(--fonte-texto);color:var(--cor-texto-corrido);font-size:11.5px;line-height:1.4;padding:8px 10px;border-radius:6px;background:rgba(16,8,25,.85);border:1px solid rgba(255,255,255,.1)}
 .nexus-start-status.is-loading{color:var(--cor-texto-pendente-4);border-color:var(--cor-texto-rotulo)}
-.nexus-start-status.is-error{color:#ff8787;border-color:rgba(255,107,107,.5)}
+.nexus-start-status.is-error{color:var(--cor-texto-corrido);border-color:var(--cor-texto-rotulo)}
+.nexus-start-status.is-care{color:var(--cor-texto-corrido);border-color:var(--cor-texto-corrido)}
 
 body:not(.modo-start) .nexus-start-container{display:none}
 

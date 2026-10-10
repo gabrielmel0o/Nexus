@@ -5,6 +5,15 @@
 (function () {
   const N = NEXUS;
 
+  // Textos fixos da interface: nunca exibimos detalhes técnicos vindos da resposta.
+  const MENSAGENS = {
+    rede: 'Não consegui falar com o servidor. Você pode explorar a galáxia de Helena enquanto isso.',
+    limite: 'Muitos pedidos agora. Espere um minuto e tente novamente.',
+    validacao: 'Não consegui montar o universo desse texto. Tente descrever com mais detalhes, entre 500 e 3.000 caracteres.',
+    servidor: 'Não consegui gerar seu universo agora. Tente novamente em instantes ou explore a galáxia de Helena.',
+    cuidado: 'O NEXUS não substitui o apoio de uma pessoa de confiança ou de um profissional. Se você estiver pensando em se machucar, procure alguém agora. No Brasil, o CVV atende 24 horas pelo telefone 188 (gratuito).'
+  };
+
   // ── Configuração inicial da câmera (posição de ombro) ───────────────────────
   // Lê as constantes de controls.js (única fonte da verdade)
   // Se N.controls ainda não existe, aguarda um loop de requestAnimationFrame
@@ -224,13 +233,14 @@
     formEl.innerHTML = `
       <div class="nexus-start-divisor"><span>ou escreva sobre a sua mente</span></div>
       <div class="nexus-start-field">
-        <textarea class="nexus-start-textarea" placeholder="Descreva como está a sua vida e a sua mente hoje (entre 500 e 3.000 caracteres)..." rows="4"></textarea>
+        <textarea class="nexus-start-textarea" aria-label="Texto sobre a sua mente" aria-describedby="nexus-start-privacy" placeholder="Descreva como está a sua vida e a sua mente hoje (entre 500 e 3.000 caracteres)..." rows="4"></textarea>
         <div class="nexus-start-meta">
           <span class="nexus-start-counter">0 / 500 caracteres</span>
         </div>
+        <p class="nexus-start-privacy" id="nexus-start-privacy">Seu texto é enviado ao Google (Gemini) para ser interpretado. O NEXUS não guarda seu texto. Na camada gratuita, o Google pode usá-lo para melhorar produtos, e revisores humanos podem lê-lo. Evite nomes reais e dados que identifiquem pessoas; use apelidos.</p>
       </div>
       <button class="nexus-start-gen-btn" disabled>Gerar meu universo</button>
-      <div class="nexus-start-status" style="display:none;"></div>
+      <div class="nexus-start-status" role="status" aria-live="polite" aria-atomic="true" style="display:none;"></div>
     `;
 
     container.appendChild(formEl);
@@ -263,6 +273,7 @@
       if (texto.length < 500 || texto.length > 3000) return;
 
       // Estado de carregamento
+      formEl.setAttribute('aria-busy', 'true');
       textarea.disabled = true;
       genBtn.disabled = true;
       startBtn.disabled = true;
@@ -272,7 +283,7 @@
 
       try {
         if (!N.universeSource || typeof N.universeSource.fromBackend !== 'function') {
-          throw { mensagem: 'Módulo de comunicação com o backend não carregado.' };
+          throw { tipo: 'servidor' };
         }
 
         const universoGerado = await N.universeSource.fromBackend(texto);
@@ -285,12 +296,15 @@
         // Sucesso: inicia o mesmo voo suave do COMEÇAR
         exitStartMode();
       } catch (err) {
-        // Erro: exibe feedback curto e reabilita o botão COMEÇAR da Helena
+        // Cuidado é um estado próprio. O texto permanece no campo em qualquer falha.
         textarea.disabled = false;
         genBtn.disabled = false;
         startBtn.disabled = false;
-        statusEl.className = 'nexus-start-status is-error';
-        statusEl.textContent = err.mensagem || 'Falha ao gerar o universo. Tente novamente ou entre com a Helena.';
+        const tipo = err && err.tipo;
+        statusEl.className = 'nexus-start-status ' + (tipo === 'cuidado' ? 'is-care' : 'is-error');
+        statusEl.textContent = MENSAGENS[tipo] || MENSAGENS.servidor;
+      } finally {
+        formEl.setAttribute('aria-busy', 'false');
       }
     });
   }

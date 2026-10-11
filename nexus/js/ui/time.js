@@ -23,7 +23,7 @@
   let captionTimer = null;
 
   function getChapters() {
-    const universe = N.getUniverse();
+    const universe = N.currentUniverse || N.getUniverse();
     return (universe && universe.chapters) || [];
   }
 
@@ -58,6 +58,17 @@
   function updateUI() {
     if (!containerEl) return;
     const chapters  = getChapters();
+
+    // Se o universo tiver menos de 2 capítulos, oculta o controle e a legenda
+    if (!chapters || chapters.length < 2) {
+      containerEl.style.display = 'none';
+      if (captionEl) captionEl.style.display = 'none';
+      return;
+    } else {
+      containerEl.style.display = '';
+      if (captionEl) captionEl.style.display = '';
+    }
+
     const curIndex  = getCurrentChapter();
     const currentCap = chapters.find(c => c.id === curIndex) || chapters[0] || {};
 
@@ -66,9 +77,9 @@
       captionEl.textContent = currentCap.caption || '';
     }
 
-    // Botão Avançar o tempo (desliga após o capítulo 3)
+    // Botão Avançar o tempo (desliga ao chegar ao último capítulo)
     if (btnNextEl) {
-      const isLast = curIndex >= 3 || curIndex >= (chapters.length - 1);
+      const isLast = curIndex >= (chapters.length - 1);
       btnNextEl.disabled = isLast;
       if (isLast) {
         btnNextEl.classList.add('is-disabled');
@@ -185,10 +196,13 @@
   }
 
   // ── Métodos Públicos ────────────────────────────────────────────────────────
+  // O boot chama refresh quando já sabe qual universo será mostrado.
+  N.time = { refresh: updateUI };
+
   N.nextChapter = function () {
     const curIndex  = getCurrentChapter();
     const chapters  = getChapters();
-    if (curIndex >= 3 || curIndex >= (chapters.length - 1)) {
+    if (curIndex >= (chapters.length - 1)) {
       return; // Já está no último capítulo
     }
 

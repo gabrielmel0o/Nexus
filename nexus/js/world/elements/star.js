@@ -1,4 +1,4 @@
-/* elements/star.js — elemento do tipo 'star' (CONQUISTA): uma estrelinha de 4 pontas, dourada,
+/* elements/star.js — elemento do tipo 'star' (SINAL): uma estrelinha de 4 pontas, dourada,
    que orbita devagar perto do planeta e pisca suavemente. O tamanho vem de "importance".
 
    Este arquivo se registra em NEXUS.elementBuilders['star'].
@@ -52,6 +52,16 @@
         blending: THREE.AdditiveBlending  // soma a cor em vez de cobrir
       });
       const sprite = new THREE.Sprite(mat);   // sprite = imagem que sempre olha para a câmera
+      sprite.userData.pickId = el.id;
+      // Um sinal apagado ou escondido pelo LOD não pode receber cliques.
+      const raycastOriginal = sprite.raycast;
+      sprite.raycast = function (raycaster, hits) {
+        if (!sinalVisivel) return;
+        for (let obj = this; obj; obj = obj.parent) {
+          if (!obj.visible) return;
+        }
+        raycastOriginal.call(this, raycaster, hits);
+      };
       sprite.scale.set(esc, esc, 1);
       sprite.position.x = planeta.size * DISTANCIA;  // afastada do centro do planeta
       pivo.add(sprite);
@@ -59,6 +69,15 @@
     });
 
     let t = 0;   // cronômetro local para o piscar
+    let sinalVisivel = false; // só recebe clique depois de acender no update
+
+    // A câmera segue o sinal em movimento, não o centro do planeta.
+    const signalWP = new THREE.Vector3();
+    N.pickRegistry = N.pickRegistry || {};
+    N.pickRegistry[el.id] = {
+      getPos: () => camadas[1].sprite.getWorldPosition(signalWP),
+      radius: tamanho / 2
+    };
 
     return {
       object: pivo,   // o grupo 3D que o planets.js vai adicionar ao grupo do planeta
@@ -86,6 +105,7 @@
 
         // k vai de 0.5 a 1: usamos para escurecer a COR (não a opacidade, que é do LOD).
         // Escurecer em mistura aditiva = diminuir a luz → efeito de piscar suave.
+        sinalVisivel = appear > 0.001;
         const k = .75 + .25 * Math.sin(t * VEL_PISCAR + seed * 6.283);
         camadas.forEach(c => {
           c.mat.color.copy(c.cor).multiplyScalar(k);

@@ -72,6 +72,61 @@ async function run() {
     assert.equal(result.status, 200);
     assert.ok(chamadasIA.at(-1).generationConfig.responseSchema.anyOf.some(s => s.properties.duvidas)); count++;
 
+    // Números mantêm seus limites; listas os informam nas descrições da API.
+    const schema = JSON.parse(fs.readFileSync(path.join(root, 'nexus/js/data/spec/nexusSpec.schema.json'), 'utf8'));
+    const sentSchema = chamadasIA.at(-1).generationConfig.responseSchema.anyOf.find(s => s.properties.titulo);
+    function checkLimits(original, sent) {
+      for (const [key, value] of Object.entries(original)) {
+        if (['minimum', 'maximum'].includes(key)) assert.equal(sent[key], value);
+        else if (key === 'minItems') assert.ok(sent.description.includes('mínimo ' + value));
+        else if (key === 'maxItems') assert.ok(sent.description.includes('máximo ' + value));
+        else if (value && typeof value === 'object') checkLimits(value, sent[key]);
+      }
+    }
+    checkLimits(schema, sentSchema); count++;
+
+    // Reproduz as duas falhas observadas com a IA real, sem gastar cota.
+    const tooManyPlanets = JSON.parse(JSON.stringify(helena));
+    tooManyPlanets.titulo = 'MARCADOR_PRIVADO_SPEC';
+    const stellarSystem = tooManyPlanets.sistemas.find(s => s.centro.tipo === 'estrela');
+    let planetCount = tooManyPlanets.sistemas.reduce((n, s) => n + (s.planetas || []).length, 0);
+    while (planetCount < 7) {
+      const extra = JSON.parse(JSON.stringify(stellarSystem.planetas[0]));
+      extra.id = 'planeta-ficticio-extra-' + planetCount;
+      extra.luas = []; extra.elementos = [];
+      stellarSystem.planetas.push(extra); planetCount++;
+    }
+    const incompatibleExo = JSON.parse(JSON.stringify(helena));
+    incompatibleExo.titulo = 'MARCADOR_PRIVADO_SPEC';
+    incompatibleExo.sistemas.find(s => s.centro.tipo === 'estrela').planetas[0].tipo = 'exo';
+    assert.equal(validate(tooManyPlanets).ok, false);
+    assert.equal(validate(incompatibleExo).ok, false);
+    for (const extra of [{}, { respostas: [] }]) {
+      const firstCall = chamadasIA.length;
+      respostasIA = [tooManyPlanets, incompatibleExo, helena];
+      result = await request({ texto, ...extra });
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.data.spec, helena);
+      assert.equal(chamadasIA.length - firstCall, 3);
+      for (const [i, rejected] of [tooManyPlanets, incompatibleExo].entries()) {
+        const correction = chamadasIA[firstCall + i + 1];
+        assert.equal(correction.contents[1].role, 'model');
+        assert.deepEqual(JSON.parse(correction.contents[1].parts[0].text), rejected);
+        for (const error of validate(rejected).erros) assert.ok(correction.contents[2].parts[0].text.includes(error));
+        assert.ok(!correction.generationConfig.responseSchema.anyOf.some(s => s.properties.duvidas));
+        if (extra.respostas) assert.deepEqual(JSON.parse(correction.contents[0].parts[0].text).respostas, []);
+      }
+      count++;
+    }
+    // Persistir na falha termina em 422: nunca desenha uma especificação inválida.
+    const firstInvalidCall = chamadasIA.length;
+    respostasIA = Array(3).fill(tooManyPlanets);
+    result = await request({ texto, respostas: [] });
+    assert.equal(result.status, 422);
+    assert.equal(result.data.spec, undefined);
+    assert.equal(chamadasIA.length - firstInvalidCall, 3);
+    assert.ok(!logs.join('\n').includes('MARCADOR_PRIVADO_SPEC')); count++;
+
     for (const respostas of [[], ['Pergunta fictícia\nResposta: criar espaços']]) {
       respostasIA = [helena];
       result = await request({ texto, respostas });

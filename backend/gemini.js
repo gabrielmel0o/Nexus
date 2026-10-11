@@ -14,20 +14,20 @@ const originalSchema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
 /**
  * Converte o schema JSON Schema padrão para o subset OpenAPI 3.0 aceito pelo Gemini responseSchema.
  * - Mantém tipos em minúsculas (string, number, integer, object, array).
- * - Remove metadados e restrições não suportadas que disparam erro 400 no parser do Gemini.
+ * - Preserva limites numéricos e descreve limites de listas para a IA.
  */
 function prepararSchemaParaGemini(schema) {
   if (!schema || typeof schema !== 'object') return schema;
   const clone = Array.isArray(schema) ? [] : {};
 
-  // Lista de chaves não suportadas ou problemáticas no responseSchema da API Gemini
+  // O modelo aceita limites numéricos, mas rejeitou com HTTP 400 os limites
+  // de listas neste schema aninhado. Esses limites vão na descrição abaixo;
+  // o validador local continua exigindo as quantidades antes de desenhar.
   const chavesIgnoradas = new Set([
     '$schema',
     'title',
     'minItems',
-    'maxItems',
-    'minimum',
-    'maximum'
+    'maxItems'
   ]);
 
   for (const key of Object.keys(schema)) {
@@ -42,6 +42,13 @@ function prepararSchemaParaGemini(schema) {
     } else {
       clone[key] = val;
     }
+  }
+  if (schema.type === 'array' && (schema.minItems !== undefined || schema.maxItems !== undefined)) {
+    const limites = [];
+    if (schema.minItems !== undefined) limites.push('mínimo ' + schema.minItems);
+    if (schema.maxItems !== undefined) limites.push('máximo ' + schema.maxItems);
+    clone.description = (clone.description ? clone.description + ' ' : '')
+      + 'Quantidade de itens nesta lista: ' + limites.join('; ') + '.';
   }
   return clone;
 }
@@ -91,7 +98,7 @@ async function chamarTentativaGemini(texto, errosAnteriores = null, respostaAnte
       role: 'user',
       parts: [
         {
-          text: `A especificação JSON que você gerou continha os seguintes erros segundo as Leis do NEXUS:\n- ${errosAnteriores.join('\n- ')}\n\nPor favor, corrija rigorosamente cada um desses pontos e forneça a especificação corrigida.`
+          text: `A especificação JSON que você gerou continha os seguintes erros segundo as Leis do NEXUS:\n- ${errosAnteriores.join('\n- ')}\n\nCorrija os erros listados e preserve os campos válidos, salvo quando uma mudança for necessária para resolver esses erros. Não troque tipos de astros sem necessidade. Antes de devolver o JSON completo, confira novamente TODAS as regras, inclusive as quantidades totais e a compatibilidade de exo e sinal. Não faça perguntas nesta correção.`
         }
       ]
     });

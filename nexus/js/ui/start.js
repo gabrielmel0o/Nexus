@@ -146,7 +146,8 @@
     // Câmera voa até visão geral
     if (N.controls) {
       // Valores da visão geral (em radianos)
-      const HOME_R = 52;
+      // O universo ativo define a distância; a Helena mantém sua pose original.
+      const HOME_R = N.controls.getOverviewRadius ? N.controls.getOverviewRadius() : 52;
       const HOME_TH_RAD = 0.5;
       const HOME_PH_RAD = 1.12;
 
@@ -187,7 +188,9 @@
           // Encaixa S na posição HOME para evitar briga com o arrasto logo depois
           S.th = HOME_TH_RAD;
           S.ph = HOME_PH_RAD;
-          S.r = HOME_R;
+          // A janela pode ter mudado de formato durante a transição.
+          T.r = N.controls.getOverviewRadius ? N.controls.getOverviewRadius() : HOME_R;
+          S.r = T.r;
           N.controls.look.set(0, 0, 0);
 
           return;

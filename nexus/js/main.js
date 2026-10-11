@@ -13,11 +13,60 @@
   N.VOLTA_GALAXIA_SEGUNDOS = VOLTA_GALAXIA_SEGUNDOS;
 
   let jaFezBoot = false;
+  let previa = null;
+  let previaFrame = null;
+  let fundoPronto = false;
+
+  function montarFundo() {
+    if (fundoPronto) return;
+    N.buildBackground();
+    N.buildStarfield();
+    fundoPronto = true;
+  }
+
+  function retirarPrevia() {
+    if (previaFrame !== null) cancelAnimationFrame(previaFrame);
+    previaFrame = null;
+    if (!previa) return;
+    N.scene.remove(previa.group);
+    // O Eu da prévia possui suas próprias geometrias, materiais e texturas do disco.
+    previa.group.traverse(obj => {
+      if (obj.geometry) obj.geometry.dispose();
+      const materiais = obj.material ? (Array.isArray(obj.material) ? obj.material : [obj.material]) : [];
+      materiais.forEach(material => {
+        if (material.map) material.map.dispose();
+        material.dispose();
+      });
+    });
+    previa = null;
+  }
+
+  function mostrarPrevia() {
+    montarFundo();
+    const eu = N.getUniverse().systems.find(s => s.center && s.center.variant === 'self');
+    const group = new THREE.Group();
+    group.position.set.apply(group.position, eu.position);
+    group.rotation.x = .16; // Mesma inclinação usada em world/system.js.
+    N.scene.add(group);
+    previa = { group, center: N.centerBuilders.blackhole(eu, group) };
+    // A prévia não registra seleção nem define o universo ativo.
+    let last = performance.now();
+    function desenharPrevia(now) {
+      const dt = Math.min((now - last) / 1000, .05);
+      last = now;
+      N.controls.update(dt);
+      previa.center.update(dt);
+      N.renderer.render(N.scene, N.cam);
+      previaFrame = requestAnimationFrame(desenharPrevia);
+    }
+    previaFrame = requestAnimationFrame(desenharPrevia);
+  }
 
   // Função de BOOT que recebe os dados do universo e monta a cena
   N.boot = function (universoRecebido) {
     if (jaFezBoot) return;
     jaFezBoot = true;
+    retirarPrevia();
 
     // Define o universo ativo e inicializa os parâmetros no state
     const source = universoRecebido || N.getUniverse();
@@ -29,8 +78,7 @@
     }
     if (N.time && N.time.refresh) N.time.refresh();
 
-    N.buildBackground();                       // 2) monta o mundo, peça por peça
-    N.buildStarfield();
+    montarFundo();                            // 2) monta o mundo, peça por peça
     if (N.buildHalo) N.buildHalo();            // halo de matéria escura (inconsciente herdado)
     const arms = N.buildArms ? N.buildArms() : null; // braços espirais da galáxia (rotinas)
     
@@ -72,4 +120,5 @@
       N.boot(N.getUniverse());
     }
   }
+  if (!jaFezBoot && document.body.classList.contains('modo-start')) mostrarPrevia();
 })();

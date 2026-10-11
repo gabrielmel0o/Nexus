@@ -95,6 +95,7 @@
       el.classList.add('is-visible');
       el.setAttribute('aria-hidden', 'false');
       N.legendaAberta = true;
+      document.body.classList.add('legenda-aberta'); // Reserva espaço no painel em telas pequenas.
     },
 
     close() {
@@ -103,6 +104,7 @@
         legendEl.setAttribute('aria-hidden', 'true');
       }
       N.legendaAberta = false;
+      document.body.classList.remove('legenda-aberta');
     },
 
     toggle() {

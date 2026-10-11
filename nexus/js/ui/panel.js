@@ -19,6 +19,13 @@
   let currentBodyId = null;
   let lastKnownChapter = null;
 
+  // Mostra os dados como texto: sinais de HTML nunca viram comandos no painel.
+  // As aspas também são protegidas porque a massa aparece em um atributo.
+  function escapeText(value) {
+    const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+    return String(value).replace(/[&<>"']/g, (character) => entities[character]);
+  }
+
   // Busca os dados no universo recebido pelo boot; antes dele, usa a Helena.
   function findBodyData(id) {
     const u = N.currentUniverse || N.getUniverse();
@@ -116,14 +123,8 @@
       }
     });
 
-    // Tecla Esc: se o painel estiver aberto e a legenda fechada, fecha o painel
-    // Se a legenda estiver aberta, o Esc é tratado pela legenda (stopImmediatePropagation)
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && N.panel && N.panel.isOpen() && !N.legendaAberta) {
-        N.panel.close();
-        e.stopImmediatePropagation();
-      }
-    }, true);
+    // O Esc fica no picking: desmarca o astro, volta a câmera e fecha este painel.
+    // A legenda trata a tecla primeiro quando está aberta.
 
     return panelEl;
   }
@@ -173,15 +174,15 @@
     el.innerHTML = `
       <button class="nexus-panel-close" aria-label="Fechar painel" title="Fechar (Esc)">×</button>
 
-      ${label ? `<div class="nexus-panel-label">${label}</div>` : ''}
-      <h2 class="nexus-panel-title">${name}</h2>
-      ${summary ? `<p class="nexus-panel-summary">${summary}</p>` : ''}
+      ${label ? `<div class="nexus-panel-label">${escapeText(label)}</div>` : ''}
+      <h2 class="nexus-panel-title">${escapeText(name)}</h2>
+      ${summary ? `<p class="nexus-panel-summary">${escapeText(summary)}</p>` : ''}
 
       ${(lawText || why) ? `
         <div class="nexus-panel-section">
           <div class="nexus-panel-section-title">Por quê?</div>
-          ${lawText ? `<div class="nexus-panel-law">${lawText}</div>` : ''}
-          ${why ? `<div class="nexus-panel-why">${why}</div>` : ''}
+          ${lawText ? `<div class="nexus-panel-law">${escapeText(lawText)}</div>` : ''}
+          ${why ? `<div class="nexus-panel-why">${escapeText(why)}</div>` : ''}
         </div>
       ` : ''}
 
@@ -190,23 +191,23 @@
           ${phase ? `
             <div class="nexus-panel-phase-row">
               <span class="nexus-panel-phase-badge">Fase</span>
-              <span class="nexus-panel-phase-text">${phase}</span>
+              <span class="nexus-panel-phase-text">${escapeText(phase)}</span>
             </div>
           ` : ''}
-          ${chapterNote ? `<div class="nexus-panel-note">${chapterNote}</div>` : ''}
+          ${chapterNote ? `<div class="nexus-panel-note">${escapeText(chapterNote)}</div>` : ''}
         </div>
       ` : ''}
 
       <div class="nexus-panel-meta">
         <div class="nexus-panel-meta-item">
           <span class="nexus-panel-meta-title">Peso emocional</span>
-          <div class="nexus-panel-dots" title="Massa: ${mass}/10">
+          <div class="nexus-panel-dots" title="Massa: ${escapeText(mass)}/10">
             ${dotsHtml}
           </div>
         </div>
         <div class="nexus-panel-meta-item">
           <span class="nexus-panel-meta-title">Profundidade</span>
-          <span class="nexus-panel-depth">${depthWord}</span>
+          <span class="nexus-panel-depth">${escapeText(depthWord)}</span>
         </div>
       </div>
     `;

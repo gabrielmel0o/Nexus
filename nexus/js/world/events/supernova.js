@@ -4,7 +4,7 @@
    1) Clarão inicial: sprite aditivo que cresce e some em ~0,8 s + flash sutil de tela em CSS (~0,5 s).
    2) Onda de choque: anel fino e achatado aditivo (dourado → violeta) expandindo até raio ~220 em ~3 s.
    3) Cada sistema cruzado pela onda pulsa seu brilho de glow (×1,3 por 0,5 s, sem mexer em opacity).
-   Sem bibliotecas novas. Sem criar objetos fora do ciclo de vida do evento. */
+   Sem bibliotecas novas. Recursos montados no boot e reutilizados pelo evento. */
 (function () {
   var N = NEXUS;
   N.events = N.events || {};
@@ -28,20 +28,40 @@
 
   // Estado da animação ativa do evento
   var activeSupernova = null;
+  var prepared = null, screenFlashTimer = null;
+  // Recursos permanentes, preparados no boot da Helena. Navegar não cria
+  // sprites, materiais, geometrias ou elementos HTML e não os descarta.
+  N.events.prepare = function () {
+    if (prepared) return;
+    var flash = new THREE.Sprite(new THREE.SpriteMaterial({ map: getFlareTexture(), color: 0xffffff,
+      transparent: true, opacity: 1, blending: THREE.AdditiveBlending, depthWrite: false }));
+    var wave = new THREE.Mesh(new THREE.RingGeometry(.97, 1.03, 96), new THREE.MeshBasicMaterial({
+      color: 0xffd166, transparent: true, opacity: .9, blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide, depthWrite: false }));
+    wave.rotation.x = Math.PI / 2 + .16;
+    flash.visible = wave.visible = false; flash.scale.set(0, 0, 0); wave.scale.set(0, 0, 0);
+    N.scene.add(flash, wave);
+    var screen = document.createElement('div'); screen.className = 'nexus-supernova-flash';
+    screen.style.display = 'none'; document.body.appendChild(screen);
+    prepared = { flash: flash, wave: wave, screen: screen };
+  };
 
-  // Limpa elementos 3D e pulsos caso uma supernova anterior ainda esteja em andamento
+  // Oculta os efeitos e restaura pulsos sem remover ou descartar recursos.
   function cleanup() {
+    clearTimeout(screenFlashTimer);
+    if (prepared) {
+      prepared.flash.visible = prepared.wave.visible = false;
+      prepared.flash.scale.set(0, 0, 0); prepared.wave.scale.set(0, 0, 0);
+      prepared.screen.style.display = 'none';
+    }
     if (!activeSupernova) return;
 
     if (activeSupernova.flashSprite && activeSupernova.flashSprite.parent) {
-      activeSupernova.flashSprite.parent.remove(activeSupernova.flashSprite);
-      if (activeSupernova.flashSprite.material) activeSupernova.flashSprite.material.dispose();
+      activeSupernova.flashSprite.visible = false;
     }
 
     if (activeSupernova.shockwaveMesh && activeSupernova.shockwaveMesh.parent) {
-      activeSupernova.shockwaveMesh.parent.remove(activeSupernova.shockwaveMesh);
-      if (activeSupernova.shockwaveMesh.geometry) activeSupernova.shockwaveMesh.geometry.dispose();
-      if (activeSupernova.shockwaveMesh.material) activeSupernova.shockwaveMesh.material.dispose();
+      activeSupernova.shockwaveMesh.visible = false;
     }
 
     // Restaura o pulso de brilho de todos os sistemas
@@ -61,20 +81,15 @@
 
   // Flash de tela discreto em CSS (~0,5 s)
   function triggerScreenFlash() {
-    var flashDiv = document.createElement('div');
-    flashDiv.className = 'nexus-supernova-flash';
-    document.body.appendChild(flashDiv);
+    var flashDiv = prepared.screen;
+    flashDiv.classList.remove('fade-out'); flashDiv.style.display = '';
 
     // Força reflow e inicia o fade out suave
     requestAnimationFrame(function () {
       flashDiv.classList.add('fade-out');
     });
 
-    setTimeout(function () {
-      if (flashDiv.parentNode) {
-        flashDiv.parentNode.removeChild(flashDiv);
-      }
-    }, 550);
+    screenFlashTimer = setTimeout(function () { flashDiv.style.display = 'none'; }, 550);
   }
 
   // Cores da onda de choque: dourado (#ffd166) → violeta (#9b5de5)
@@ -82,6 +97,7 @@
   var COLOR_VIOLET = new THREE.Color(0x9b5de5);
 
   N.events.supernova = function () {
+    if (!prepared) throw new Error('Prepare a supernova no boot antes de ativá-la.');
     // 1) Se já houver uma ativa, finaliza a anterior de forma segura
     cleanup();
 
@@ -95,34 +111,18 @@
     triggerScreenFlash();
 
     // 4) Clarão 3D: sprite aditivo que cresce e some em ~0,8 s
-    var flashMat = new THREE.SpriteMaterial({
-      map: getFlareTexture(),
-      color: 0xffffff,
-      transparent: true,
-      opacity: 1.0,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    });
-    var flashSprite = new THREE.Sprite(flashMat);
+    var flashSprite = prepared.flash;
+    flashSprite.visible = true; flashSprite.material.opacity = 1;
     flashSprite.position.copy(origin);
     flashSprite.scale.set(4, 4, 1);
-    N.scene.add(flashSprite);
 
     // 5) Onda de choque: anel fino e achatado aditivo expandindo até raio ~220 em ~3 s
-    var ringGeo = new THREE.RingGeometry(0.97, 1.03, 96);
-    var ringMat = new THREE.MeshBasicMaterial({
-      color: COLOR_GOLD.clone(),
-      transparent: true,
-      opacity: 0.9,
-      blending: THREE.AdditiveBlending,
-      side: THREE.DoubleSide,
-      depthWrite: false
-    });
-    var shockwaveMesh = new THREE.Mesh(ringGeo, ringMat);
+    var shockwaveMesh = prepared.wave;
+    shockwaveMesh.visible = true; shockwaveMesh.scale.set(1, 1, 1);
+    shockwaveMesh.material.opacity = .9; shockwaveMesh.material.color.copy(COLOR_GOLD);
     shockwaveMesh.position.copy(origin);
     // Inclina no plano da galáxia (rotação x de ~0.16)
     shockwaveMesh.rotation.x = Math.PI / 2 + 0.16;
-    N.scene.add(shockwaveMesh);
 
     // 6) Prepara lista de sistemas com suas distâncias em relação à origem
     var systemsToCross = [];
@@ -180,12 +180,12 @@
         var opacClarao = Math.max(0, 1.0 - Math.pow(progClarão, 1.4));
         s.flashSprite.material.opacity = opacClarao;
       } else {
-        // Remove da cena após os 0,8 s
+        // Oculta após os 0,8 s; a próxima ativação usa o mesmo sprite.
         if (s.flashSprite.parent) {
-          s.flashSprite.parent.remove(s.flashSprite);
+          s.flashSprite.visible = false; s.flashSprite.scale.set(0, 0, 0);
         }
         if (s.flashSprite.material) {
-          s.flashSprite.material.dispose();
+          s.flashSprite.material.opacity = 0;
         }
         s.flashSprite = null;
       }
@@ -211,15 +211,15 @@
         }
         s.shockwaveMesh.material.opacity = Math.max(0, opacOnda);
       } else {
-        // Remove da cena após os 3 s
+        // Oculta após os 3 s; o anel continua montado.
         if (s.shockwaveMesh.parent) {
-          s.shockwaveMesh.parent.remove(s.shockwaveMesh);
+          s.shockwaveMesh.visible = false; s.shockwaveMesh.scale.set(0, 0, 0);
         }
         if (s.shockwaveMesh.geometry) {
-          s.shockwaveMesh.geometry.dispose();
+          // A geometria permanece preparada para outra passagem pelo evento.
         }
         if (s.shockwaveMesh.material) {
-          s.shockwaveMesh.material.dispose();
+          s.shockwaveMesh.material.opacity = 0;
         }
         s.shockwaveMesh = null;
       }

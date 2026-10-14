@@ -74,8 +74,8 @@
 
     return {
       pontos, geo,
-      planetas: planets.map(p => ({ grupo: p.group, mats: guardarMateriais(p.group) })),
-      orbitas: planets.map(p => ({ linha: p.orbit, mats: guardarMateriais(p.orbit) })),
+      planetas: planets.map(p => ({ id: p.d.id, grupo: p.group, mats: guardarMateriais(p.group) })),
+      orbitas: planets.map(p => ({ id: p.d.id, linha: p.orbit, mats: guardarMateriais(p.orbit) })),
       cur: null    // níveis atuais (0 a 1); começa vazio e "pula" direto para o certo no 1º quadro
     };
   };
@@ -104,11 +104,11 @@
     // Aplica os valores atuais nos objetos.
     L.planetas.forEach(p => {
       aplicarOpacidade(p.mats, L.cur.planetas);
-      p.grupo.visible = L.cur.planetas > .01;        // totalmente apagado: nem desenha (economiza)
+      p.grupo.visible = L.cur.planetas > .01 && (!N.presence || N.presence.isPresent(p.id));
     });
     L.orbitas.forEach(o => {
       aplicarOpacidade(o.mats, L.cur.orbitas);
-      o.linha.visible = L.cur.orbitas > .01;
+      o.linha.visible = L.cur.orbitas > .01 && (!N.presence || N.presence.isPresent(o.id));
     });
 
     L.pontos.material.opacity = L.cur.pontos;
@@ -116,13 +116,20 @@
     if (L.pontos.visible) {                          // copia a posição de cada planeta para o seu pontinho
       const arr = L.geo.attributes.position.array;
       const vLOD = new THREE.Vector3();
+      let activeCount = 0;
       system.planets.forEach((p, i) => {
+        if (N.presence && !N.presence.isPresent(p.d.id)) return;
         p.group.getWorldPosition(vLOD);
         system.group.worldToLocal(vLOD);
-        arr[i * 3] = vLOD.x;
-        arr[i * 3 + 1] = vLOD.y;
-        arr[i * 3 + 2] = vLOD.z;
+        arr[activeCount * 3] = vLOD.x;
+        arr[activeCount * 3 + 1] = vLOD.y;
+        arr[activeCount * 3 + 2] = vLOD.z;
+        const color = new THREE.Color(p.d.base);
+        L.geo.attributes.color.array.set([color.r, color.g, color.b], activeCount * 3);
+        activeCount++;
       });
+      L.geo.setDrawRange(0, activeCount);
+      L.geo.attributes.color.needsUpdate = true;
       L.geo.attributes.position.needsUpdate = true;
     }
   };

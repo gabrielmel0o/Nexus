@@ -107,13 +107,15 @@
     }
 
     let theta = 0; // Ângulo orbital verdadeiro
-    const rMax = el.orbit || 18; // Distância do afélio (ponto mais distante)
+    let rMax = el.orbit || 18; // Distância do afélio (ponto mais distante)
+    let targetRMax = rMax;
     let trailTimer = 0;
 
     if (N.registerOrbit) {
       const dreamWP = new THREE.Vector3();
       N.registerOrbit({
         line: orbitLine,
+        ownerId: el.id,
         category: 'major',
         getBodyPos: function () {
           bodyMesh.getWorldPosition(dreamWP);
@@ -130,7 +132,17 @@
 
     return {
       object: group,
+      applyHistory(data, continuing) {
+        if (!data) return;
+        targetRMax = data.orbit; el.speed = data.speed;
+        if (!continuing) {
+          rMax = targetRMax; theta = 0; trailTimer = 0;
+          trailHistory.length = 0; trailSprites.forEach(s => { s.visible = false; });
+        }
+        this.update(0);
+      },
       update(dt) {
+        if (N.state.frame) rMax += (targetRMax - rMax) * Math.min(1, dt * 2.8);
         // Lê reach (0 a 1): define a proximidade mínima do coração
         let reach = N.state ? N.state.get(orbiterId, 'reach') : 0.55;
         if (reach === undefined || reach === null) reach = 0.55;

@@ -97,6 +97,9 @@ body.modo-start .logo{left:var(--start-logo-x);top:calc(env(safe-area-inset-top,
 /* O fundo já usado nos painéis mantém o aviso legível diante do disco claro do Eu. */
 .nexus-start-form{pointer-events:auto;display:flex;flex-direction:column;gap:10px;max-height:calc(100vh - var(--start-botao-y) - 80px);overflow-y:auto;background:rgba(16,8,25,.82);border-radius:14px;padding:12px;box-sizing:border-box}
 .nexus-start-form>*{flex-shrink:0}
+.nexus-start-history{display:flex;flex-wrap:wrap;gap:6px}
+.nexus-start-history-info{flex-basis:100%;margin:0}
+.nexus-start-history .nexus-start-gen-btn{flex:1 1 45%}
 .nexus-start-divisor{display:flex;align-items:center;font-size:11px;letter-spacing:.05em;color:var(--cor-texto-rotulo);font-weight:600;text-transform:uppercase}
 .nexus-start-field{position:relative;display:flex;flex-direction:column;gap:4px}
 .nexus-start-textarea{font-family:var(--fonte-texto);font-size:12.5px;line-height:1.45;color:var(--cor-texto-corrido);background:rgba(16,8,25,.75);border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:12px;resize:none;outline:none;box-sizing:border-box;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:border-color .2s,background .2s}

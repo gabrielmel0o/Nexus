@@ -41,7 +41,7 @@
       new THREE.MeshBasicMaterial({
         map: N.makeTexture(512, 256, function (g, w, h) {
           g.fillStyle = cor; g.fillRect(0, 0, w, h);
-          N.blobs(g, w, h, patch, MANCHAS);
+          N.blobs(g, w, h, patch, MANCHAS, N.state.frame ? N.createRNG(cor) : undefined);
         })
       })
     );
@@ -106,6 +106,7 @@
 
     return {
       object: pivo,
+      applyHistory: function () { angulo = 0; estA.esfera.rotation.y = estB.esfera.rotation.y = 0; this.update(0); },
       update: function (dt) {
         // Lê a tensão do state (0 a 1)
         var tension = N.state.get(systemId, 'tension');
@@ -133,6 +134,10 @@
           : 1.0;
         estA.glowMat.color.setScalar(pulseMod);
         estB.glowMat.color.setScalar(pulseMod);
+        if (N.state.frame) {
+          var brightness = N.state.get(systemId, 'brightness');
+          estA.glowMat.color.setScalar(pulseMod * brightness); estB.glowMat.color.setScalar(pulseMod * brightness);
+        }
       }
     };
   };

@@ -15,7 +15,8 @@
     // A estrela emite PointLight SOMENTE se o sistema tiver planetas.
     // No universo de Helena, só "criacao" e "nao-escolhida" têm planetas.
     var pointLight = null;
-    if (systemData.planets && systemData.planets.length > 0) {
+    if (systemData.planets && systemData.planets.length > 0
+      && (!N.state.frame || ['star', 'binary'].indexOf(systemData.center.kind) >= 0)) {
       var baseColor = systemData.center && systemData.center.color
         ? systemData.center.color
         : '#ffffff';
@@ -35,7 +36,17 @@
       builder = N.centerBuilders['star'];
     }
 
-    var centerObj = builder(systemData, group);
+    var centerObj;
+    if (N.state.frame && systemData.center.kind === 'star' && systemData.historyCenters.length > 1) {
+      var variants = systemData.historyCenters.map(function (center) {
+        var instance = builder(Object.assign({}, systemData, { center: center }), group);
+        return { color: center.color, instance: instance };
+      });
+      centerObj = { object: new THREE.Group(), update: function (dt) {
+        variants.forEach(function (v) { v.instance.object.userData.glowModifier = centerObj.object.userData.glowModifier || 1;
+          if (v.instance.object.visible) v.instance.update(dt); });
+      }, variants: variants };
+    } else centerObj = builder(systemData, group);
 
     // Registra o CENTRO do sistema no mapa de seleção.
     // getPos: função que devolve a posição ATUAL do centro no mundo (o grupo do sistema).
@@ -67,6 +78,10 @@
         var inst = orbBuilder(orb, systemData);
         group.add(inst.object);
         orbiters.push(inst);
+        if (N.state.frame && N.presence) N.presence.register(orb.id, function (data, continuing) {
+          if (inst.applyHistory) inst.applyHistory(data, continuing);
+          N.presence.gate(orb.id, inst.object);
+        });
 
         // Registra o orbitante: getPos segue o objeto 3D em movimento
         var orbWP = new THREE.Vector3();
@@ -91,7 +106,7 @@
     // Fórmula: ω(r) = ω0 / (1 + r / 40)
     // ω0 calibrado para o sistema mais próximo (criacao, r≈51.26) dar 1 volta em 10 min (600s).
     var isEu = systemData.id === 'eu';
-    var isRafael = systemData.id === 'rafael';
+    var isRafael = systemData.id === 'rafael' || (N.state.frame && systemData.center.kind === 'visitor');
     var x0 = systemData.position[0];
     var y0 = systemData.position[1];
     var z0 = systemData.position[2];
@@ -126,6 +141,7 @@
         var sysOrbitWP = new THREE.Vector3();
         N.registerOrbit({
           line: galaxyOrbitLine,
+          ownerId: systemData.id,
           category: 'major',
           getBodyPos: function () {
             group.getWorldPosition(sysOrbitWP);
@@ -150,7 +166,9 @@
       orbiters: orbiters,
       label: label,
       galaxyOrbit: galaxyOrbit,
-      galaxyOrbitLine: galaxyOrbitLine
+      galaxyOrbitLine: galaxyOrbitLine,
+      historyOrbitRadius: rXZ,
+      historyOrbitY: y0
     };
 
     // Registra no mapa global de sistemas para acesso direto por forças / outros módulos
@@ -160,15 +178,56 @@
     // LOD cuida de esconder planetas, luas, órbitas, nomes e elementos quando longe
     // O centro NUNCA some — o LOD só controla planetas, órbitas, nomes e elementos.
     system.lod = N.buildLOD(group, planets);
+    if (N.state.frame && N.presence) N.presence.register(systemData.id, function (body, continuing) {
+      if (body) {
+        var phase = body.system;
+        systemData.position = phase.position.slice(); systemData.depth = phase.depth; systemData.name = phase.name;
+        systemData.center.path = phase.center.path; systemData.center.color = phase.center.color;
+        if (!continuing) group.position.set.apply(group.position, phase.position);
+        var r = Math.hypot(phase.position[0], phase.position[2]);
+        galaxyOrbit.targetR = r; galaxyOrbit.targetY = phase.position[1];
+        if (!continuing) { galaxyOrbit.r = r; galaxyOrbit.y = phase.position[1]; galaxyOrbit.angle = Math.atan2(phase.position[2], phase.position[0]); }
+        galaxyOrbit.omega = galaxyOrbit.isStatic ? 0 : OMEGA_0 / (1 + r / 40);
+        if (galaxyOrbitLine) {
+          galaxyOrbitLine.scale.set(galaxyOrbit.r / rXZ, 1, galaxyOrbit.r / rXZ);
+          galaxyOrbitLine.position.y = galaxyOrbit.y - y0;
+        }
+        if (centerObj.variants) centerObj.variants.forEach(function (v) { v.instance.object.visible = v.color === phase.center.color; });
+        if (!continuing) {
+          if (centerObj.variants) centerObj.variants.forEach(function (v) { if (v.instance.applyHistory) v.instance.applyHistory(); });
+          else if (centerObj.applyHistory) centerObj.applyHistory();
+        }
+        if (pointLight) pointLight.color.set(phase.center.color).lerp(new THREE.Color(0xffffff), .75);
+        label.textContent = body.name;
+      }
+      N.presence.gate(systemData.id, group);
+      if (galaxyOrbitLine) galaxyOrbitLine.visible = N.presence.isPresent(systemData.id);
+      label.style.display = N.presence.isPresent(systemData.id) ? '' : 'none';
+      if (pointLight) pointLight.intensity = body && N.presence.isPresent(systemData.id) && body.system.planets.length ? 1.7 : 0;
+      if (!continuing && system.lod) system.lod.cur = null;
+    });
     return system;
   };
 
   // Chamado a cada quadro para cada sistema
   N.updateSystem = function (system, dt) {
+    if (N.state.frame && N.presence && !N.presence.isPresent(system.data.id)) return;
     // 0) Rotação diferencial da galáxia em torno do Eu (eixo Y horizontal)
     if (system.galaxyOrbit && !system.galaxyOrbit.isStatic) {
+      if (N.state.frame) {
+        var ease = Math.min(1, dt * 2.8), orbit = system.galaxyOrbit;
+        orbit.r += (orbit.targetR - orbit.r) * ease;
+        orbit.y += (orbit.targetY - orbit.y) * ease;
+        if (system.galaxyOrbitLine) {
+          // A base da linha é a posição usada na construção, guardada no boot.
+          system.galaxyOrbitLine.scale.set(orbit.r / system.historyOrbitRadius, 1, orbit.r / system.historyOrbitRadius);
+          system.galaxyOrbitLine.position.y = orbit.y - system.historyOrbitY;
+        }
+      }
       if (N.ROTACAO_GALAXIA !== false) {
         system.galaxyOrbit.angle += system.galaxyOrbit.omega * dt;
+      }
+      if (N.ROTACAO_GALAXIA !== false || N.state.frame) {
         system.group.position.x = system.galaxyOrbit.r * Math.cos(system.galaxyOrbit.angle);
         system.group.position.z = system.galaxyOrbit.r * Math.sin(system.galaxyOrbit.angle);
         system.group.position.y = system.galaxyOrbit.y;
@@ -184,7 +243,9 @@
     system.centerObj.update(dt);
 
     // Atualiza os orbitantes (companion, dream etc.)
-    system.orbiters.forEach(function (o) { o.update(dt); });
+    system.orbiters.forEach(function (o, i) {
+      if (!N.state.frame || N.presence.isPresent(system.data.orbiters[i].id)) o.update(dt);
+    });
 
     // "nomes" = quão visíveis os nomes estão agora (0 a 1). No 1º quadro o LOD ainda não calculou: começa em 0.
     var nomes = system.lod.cur ? system.lod.cur.nomes : 0;

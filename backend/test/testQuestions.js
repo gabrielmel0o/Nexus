@@ -9,6 +9,9 @@ const { createRequire } = require('node:module');
 const helena = require('../../nexus/js/data/spec/helenaSpec.js');
 const validate = require('../../nexus/js/data/validator.js');
 const compile = require('../../nexus/js/data/compiler.js');
+const history = require('../../nexus/js/data/history.js');
+const compileHistory = require('../../nexus/js/data/historyCompiler.js');
+const { createStore } = require('../../nexus/js/data/universeStore.js');
 const root = path.resolve(__dirname, '../..');
 const texto = 'Relato fictício sobre uma fase de mudança, criação e vínculos. '.repeat(12);
 const pergunta = 'O que costuma trazer energia para você nesta fase?';
@@ -174,12 +177,15 @@ async function run() {
     for (const action of ['continuar', 'pular', 'cuidado', 'editar', 'falha']) {
       const selectors = {};
       for (const name of ['textarea', 'counter', 'gen-btn', 'status', 'questions', 'question-fields', 'continue', 'skip']) selectors['.nexus-start-' + name] = element();
+      selectors['.nexus-start-generate'] = selectors['.nexus-start-gen-btn'];
+      for (const name of ['history-info', 'resume', 'update', 'download', 'import', 'file', 'delete', 'cancel-update', 'operation']) selectors['.nexus-start-' + name] = element();
       const form = element(), container = element(), startBtn = element();
       form.querySelector = s => selectors[s];
       const textarea = selectors['.nexus-start-textarea']; textarea.value = texto;
       const payloads = [], universes = [];
       const context = {
-        NEXUS: { validateSpec: validate, compileSpec: compile, boot: u => universes.push(u) },
+        NEXUS: { validateSpec: validate, compileSpec: compile, history, compileHistory,
+          universeStore: createStore(() => ({ getItem: () => null, setItem() {} })), boot: u => universes.push(u) },
         document: { readyState: 'complete', body: { classList: { contains: () => false, remove() {} } },
           querySelector: s => s === '.nexus-start-container' ? container : startBtn, createElement: () => {
             if (!container.children.length) return form;

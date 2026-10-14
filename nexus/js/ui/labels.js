@@ -14,6 +14,12 @@
   // obj = o grupo 3D. Converte a posição dele no universo em posição na tela e move o texto até lá.
   // alpha = de 0 a 1, vem do LOD: quanto o nome deve aparecer conforme a distância da câmera.
   N.updateLabel = (el, obj, size, alpha = 1) => {
+    if (el.dataset.pickId && N.presence) {
+      if (!N.presence.isPresent(el.dataset.pickId)) { el.style.opacity = 0; el.style.display = 'none'; return; }
+      el.style.display = '';
+      var body = N.presence.body(el.dataset.pickId);
+      if (body) el.textContent = body.name || body.title || body.id;
+    }
     obj.getWorldPosition(v);
     v.project(N.cam);
     const x = (v.x * .5 + .5) * innerWidth;

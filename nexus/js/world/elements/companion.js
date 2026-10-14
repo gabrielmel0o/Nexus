@@ -50,10 +50,11 @@
       new THREE.MeshBasicMaterial({
         map: N.makeTexture(256, 128, function (g, w, h) {
           g.fillStyle = cores.color; g.fillRect(0, 0, w, h);
-          N.blobs(g, w, h, cores.patch, v.manchas);
+          N.blobs(g, w, h, cores.patch, v.manchas, N.state.frame ? N.createRNG(el.id) : undefined);
         })
       })
     );
+    var glows = [];
 
     // ── Glow ─────────────────────────────────────────────────────────────
     var glowTex = N.makeTexture(128, 128, function (g) {
@@ -72,6 +73,7 @@
       });
       var s = new THREE.Sprite(mat);
       s.scale.set(tam, tam, 1);
+      glows.push(s);
       return s;
     };
 
@@ -93,6 +95,7 @@
 
     // Afasta o corpo do centro pela distância orbital
     var orbitDist = el.orbit || 9;
+    var targetOrbit = orbitDist, baseOrbit = orbitDist;
     corpo.position.x = orbitDist;
     pivo.add(corpo);
 
@@ -118,6 +121,7 @@
       var compWP = new THREE.Vector3();
       N.registerOrbit({
         line: cOrbitLine,
+        ownerId: el.id,
         category: 'major',
         getBodyPos: function () {
           corpo.getWorldPosition(compWP);
@@ -131,7 +135,19 @@
 
     return {
       object: pivo,
+      applyHistory: function (data, continuing) {
+        if (!data) return;
+        velocidade = data.speed; targetOrbit = data.orbit;
+        if (!continuing) { orbitDist = targetOrbit; angulo = 0; }
+        corpo.position.set(Math.cos(angulo) * orbitDist, 0, Math.sin(angulo) * orbitDist);
+        cOrbitLine.scale.set(orbitDist / baseOrbit, 1, orbitDist / baseOrbit);
+      },
       update: function (dt) {
+        if (N.state.frame) {
+          orbitDist += (targetOrbit - orbitDist) * Math.min(1, dt * 2.8);
+          cOrbitLine.scale.set(orbitDist / baseOrbit, 1, orbitDist / baseOrbit);
+        }
+        if (N.state.frame) glows.forEach(function (g) { g.material.color.setScalar(N.state.get(el.id, 'brightness')); });
         angulo += velocidade * dt;
         corpo.position.x = Math.cos(angulo) * orbitDist;
         corpo.position.z = Math.sin(angulo) * orbitDist;

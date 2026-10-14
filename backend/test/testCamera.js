@@ -34,7 +34,7 @@ function setup(aspect) {
 
 // Confere pontos da superfície dos limites de cada sistema no volume da câmera.
 // Não usa a fórmula do enquadramento para decidir se os pontos cabem.
-function assertFits(N) {
+function assertFits(N, phaseSystems) {
   const eye = [N.cam.position.x, N.cam.position.y, N.cam.position.z];
   const length = Math.hypot(...eye);
   const forward = eye.map(x => -x / length);
@@ -44,7 +44,7 @@ function assertFits(N) {
     right[2] * forward[0] - right[0] * forward[2], right[0] * forward[1] - right[1] * forward[0]];
   const dot = (a, b) => a.reduce((sum, value, i) => sum + value * b[i], 0);
   const tangent = Math.tan(N.cam.fov * Math.PI / 360);
-  for (const system of N.currentUniverse.systems) {
+  for (const system of phaseSystems || N.currentUniverse.systems) {
     const radius = compile.geometry.systemRadius(system);
     for (let i = 0; i < 160; i++) {
       const z = 1 - 2 * (i + 0.5) / 160;
@@ -119,4 +119,18 @@ for (const universe of universes) {
     assert.equal(JSON.stringify(universe), before);
   }
 }
-console.log(`OK: ${scenarios} enquadramentos, Helena original, zoom, retorno, resize e seleção preservados.`);
+const { fixtures, history } = require('./testHistoryCompiler.js');
+const historical = require('../../nexus/js/data/historyCompiler.js')(history(fixtures()));
+let historicalScenarios = 0;
+for (const aspect of [0.3, 1, 2]) {
+  const { N } = setup(aspect); N.currentUniverse = historical;
+  const radius = N.controls.getOverviewRadius();
+  for (const angles of [[.5, 1.12], [2, .4], [-1, 2.5]]) {
+    Object.assign(N.controls.state, { th: angles[0], ph: angles[1], r: radius });
+    Object.assign(N.controls.target, N.controls.state); N.controls.update(0);
+    historical.historyFrames.forEach(frame => {
+      assertFits(N, Object.values(frame.bodies).filter(b => b.system).map(b => b.system)); historicalScenarios++;
+    });
+  }
+}
+console.log(`OK: ${scenarios} enquadramentos originais e ${historicalScenarios} de fases históricas; Helena, zoom, retorno e resize preservados.`);

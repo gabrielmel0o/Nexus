@@ -76,6 +76,8 @@
     if (N.state && typeof N.state.init === 'function') {
       N.state.init(universe);
     }
+    if (N.presence) N.presence.begin();
+    if (universe.historyFrames && N.prepareHistoryForces) N.prepareHistoryForces(universe);
     if (N.time && N.time.refresh) N.time.refresh();
 
     montarFundo();                            // 2) monta o mundo, peça por peça
@@ -84,6 +86,8 @@
     
     // Cria um sistema para cada item dos dados
     const systems = universe.systems.map(s => N.buildSystem(s));
+    if (N.events && N.events.prepare && universe.chapters.some(c => c.event === 'supernova')) N.events.prepare();
+    if (N.presence && universe.historyFrames) N.presence.apply();
 
     let last = performance.now();
     function loop(now) {                       // 3) a cada quadro (~60x por segundo):

@@ -49,6 +49,7 @@
 
   N.centerBuilders.nebula = function (systemData, parent) {
     const systemId = systemData.id;
+    const random = N.state.frame ? N.createRNG(systemId) : Math.random;
     const group = new THREE.Group();
 
     // ── 1. Estrelinhas ao fundo (~25 estrelas que ficam bloqueadas pela nebulosa) ──
@@ -60,19 +61,19 @@
         color: 0xd8e4ff,
         blending: THREE.AdditiveBlending,
         transparent: true,
-        opacity: 0.65 + Math.random() * 0.3,
+        opacity: 0.65 + random() * 0.3,
         depthWrite: false
       });
       const star = new THREE.Sprite(starMat);
       // Espalhadas em um plano recuado atrás da nebulosa (Z negativo)
-      const ang = Math.random() * Math.PI * 2;
-      const dist = 3 + Math.random() * 11;
+      const ang = random() * Math.PI * 2;
+      const dist = 3 + random() * 11;
       star.position.set(
         Math.cos(ang) * dist,
-        (Math.random() - 0.5) * 8,
-        -5 - Math.random() * 6
+        (random() - 0.5) * 8,
+        -5 - random() * 6
       );
-      const s = 1.2 + Math.random() * 1.5;
+      const s = 1.2 + random() * 1.5;
       star.scale.set(s, s, 1);
       starsGroup.add(star);
     }
@@ -92,21 +93,21 @@
     const numPatches = 10;
     for (let i = 0; i < numPatches; i++) {
       const sprite = new THREE.Sprite(patchMat);
-      const ang = (i / numPatches) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
-      const r = 1.5 + Math.random() * 4.2;
+      const ang = (i / numPatches) * Math.PI * 2 + (random() - 0.5) * 0.5;
+      const r = 1.5 + random() * 4.2;
       sprite.position.set(
         Math.cos(ang) * r,
-        (Math.random() - 0.5) * 2.8,
-        (Math.random() - 0.5) * 3.5 // Entre -1.75 e +1.75 (na frente das estrelas)
+        (random() - 0.5) * 2.8,
+        (random() - 0.5) * 3.5 // Entre -1.75 e +1.75 (na frente das estrelas)
       );
-      const scale = 8 + Math.random() * 6.5;
+      const scale = 8 + random() * 6.5;
       sprite.scale.set(scale, scale, 1);
       cloudsGroup.add(sprite);
 
       clouds.push({
         sprite,
-        rotSpeed: (Math.random() - 0.5) * 0.04,
-        driftSpeed: 0.2 + Math.random() * 0.3,
+        rotSpeed: (random() - 0.5) * 0.04,
+        driftSpeed: 0.2 + random() * 0.3,
         basePos: sprite.position.clone()
       });
     }
@@ -155,6 +156,7 @@
 
     return {
       object: group,
+      applyHistory() { tempo = 0; this.update(0); },
       update(dt) {
         tempo += dt;
 

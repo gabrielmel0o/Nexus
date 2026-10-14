@@ -12,6 +12,7 @@ const http = require('http');
 
 // Carrega o validador e a Helena convertida diretamente do repositório (sem duplicação)
 const history = require('../nexus/js/data/history.js');
+const compileHistory = require('../nexus/js/data/historyCompiler.js');
 const helenaSpec = require('../nexus/js/data/spec/helenaSpec.js');
 const { chamarGemini } = require('./gemini.js');
 
@@ -207,6 +208,10 @@ const server = http.createServer(async (req, res) => {
           if (validacao.ok && atualizacao) {
             const identidade = history.validateTransition(especificacaoAnterior, specCandidata);
             if (!identidade.ok) { validacao.ok = false; validacao.erros = identidade.erros; }
+          }
+          if (validacao.ok) {
+            const forcas = compileHistory.validateForces(specCandidata);
+            if (!forcas.ok) { validacao.ok = false; validacao.erros = forcas.erros; }
           }
 
           if (validacao.ok) {

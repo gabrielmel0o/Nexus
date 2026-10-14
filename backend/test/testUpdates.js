@@ -8,6 +8,7 @@ const vm = require('node:vm');
 const http = require('node:http');
 const { createRequire } = require('node:module');
 const H = require('../../nexus/js/data/history.js');
+const compose = require('../../nexus/js/data/historyCompiler.js');
 const { createStore } = require('../../nexus/js/data/universeStore.js');
 const canonical = require('../../nexus/js/data/spec/helenaSpec.js');
 const clone = v => JSON.parse(JSON.stringify(v));
@@ -103,6 +104,50 @@ async function run() {
       assert.equal((await request({ texto, especificacaoAnterior: canonical })).status, 200);
       assert.match(calls.at(-1).contents[2].parts[0].text, /categoria, tipo ou pai/);
     });
+    await test('forças incompatíveis com o motor entram na correção na geração e atualização', async () => {
+      const cases = [
+        ['mare', f => { f.origem = 'corpo'; }, /lua/],
+        ['eclipse', f => { f.origem = 'criacao'; f.alvos = ['mae']; }, /lua/],
+        ['mare', f => { f.alvos = ['corpo']; }, /lua/],
+        ['gravidade', f => { f.alvos = ['criacao']; }, /alvos em planetas/]
+      ];
+      for (const [type, change, message] of cases) {
+        const wrong = clone(canonical); change(wrong.forcas.find(f => f.tipo === type));
+        const originalWrong = JSON.stringify(wrong);
+        assert.equal(H.validateSpecification(wrong).ok, true, 'Reproduz a divergência com a validação semântica');
+        assert.throws(() => compose(H.create(wrong, now)), message);
+        for (const update of [false, true]) {
+          const before = calls.length; queue = [wrong, canonical];
+          const payload = update ? { texto, especificacaoAnterior: canonical } : { texto: 'Relato fictício. '.repeat(40) };
+          const result = await request(payload);
+          assert.equal(result.status, 200); assert.equal(calls.length - before, 2);
+          assert.match(calls.at(-1).contents[2].parts[0].text, message);
+          assert.deepEqual(result.data.spec, canonical);
+          assert.doesNotThrow(() => compose(H.create(result.data.spec, now)));
+        }
+        assert.equal(JSON.stringify(wrong), originalWrong, 'A validação não reescreve a força');
+      }
+    });
+    await test('força incompatível persistente esgota somente duas correções e preserva histórico', async () => {
+      const beforeHistory = store.exportJSON().json, before = calls.length;
+      const wrong = H.latest(store.load().historico);
+      wrong.forcas.find(f => f.tipo === 'gravidade').alvos = ['criacao'];
+      queue = [wrong, wrong, wrong];
+      const result = await request({ texto, especificacaoAnterior: H.latest(store.load().historico) });
+      assert.equal(result.status, 422); assert.equal(result.data.spec, undefined);
+      assert.equal(calls.length - before, 3); assert.equal(queue.length, 0);
+      assert.equal(store.exportJSON().json, beforeHistory);
+    });
+    await test('gravidade com origem não estelar continua aceita sem correções ou reinterpretação', async () => {
+      for (const source of ['corpo', 'aprovacao', 'proposta', 'sonho-recorrente']) {
+        const spec = clone(canonical); spec.forcas.find(f => f.tipo === 'gravidade').origem = source;
+        const before = calls.length; queue = [spec];
+        const result = await request({ texto, especificacaoAnterior: canonical });
+        assert.equal(result.status, 200); assert.equal(calls.length - before, 1);
+        assert.deepEqual(result.data.spec, spec);
+        assert.doesNotThrow(() => compose(H.create(result.data.spec, now)));
+      }
+    });
     await test('perguntas na atualização são corrigidas, nunca repassadas', async () => {
       queue = [{ duvidas: ['Pergunta fictícia indevida?'] }, canonical];
       const result = await request({ texto, especificacaoAnterior: canonical });
@@ -186,6 +231,7 @@ async function run() {
     await test('logs não contêm relatos, respostas, especificações ou erros externos', async () => {
       const recorded = logs.join('\n');
       for (const marker of [texto, 'MARCADOR_PRIVADO', 'Título fictício preservado', canonical.sistemas[0].centro.summary]) assert.ok(!recorded.includes(marker));
+      assert.doesNotMatch(recorded, /Maré e eclipse exigem|A gravidade atual exige/);
       assert.equal(server.address().address, '127.0.0.1');
     });
     console.log('OK: ' + count + ' grupos de cenários HTTP/atualização. Gemini simulado; servidor temporário encerrado.');

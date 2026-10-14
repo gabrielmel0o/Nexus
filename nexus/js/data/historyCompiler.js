@@ -143,6 +143,18 @@
     });
     return universe;
   }
+  // O backend usa a mesma regra dos efeitos antes de aceitar uma resposta da IA.
+  // Recebe uma especificação já validada, sem compor ou enviar o histórico.
+  compileHistory.validateForces = function (spec) {
+    var universe = compile(spec);
+    try {
+      checkForces(universe, index(universe));
+      return { ok: true, erros: [] };
+    } catch (e) {
+      if (e.code !== 'compilacao') throw e;
+      return { ok: false, erros: [e.message] };
+    }
+  };
   if (typeof NEXUS !== 'undefined') NEXUS.compileHistory = compileHistory;
   if (node) module.exports = compileHistory;
 })();

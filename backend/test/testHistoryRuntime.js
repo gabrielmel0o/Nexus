@@ -13,6 +13,7 @@ class V {
   clone() { return new V(this.x, this.y, this.z); }
   sub(v) { this.x -= v.x; this.y -= v.y; this.z -= v.z; return this; }
   add(v) { this.x += v.x; this.y += v.y; this.z += v.z; return this; }
+  lerp(v, t) { this.x += (v.x - this.x) * t; this.y += (v.y - this.y) * t; this.z += (v.z - this.z) * t; return this; }
   subVectors(a, b) { return this.copy(a).sub(b); }
   addVectors(a, b) { return this.copy(a).add(b); }
   multiplyScalar(k) { this.x *= k; this.y *= k; this.z *= k; return this; }
@@ -78,7 +79,7 @@ function element() {
     getBoundingClientRect() { return { left: 0, top: 0, width: 100, height: 100 }; },
     getContext() { return { createRadialGradient() { return { addColorStop() {} }; }, fillRect() {} }; } };
 }
-function setup(universe) {
+function setup(universe, realCamera = false) {
   const body = element(), N = { scene: new O(), cam: { position: new V(0, 0, 60), quaternion: {} },
     renderer: { domElement: element(), render() {} }, ROTACAO_GALAXIA: false,
     controls: { update() {}, flyHome() { N.homeFlights = (N.homeFlights || 0) + 1; }, flyTo() {} },
@@ -97,6 +98,11 @@ function setup(universe) {
     'world/elements/companion.js', 'world/elements/dream.js', 'world/elements/star.js', 'world/elements/comet.js',
     'ui/labels.js', 'ui/panel.js', 'world/orbits.js', 'world/lod.js', 'world/planets.js', 'world/system.js',
     'world/forces.js', 'world/arms.js', 'world/events/supernova.js', 'main.js']) load(file);
+  if (realCamera) {
+    Object.assign(N.cam, { fov: 38, aspect: 1280 / 720, far: 2000,
+      updateProjectionMatrix() {}, lookAt(v) { N.cameraLook = v.clone(); } });
+    load('core/controls.js');
+  }
   N.boot(universe || N.getUniverse());
   function tick(dt = 0) { N.state.update(dt); N.scene.updateMatrixWorld(true); N.updateForces(dt);
     Object.values(N.systemsById).forEach(s => N.updateSystem(s, dt)); N.updateOrbitsFX(); N.panel.update(); }
@@ -269,6 +275,41 @@ test('tamanhos e órbitas intermediários preservam Eu e separação durante a t
         envelopes.push({ id, position: runtime.group.position, radius });
       }
     }
+  }
+});
+test('seleção e câmera seguem o corpo dos orbitantes em Helena e no histórico', () => {
+  for (const historical of [false, true]) {
+    const t = setup(historical ? compose(history(fixtures())) : undefined, true);
+    const before = { ...resources };
+    for (const phase of historical ? [0, 2, 1, 2] : [0, 1, 2, 3, 0]) {
+      t.N.state.applyChapter(phase);
+      if (historical && phase === 1) {
+        assert.equal(t.N.selected, null, 'O sonho ausente deixa de ser acompanhado');
+        t.N.controls.update(.2); assert.equal(t.N.controls.lookT.length(), 0);
+      }
+      for (const system of Object.values(t.N.systemsById)) {
+        system.data.orbiters.forEach((orb, index) => {
+          if (historical && !t.N.presence.isPresent(orb.id)) return;
+          let mesh;
+          system.orbiters[index].object.traverse(o => {
+            if (!mesh && o instanceof Mesh && o.userData.pickId === orb.id) mesh = o;
+          });
+          assert.ok(mesh, 'Encontra o corpo visível, sem usar o alvo registrado');
+          t.tick(.2); t.N.selectBody(orb.id);
+          const previous = mesh.getWorldPosition(new V()).clone();
+          for (let step = 0; step < 5; step++) {
+            t.tick(.2); t.N.controls.update(.2);
+            const actual = mesh.getWorldPosition(new V());
+            assert.ok(actual.distanceTo(system.group.getWorldPosition(new V())) > .5);
+            assert.ok(t.N.pickRegistry[orb.id].getPos().distanceTo(actual) < 1e-9, orb.type + ': registro mira o corpo');
+            assert.ok(t.N.controls.lookT.distanceTo(actual) < 1e-9, orb.type + ': câmera acompanha o corpo');
+            assert.ok(t.N.cameraLook.distanceTo(actual) < 1e-9);
+          }
+          assert.ok(previous.distanceTo(mesh.getWorldPosition(new V())) > .01, 'O alvo continua em órbita');
+        });
+      }
+    }
+    assert.deepEqual(resources, before, 'Selecionar e navegar não recriam recursos');
   }
 });
 console.log('OK: ' + count + ' grupos com controladores reais e DOM/3D simulados. Conferência visual continua manual.');

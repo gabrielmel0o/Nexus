@@ -135,6 +135,7 @@
 
     return {
       object: pivo,
+      focusObject: corpo, // A câmera segue a estrela, não o pivô no centro do sistema.
       applyHistory: function (data, continuing) {
         if (!data) return;
         velocidade = data.speed; targetOrbit = data.orbit;

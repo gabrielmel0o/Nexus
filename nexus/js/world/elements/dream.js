@@ -132,6 +132,7 @@
 
     return {
       object: group,
+      focusObject: bodyMesh, // O rastro e a órbita ficam no grupo; o foco acompanha o corpo.
       applyHistory(data, continuing) {
         if (!data) return;
         targetRMax = data.orbit; el.speed = data.speed;

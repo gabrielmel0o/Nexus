@@ -83,7 +83,7 @@
           N.presence.gate(orb.id, inst.object);
         });
 
-        // Registra o orbitante: getPos segue o objeto 3D em movimento
+        // Segue o corpo visível; o grupo que contém a órbita fica no centro.
         var orbWP = new THREE.Vector3();
         N.pickRegistry[orb.id] = {
           getPos: (function (obj) {
@@ -91,7 +91,7 @@
               obj.getWorldPosition(orbWP);
               return orbWP;
             };
-          })(inst.object),
+          })(inst.focusObject || inst.object),
           radius: 1.5  // anã vermelha / sonho recorrente são pequenos
         };
       } else {

@@ -9,11 +9,13 @@
 <link rel="stylesheet" href="ui/css/base.css">
 <link rel="stylesheet" href="ui/css/hover.css">
 <link rel="stylesheet" href="ui/css/tela-inicial.css">
+<link rel="stylesheet" href="ui/css/tela-comecar.css">
+<link rel="stylesheet" href="ui/css/estados-comecar.css">
 <link rel="stylesheet" href="css/universo.css">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 </head>
 <body class="modo-start">
-<!-- Nesta etapa, somente a tela inicial foi integrada. -->
+<!-- Telas inicial e Começar integradas; as demais ainda usam a interface antiga. -->
 <div id="interface-nexus">
   <div class="nexus-ui" id="tela-inicial">
 
@@ -97,6 +99,65 @@
     </main><!-- fim .conteudo-inicial -->
 
   </div><!-- fim #tela-inicial -->
+  <div class="nexus-ui oculto" id="tela-comecar" aria-hidden="true">
+
+    <div id="fundo-desfocado" aria-hidden="true"></div>
+
+    <!-- Painel de vidro lateral esquerdo -->
+    <main class="painel-vidro painel-comecar" id="painel-comecar">
+
+      <!-- Cabeçalho: botão voltar + título da tela -->
+      <header class="cabecalho-painel">
+        <button class="btn-voltar" id="botao-voltar-comecar" type="button" aria-label="Voltar para a tela inicial">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          <span aria-hidden="true">&#10094;</span>
+        </button>
+        <h1 class="titulo-comecar" id="titulo-comecar">COMEÇAR</h1>
+      </header>
+
+      <!-- Bloco de formulário interno com borda sutil -->
+      <section class="bloco-formulario" aria-label="Formulário de descrição da mente">
+
+        <!-- Rótulo de seção com linha horizontal -->
+        <h2 class="rotulo-secao" id="rotulo-secao-mente">ESCREVA SOBRE A SUA MENTE</h2>
+
+        <!-- Campo de texto principal com borda laranja -->
+        <textarea
+          class="campo-texto campo-texto-mente"
+          id="campo-texto-mente"
+          placeholder="Descreva como está a sua vida e a sua mente hoje (entre 500 e 3.000 caracteres)..."
+          rows="12"
+          maxlength="3000"
+          spellcheck="false"
+        ></textarea>
+
+        <!-- Contador dinâmico de caracteres (exemplo de valor inicial) -->
+        <div class="contador-caracteres" id="contador-caracteres-comecar" aria-live="polite">
+          <span id="caracteres-digitados-comecar">0</span> / 3.000 caracteres &middot; m&iacute;nimo 500
+        </div>
+
+        <!-- Avisos de privacidade e regras da criação -->
+        <aside class="texto-privacidade" id="aviso-privacidade-comecar">
+          <p>
+            Seu texto &eacute; enviado ao Google (Gemini) para ser interpretado. O NEXUS n&atilde;o guarda seu texto. Na camada gratuita, o Google pode us&aacute;-lo para melhorar produtos, e revisores humanos podem l&ecirc;-lo. Evite nomes reais e dados que identifiquem pessoas; use apelidos.
+          </p>
+          <p>
+            Uma nova gera&ccedil;&atilde;o cria outro universo e substitui o hist&oacute;rico salvo. Para acrescentar uma fase, use Atualizar meu universo.
+          </p>
+        </aside>
+
+        <!-- Botão de ação: desabilitado por padrão até atingir 500 caracteres -->
+        <button class="btn btn-laranja btn-gerar-universo" id="botao-gerar-universo" type="button" disabled>
+          <span class="btn__feixe" aria-hidden="true"></span>
+          <span class="icone-play" aria-hidden="true">&#9654;</span>
+          <span class="rotulo-botao">GERAR MEU UNIVERSO</span>
+        </button>
+
+      </section><!-- fim .bloco-formulario -->
+
+    </main><!-- fim #painel-comecar -->
+
+  </div><!-- fim #tela-comecar -->
 </div>
 <div class="hint oculto">arraste para girar · role ou pince para aproximar</div>
 <!-- Botão de legenda: só visível quando painel-aberto está no body -->
@@ -140,6 +201,7 @@
 <script src="js/ui/panel.js"></script>
 <script src="js/ui/legend.js"></script>
 <script src="js/ui/start.js"></script>
+<script src="js/ui/comecar.js"></script>
 <script src="js/ui/time.js"></script>
 <script src="js/world/arms.js"></script>
 <script src="js/world/halo.js"></script>

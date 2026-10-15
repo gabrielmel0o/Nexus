@@ -133,7 +133,7 @@
     // Remove classe modo-start do body (logo volta à regra normal)
     document.body.classList.remove('modo-start');
     // A nova tela inicial sai junto com a Start, sem mudar o voo ou o motor.
-    if (N.ui) N.ui.ocultarInicial();
+    if (N.ui) N.ui.ocultarMenus();
     const hint = document.querySelector('.hint');
     if (hint) hint.classList.remove('oculto');
 
@@ -394,6 +394,12 @@
     // Ponte provisória: reutiliza as ações antigas, sem montar as telas 2, 3 e 4.
     // Ela será substituída aos poucos, após a aprovação de cada tela.
     N.start = {
+      // A tela nova usa a mesma entrada, pose e transição da Start existente.
+      mensagens: MENSAGENS,
+      entrar(universo) {
+        N.boot(universo);
+        exitStartMode();
+      },
       abrirHelena() { startBtn.click(); },
       continuar() {
         // Se a compilação falhar, o aviso existente precisa continuar visível.

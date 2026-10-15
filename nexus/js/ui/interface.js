@@ -1,4 +1,4 @@
-/* interface.js — liga a tela inicial aprovada aos caminhos que já funcionam.
+/* interface.js — liga as telas inicial e Começar aos caminhos que já funcionam.
    As outras telas ainda usam a interface antiga até sua integração ser aprovada. */
 (function () {
   const N = NEXUS;
@@ -17,6 +17,7 @@
   N.ui = {
     mostrarInicial() {
       // Voltar do formulário não recarrega a página nem descarta texto ou resultado em memória.
+      if (N.comecar) N.comecar.ocultar();
       formularioAntigo().classList.add('oculto');
       inicial().classList.remove('oculto');
       inicial().setAttribute('aria-hidden', 'false');
@@ -27,8 +28,14 @@
       inicial().classList.add('oculto');
       inicial().setAttribute('aria-hidden', 'true');
     },
+    ocultarMenus() {
+      this.ocultarInicial();
+      if (N.comecar) N.comecar.ocultar();
+      formularioAntigo().classList.add('oculto');
+    },
     abrirFormularioAntigo(modo) {
       this.ocultarInicial();
+      if (N.comecar) N.comecar.ocultar();
       formularioAntigo().classList.remove('oculto');
       N.start.abrirFormulario(modo);
     }
@@ -42,7 +49,8 @@
         // A continuação existente valida, compila e abre a fase mais recente sem backend.
         N.start.continuar();
       } else {
-        N.ui.abrirFormularioAntigo('gerar');
+        N.ui.ocultarMenus();
+        N.comecar.abrir();
       }
     });
     document.getElementById('botao-helena').addEventListener('click', () => {

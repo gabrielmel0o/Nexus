@@ -13,13 +13,14 @@
 <link rel="stylesheet" href="ui/css/tela-comecar.css">
 <link rel="stylesheet" href="ui/css/tela-atualizar.css">
 <link rel="stylesheet" href="ui/css/tela-gerenciamento.css">
+<link rel="stylesheet" href="ui/css/tela-saibamais.css">
 <link rel="stylesheet" href="ui/css/estados-comecar.css">
 <link rel="stylesheet" href="ui/css/legenda-barra.css">
 <link rel="stylesheet" href="css/universo.css">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 </head>
 <body class="modo-start">
-<!-- Telas 1 a 5 integradas; os painéis da exploração ainda usam a interface antiga. -->
+<!-- Telas 1 a 6 integradas; os painéis da exploração ainda usam a interface antiga. -->
 <div id="interface-nexus">
   <div class="nexus-ui" id="tela-inicial">
 
@@ -338,6 +339,85 @@
     </footer>
 
   </div><!-- fim #tela-visualizacao -->
+  <div class="nexus-ui oculto" id="tela-saibamais" aria-hidden="true">
+
+    <!-- PAINEL EXPLICATIVO LATERAL DIREITO -->
+    <aside class="painel-saibamais" id="painel-saibamais" aria-labelledby="titulo-saibamais">
+
+      <h1 class="titulo-saibamais" id="titulo-saibamais">
+        Como ler este<br>universo
+      </h1>
+
+      <dl class="lista-definicoes-universo">
+
+        <!-- CAMADAS -->
+        <div class="item-definicao">
+          <dt class="rotulo-definicao">CAMADAS</dt>
+          <dd class="texto-definicao">
+            Corpos = o que existe &middot; For&ccedil;as = o que move tudo, sem forma &middot; Eventos = o que acontece no tempo
+          </dd>
+        </div>
+
+        <!-- ESTRELA -->
+        <div class="item-definicao">
+          <dt class="rotulo-definicao">ESTRELA</dt>
+          <dd class="texto-definicao">
+            O que emite luz (valores, paix&otilde;es)
+          </dd>
+        </div>
+
+        <!-- PLANETA -->
+        <div class="item-definicao">
+          <dt class="rotulo-definicao">PLANETA</dt>
+          <dd class="texto-definicao">
+            &Aacute;rea da vida (reflete luz)
+          </dd>
+        </div>
+
+        <!-- LUA -->
+        <div class="item-definicao">
+          <dt class="rotulo-definicao">LUA</dt>
+          <dd class="texto-definicao">
+            Faceta
+          </dd>
+        </div>
+
+        <!-- NEBULOSA ESCURA -->
+        <div class="item-definicao">
+          <dt class="rotulo-definicao">NEBULOSA ESCURA</dt>
+          <dd class="texto-definicao">
+            Desejo reprimido
+          </dd>
+        </div>
+
+        <!-- BURACO NEGRO -->
+        <div class="item-definicao">
+          <dt class="rotulo-definicao">BURACO NEGRO</dt>
+          <dd class="texto-definicao">
+            Trauma
+          </dd>
+        </div>
+
+        <!-- BURACO NEGRO CENTRAL -->
+        <div class="item-definicao">
+          <dt class="rotulo-definicao">BURACO NEGRO CENTRAL</dt>
+          <dd class="texto-definicao">
+            O Eu
+          </dd>
+        </div>
+
+        <!-- FORÇAS (GRAVIDADE, MARÉ, ECLIPSE) -->
+        <div class="item-definicao">
+          <dt class="rotulo-definicao">FOR&Ccedil;AS (GRAVIDADE, MAR&Eacute;, ECLIPSE)</dt>
+          <dd class="texto-definicao">
+            Sentimentos
+          </dd>
+        </div>
+
+      </dl>
+
+    </aside><!-- fim #painel-saibamais -->
+  </div><!-- fim #tela-saibamais -->
 </div>
 <!-- Container do botão START (só visível no modo-start) -->
 <!-- Formulários antigos mantidos até aprovar as próximas telas. -->

@@ -46,6 +46,8 @@ async function esperar(expression) {
 function ok(nome) { grupos++; console.log('[OK] ' + nome); }
 async function abrir() {
   await chamar('Page.navigate', { url: pathToFileURL(path.resolve(__dirname, '../../nexus/index.html')).href });
+  await chamar('Page.bringToFront');
+  await chamar('Emulation.setFocusEmulationEnabled', { enabled: true });
   await esperar('document.readyState === "complete" && !!(window.NEXUS && NEXUS.start && document.querySelector(".legenda-barra"))');
 }
 async function clicar(id) {
@@ -164,7 +166,7 @@ async function testar() {
   assert.equal(await executar('NEXUS.panel.isOpen()'), true);
   await chamar('Input.dispatchKeyEvent', {type:'keyDown',key:'Escape',code:'Escape'});
   assert.equal(await executar('NEXUS.panel.isOpen()'), false);
-  ok('Saiba Mais usa guia antigo, alterna e Esc fecha guia antes da seleção');
+  ok('Saiba Mais alterna e Esc fecha guia antes da seleção');
 
   await abrir();
   await executar(`let h=NEXUS.history.create(NEXUS.specs.helena);

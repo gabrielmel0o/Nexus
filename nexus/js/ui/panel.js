@@ -115,7 +115,11 @@
     panelEl.className = 'nexus-panel';
     panelEl.setAttribute('role', 'dialog');
     panelEl.setAttribute('aria-hidden', 'true');
-    document.body.appendChild(panelEl);
+    panelEl.inert = true;
+    // Mantém o painel antigo na camada da exploração. O guia da tela 6 pode
+    // aparecer por cima à direita, sem alterar CSS, posição ou conteúdo do astro.
+    const exploracao = document.querySelector('#tela-visualizacao');
+    (exploracao || document.body).appendChild(panelEl);
 
     // Fecha a UI ao clicar no botão de fechar (×), sem interferir no estado da câmera
     panelEl.addEventListener('click', (e) => {
@@ -226,6 +230,7 @@
       render(body);
       const el = ensureElement();
       el.classList.add('is-visible');
+      el.inert = false;
       el.setAttribute('aria-hidden', 'false');
       // Liga classe no body para mostrar logo (reutilizável para legenda e start)
       document.body.classList.add('painel-aberto');
@@ -234,6 +239,7 @@
     close() {
       currentBodyId = null;
       if (panelEl) {
+        panelEl.inert = true; // Os botões ocultos não recebem foco ou cliques.
         panelEl.classList.remove('is-visible');
         panelEl.setAttribute('aria-hidden', 'true');
       }

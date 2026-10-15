@@ -1,0 +1,234 @@
+/*
+  ============================================================
+  NEXUS — tela-inicial.css
+  CSS específico da Tela Inicial (nº 1).
+  Referência visual corrigida: telas/10-tela_inicial.png
+  Depende de css/base.css (carregado antes).
+  ============================================================
+*/
+
+
+/* ============================================================
+   1. CONTAINER DA TELA INICIAL
+   ============================================================ */
+
+#tela-inicial {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+
+/* ============================================================
+   2. CAMADA DE GRADIENTE
+   Preto/roxo sólido na esquerda, transparente em ~67% da largura.
+   Usa a variável centralizada --gradiente-menu-inicial do :root.
+   ============================================================ */
+
+.gradiente-esquerda {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--gradiente-menu-inicial);
+  pointer-events: none;
+  z-index: 0;
+}
+
+
+/* ============================================================
+   3. CONTAINER DO CONTEÚDO (logo + botões)
+   Usa position absolute fixado no canto superior esquerdo.
+   Tem altura 100vh para que o flex distribua logo no topo
+   e botões na parte inferior, como na referência.
+   ============================================================ */
+
+.conteudo-inicial {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  z-index: 1;
+
+  /* Largura total disponível até a linha vermelha de referência (~67%)
+     O container maior garante que o logo pode ser mais largo que os botões */
+  width: clamp(300px, 67vw, 960px);
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  /* Padding: afasta do canto — valores baseados no PNG de referência */
+  padding-top: 4.5vh;
+  padding-left: 3.2vw;
+  padding-right: 3.2vw;
+  padding-bottom: 4vh;
+
+  pointer-events: none; /* Container não bloqueia o mouse */
+}
+
+
+/* ============================================================
+   4. LOGOTIPO (SVG "NEXUS + O UNIVERSO DA SUA MENTE")
+   No PNG: logo tem ~41% da largura total da tela.
+   (600px / 1456px ≈ 41%).
+   A tagline "O UNIVERSO DA SUA MENTE" está dentro do próprio SVG.
+   ============================================================ */
+
+.logo-wrapper {
+  flex-shrink: 0; /* Logo não encolhe se a tela for pequena */
+}
+
+.logo-imagem {
+  display: block;
+  width: clamp(220px, 41vw, 620px); /* ~41% da tela, como na referência */
+  height: auto;                      /* Mantém proporção 3000:774 do SVG */
+}
+
+
+/* ============================================================
+   5. MENU DE BOTÕES
+   No PNG: botões começam em ~45% do alto da tela e terminam
+   em ~90% do alto. Usamos margin-top:auto + margin-bottom
+   para empurrar o bloco de botões para esse intervalo.
+   Largura: ~30% da tela (≈ 435px em 1456px de referência).
+   ============================================================ */
+
+.menu-principal {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;               /* Espaço entre botões */
+  width: clamp(260px, 30vw, 440px); /* Largura dos botões: ~30% da tela */
+  margin-top: 15rem;           /* Empurra para baixo ocupando o espaço do logo */
+  margin-bottom: 12vh;        /* Recua do fundo: botões terminam em ~88% do alto */
+  pointer-events: auto;       /* Botões são clicáveis */
+}
+
+/* Gap adicional antes do botão HELENA:
+   No PNG há um espaço visivelmente maior entre GERENCIAMENTO e HELENA */
+#botao-helena {
+  margin-top: 3rem;
+}
+
+
+/* ============================================================
+   6. ESTILO BASE COMPARTILHADO: TODOS OS BOTÕES DESTA TELA
+   ============================================================ */
+
+.btn-comecar,
+.btn-menu-item {
+  width: 100%;
+  padding: 0;
+  /* Altura: proporcional ao PNG (~8% de 816px ≈ 65px → ~4rem) */
+  min-height: clamp(3.5rem, 6.5vh, 5rem);
+  border-radius: var(--raio-botao);
+  overflow: visible;    /* Permite ao anel de luz renderizar por fora sem cortes */
+  display: flex;
+  align-items: stretch; /* Ícone e texto têm mesma altura */
+  text-align: left;
+  border: none;
+  cursor: pointer;
+}
+
+
+/* ============================================================
+   7. BOTÃO COMEÇAR (laranja)
+   ============================================================ */
+
+.btn-comecar {
+  background: var(--cor-laranja-principal); /* #FF8900 */
+}
+
+/* Caixa do ícone ▶ dentro do botão COMEÇAR */
+.icone-comecar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cor-laranja-terciario); /* #632A00 — escuro */
+  color: var(--cor-laranja-principal);      /* Seta laranja sobre fundo escuro */
+  font-size: 0.8rem;
+  width: 3.4rem;
+  flex-shrink: 0;
+  border-top-left-radius: var(--raio-botao);
+  border-bottom-left-radius: var(--raio-botao);
+}
+
+
+/* ============================================================
+   8. BOTÕES ESCUROS (ATUALIZAR, GERENCIAMENTO, HELENA)
+   ============================================================ */
+
+.btn-menu-item {
+  background: var(--cor-botoes); /* #100819 */
+}
+
+/* Caixa do ícone SVG — mesma largura da caixa do COMEÇAR */
+.btn-menu-item .btn-icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.4rem;
+  flex-shrink: 0;
+  padding: 1.8rem;
+  border-top-left-radius: var(--raio-botao);
+  border-bottom-left-radius: var(--raio-botao);
+  /* Linha divisória sutil entre ícone e texto */
+  border-right: 1px solid rgba(226, 227, 228, 0.12);
+}
+
+.btn-menu-item .btn-icone img {
+  width: 1.4rem;
+  height: 1.4rem;
+  object-fit: contain;
+  display: block;
+}
+
+
+/* ============================================================
+   9. GRUPO DE TEXTO (título + subtítulo)
+   ============================================================ */
+
+.btn-texto-grupo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.18em;
+  padding: 0.6em 1em;
+}
+
+/* Título: COMEÇAR, ATUALIZAR, GERENCIAMENTO, HELENA
+   Todos com o mesmo tamanho (regra F da especificação). */
+.btn-rotulo-principal {
+  display: block;
+  font-family: var(--fonte-titulo);
+  font-weight: 900;
+  font-size: var(--tamanho-titulo-botao);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+/* Subtítulo: descrição abaixo do nome */
+.btn-rotulo-secundario {
+  display: block;
+  font-family: var(--fonte-texto);
+  font-weight: 400;
+  font-size: var(--tamanho-subtitulo);
+  line-height: 1.2;
+}
+
+/* COMEÇAR: texto escuro sobre laranja */
+.btn-comecar .btn-rotulo-principal,
+.btn-comecar .btn-rotulo-secundario {
+  color: var(--texto-laranja); /* #291100 */
+}
+
+/* Botões escuros: branco principal, cinza secundário */
+.btn-menu-item .btn-rotulo-principal {
+  color: var(--cor-branco-nexus);
+}
+
+.btn-menu-item .btn-rotulo-secundario {
+  color: var(--cor-texto-secundario);
+}

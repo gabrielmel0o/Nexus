@@ -1,0 +1,145 @@
+/*
+  ============================================================
+  NEXUS — tela-sair.css
+  CSS específico do modal de confirmação de saída (tela 9).
+  Referência visual: telas/09-sair.png e telas/12-sair.png
+  Depende de: css/base.css.
+  ============================================================
+*/
+
+
+/* ============================================================
+   1. CAMADA DE DESFOQUE SOBRE AS INTERFACES ANTERIORES
+   Na tela 9, o desfoque gaussiano de 8,5px atua sobre as interfaces
+   que já estavam abertas atrás (ex.: o menu da tela 8).
+   Portanto, o desfoque fica em z-index: 15 (acima da tela 8 em z-index: 10)
+   e o modal de saída fica em z-index: 20.
+   ============================================================ */
+
+.desfoque-sobre-interfaces {
+  z-index: 15 !important;
+}
+
+.interface-fundo {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+
+/* ============================================================
+   2. CONTAINER E MODAL CENTRALIZADO
+   Fica perfeitamente centralizado na viewport.
+   Largura medida na referência: ~1007px em 1920p (~52.4vw).
+   Dividido em topo (#E2E3E4) e base (#111450).
+   ============================================================ */
+
+.modal-sair {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: clamp(340px, 52.4vw, 1020px);
+  border-radius: clamp(0.75rem, 1.2vw, 1.25rem);
+  overflow: hidden; /* Mantém os cantos arredondados no topo e na base */
+
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+  pointer-events: auto;
+  z-index: 20;
+}
+
+
+/* ============================================================
+   2. PARTE SUPERIOR (fundo claro #E2E3E4)
+   ============================================================ */
+
+.modal-sair-topo {
+  background: var(--cor-branco-nexus); /* #E2E3E4 */
+  padding: clamp(2rem, 3.8vh, 3.8rem) clamp(2.2rem, 3.8vw, 4.5rem) clamp(1.8rem, 3vh, 3rem);
+
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.75rem, 1.2vh, 1.4rem);
+}
+
+.titulo-modal-sair {
+  font-family: var(--fonte-titulo);
+  font-weight: 900;
+  font-size: clamp(1.6rem, 2.2vw, 2.6rem);
+  line-height: 1.1;
+  color: var(--cor-botoes); /* #100819 */
+  margin: 0;
+  padding: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.subtitulo-modal-sair {
+  font-family: var(--fonte-texto);
+  font-weight: 400;
+  font-size: clamp(0.8rem, 0.95vw, 1.1rem);
+  line-height: 1.4;
+  color: var(--cor-botoes); /* #100819 */
+  margin: 0;
+  padding: 0;
+}
+
+
+/* ============================================================
+   3. PARTE INFERIOR (fundo azul escuro #111450)
+   Contém os dois botões de ação com formato de pílula.
+   ============================================================ */
+
+.modal-sair-base {
+  background: var(--cor-azul-principal); /* #111450 */
+  padding: clamp(1.2rem, 2vh, 2rem) clamp(2.2rem, 3.8vw, 4.5rem);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(1rem, 2vw, 2.5rem);
+}
+
+/* Botão genérico do modal de saída */
+.btn-modal-sair {
+  /* Divide o espaço igualmente, mesmo quando os textos têm comprimentos diferentes. */
+  flex: 1;
+  height: clamp(2.8rem, 5vh, 3.8rem); /* ~63px em 1080p medidos na referência */
+  padding: 0 clamp(1.4rem, 2.2vw, 2.8rem);
+
+  border: none;
+  border-radius: 9999px; /* Cantos arredondados estilo pílula */
+  cursor: pointer;
+  outline: none;
+
+  font-family: var(--fonte-titulo);
+  font-weight: 900;
+  font-size: clamp(0.75rem, 0.88vw, 1rem);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.btn-modal-sair:focus-visible {
+  outline: 2px solid var(--cor-branco-nexus);
+  outline-offset: 3px;
+}
+
+/* Botão esquerdo: "NÃO, CONTINUAR NO NEXUS" (cinza) */
+.btn-cancelar-sair {
+  background: var(--cor-texto-secundario); /* #9D9D9D */
+  color: var(--cor-branco-nexus);
+}
+
+/* Botão direito: "SIM, SAIR DO NEXUS" (laranja principal) */
+.btn-confirmar-sair {
+  background: var(--cor-laranja-principal); /* #FF8900 */
+  color: var(--texto-laranja); /* #291100 */
+}

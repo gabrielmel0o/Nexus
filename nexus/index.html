@@ -4,20 +4,553 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>NEXUS · O Universo da Sua Mente</title>
+<!-- O CSS antigo atende provisoriamente as telas ainda pendentes. -->
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="ui/css/base.css">
+<link rel="stylesheet" href="ui/css/hover.css">
+<link rel="stylesheet" href="ui/css/barra-inferior.css">
+<link rel="stylesheet" href="ui/css/tela-inicial.css">
+<link rel="stylesheet" href="ui/css/tela-comecar.css">
+<link rel="stylesheet" href="ui/css/tela-atualizar.css">
+<link rel="stylesheet" href="ui/css/tela-gerenciamento.css">
+<link rel="stylesheet" href="ui/css/tela-saibamais.css">
+<link rel="stylesheet" href="ui/css/tela-astro.css">
+<link rel="stylesheet" href="ui/css/tela-menu.css">
+<link rel="stylesheet" href="ui/css/tela-sair.css">
+<link rel="stylesheet" href="ui/css/estados-comecar.css">
+<link rel="stylesheet" href="ui/css/legenda-barra.css">
+<link rel="stylesheet" href="css/universo.css">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 </head>
 <body class="modo-start">
-<!-- Área reservada ao logo definitivo (feito no Affinity). NÃO desenhar logo aqui. -->
-<div class="logo">
-  <img src="assets/logo.svg" alt="NEXUS"
-       onerror="this.style.display='none';this.parentElement.dataset.fallback='LOGO';">
+<!-- Telas 1 a 7 integradas; os painéis da exploração ainda usam a interface antiga. -->
+<div id="interface-nexus">
+  <div class="nexus-ui" id="tela-inicial">
+
+    <!-- Gradiente: camada de fundo, da esquerda (sólido) até transparente.
+         Não é clicável. Fica abaixo do conteúdo. -->
+    <div class="gradiente-esquerda" aria-hidden="true"></div>
+
+    <!-- Conteúdo principal: logotipo + botões.
+         Fica acima do gradiente, alinhado à esquerda. -->
+    <main class="conteudo-inicial">
+
+      <!-- Logotipo NEXUS com tagline "O UNIVERSO DA SUA MENTE"
+           A tagline já está desenhada dentro do próprio SVG.
+           id="logo-nexus" para o JS poder referenciar se necessário. -->
+      <div class="logo-wrapper" id="logo-nexus">
+        <img
+          src="ui/svg/logotipo_inicial.svg"
+          alt="NEXUS – O Universo da Sua Mente"
+          class="logo-imagem"
+        >
+      </div>
+
+      <!-- Menu principal: 4 botões empilhados.
+           pointer-events:auto está herdado da regra de .nexus-ui button em base.css -->
+      <nav class="menu-principal" aria-label="Menu principal do NEXUS">
+
+        <!-- Botão 1: COMEÇAR (laranja)
+             Ícone ▶ em caixa escura à esquerda; texto escuro sobre laranja -->
+        <button class="btn btn-comecar" id="botao-comecar" type="button">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          <!-- Caixa do ícone play (fundo terciário escuro, ícone em laranja) -->
+          <span class="icone-comecar" aria-hidden="true">&#9654;</span>
+          <!-- Texto: título + subtítulo -->
+          <span class="btn-texto-grupo">
+            <span class="btn-rotulo-principal">COMEÇAR</span>
+            <span class="btn-rotulo-secundario">Veja seu próprio Universo</span>
+          </span>
+        </button>
+
+        <!-- Botão 2: ATUALIZAR (escuro)
+             Ícone SVG de setas circulares; texto branco -->
+        <button class="btn btn-padrao btn-menu-item" id="botao-atualizar" type="button">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          <span class="btn-icone" aria-hidden="true">
+            <img src="ui/svg/atualizar.svg" alt="">
+          </span>
+          <span class="btn-texto-grupo">
+            <span class="btn-rotulo-principal">ATUALIZAR</span>
+            <span class="btn-rotulo-secundario">Conte as novidades da sua vida</span>
+          </span>
+        </button>
+
+        <!-- Botão 3: GERENCIAMENTO (escuro)
+             Ícone SVG de engrenagem; texto branco -->
+        <button class="btn btn-padrao btn-menu-item" id="botao-gerenciamento" type="button">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          <span class="btn-icone" aria-hidden="true">
+            <img src="ui/svg/gerenciamento.svg" alt="">
+          </span>
+          <span class="btn-texto-grupo">
+            <span class="btn-rotulo-principal">GERENCIAMENTO</span>
+            <span class="btn-rotulo-secundario">Gerencie os seus dados</span>
+          </span>
+        </button>
+
+        <!-- Botão 4: HELENA (escuro)
+             Ícone SVG de silhueta; texto branco -->
+        <button class="btn btn-padrao btn-menu-item" id="botao-helena" type="button">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          <span class="btn-icone" aria-hidden="true">
+            <img src="ui/svg/helena.svg" alt="">
+          </span>
+          <span class="btn-texto-grupo">
+            <span class="btn-rotulo-principal">HELENA</span>
+            <span class="btn-rotulo-secundario">Veja uma demonstração do Nexus</span>
+          </span>
+        </button>
+
+      </nav><!-- fim .menu-principal -->
+
+    </main><!-- fim .conteudo-inicial -->
+
+  </div><!-- fim #tela-inicial -->
+  <div class="nexus-ui oculto" id="tela-comecar" aria-hidden="true">
+
+    <div id="fundo-desfocado" aria-hidden="true"></div>
+
+    <!-- Painel de vidro lateral esquerdo -->
+    <main class="painel-vidro painel-comecar" id="painel-comecar">
+
+      <!-- Cabeçalho: botão voltar + título da tela -->
+      <header class="cabecalho-painel">
+        <button class="btn-voltar" id="botao-voltar-comecar" type="button" aria-label="Voltar para a tela inicial">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          <span aria-hidden="true">&#10094;</span>
+        </button>
+        <h1 class="titulo-comecar" id="titulo-comecar">COMEÇAR</h1>
+      </header>
+
+      <!-- Bloco de formulário interno com borda sutil -->
+      <section class="bloco-formulario" aria-label="Formulário de descrição da mente">
+
+        <!-- Rótulo de seção com linha horizontal -->
+        <h2 class="rotulo-secao" id="rotulo-secao-mente">ESCREVA SOBRE A SUA MENTE</h2>
+
+        <!-- Campo de texto principal com borda laranja -->
+        <textarea
+          class="campo-texto campo-texto-mente"
+          id="campo-texto-mente"
+          placeholder="Descreva como está a sua vida e a sua mente hoje (entre 500 e 3.000 caracteres)..."
+          rows="12"
+          maxlength="3000"
+          spellcheck="false"
+        ></textarea>
+
+        <!-- Contador dinâmico de caracteres (exemplo de valor inicial) -->
+        <div class="contador-caracteres" id="contador-caracteres-comecar" aria-live="polite">
+          <span id="caracteres-digitados-comecar">0</span> / 3.000 caracteres &middot; m&iacute;nimo 500
+        </div>
+
+        <!-- Avisos de privacidade e regras da criação -->
+        <aside class="texto-privacidade" id="aviso-privacidade-comecar">
+          <p>
+            Seu texto &eacute; enviado ao Google (Gemini) para ser interpretado. O NEXUS n&atilde;o guarda seu texto. Na camada gratuita, o Google pode us&aacute;-lo para melhorar produtos, e revisores humanos podem l&ecirc;-lo. Evite nomes reais e dados que identifiquem pessoas; use apelidos.
+          </p>
+          <p>
+            Uma nova gera&ccedil;&atilde;o cria outro universo e substitui o hist&oacute;rico salvo. Para acrescentar uma fase, use Atualizar meu universo.
+          </p>
+        </aside>
+
+        <!-- Botão de ação: desabilitado por padrão até atingir 500 caracteres -->
+        <button class="btn btn-laranja btn-gerar-universo" id="botao-gerar-universo" type="button" disabled>
+          <span class="btn__feixe" aria-hidden="true"></span>
+          <span class="icone-play" aria-hidden="true">&#9654;</span>
+          <span class="rotulo-botao">GERAR MEU UNIVERSO</span>
+        </button>
+
+      </section><!-- fim .bloco-formulario -->
+
+    </main><!-- fim #painel-comecar -->
+
+  </div><!-- fim #tela-comecar -->
+  <div class="nexus-ui oculto" id="tela-atualizar" aria-hidden="true">
+
+    <!-- Painel de vidro lateral esquerdo -->
+    <main class="painel-vidro painel-comecar" id="painel-atualizar">
+
+      <!-- Cabeçalho: botão voltar + título da tela -->
+      <header class="cabecalho-painel">
+        <button class="btn-voltar" id="botao-voltar-atualizar" type="button" aria-label="Voltar para a tela inicial">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          <span aria-hidden="true">&#10094;</span>
+        </button>
+        <h1 class="titulo-comecar" id="titulo-atualizar">ATUALIZAR</h1>
+      </header>
+
+      <!-- Bloco de formulário interno com borda sutil -->
+      <section class="bloco-formulario" aria-label="Formulário de atualização da mente">
+
+        <!-- Rótulo de seção: "O QUE MUDOU" (em vez de "ESCREVA SOBRE A SUA MENTE") -->
+        <h2 class="rotulo-secao" id="rotulo-secao-mudancas">O QUE MUDOU</h2>
+
+        <!-- Campo de texto: mínimo 100 caracteres (diferente da tela 2 que exige 500) -->
+        <textarea
+          class="campo-texto campo-texto-mente"
+          id="campo-texto-mudancas"
+          placeholder="Conte o que mudou na sua vida e na sua mente (entre 100 e 3.000 caracteres)..."
+          rows="12"
+          maxlength="3000"
+          spellcheck="false"
+        ></textarea>
+
+        <!-- Contador: mínimo 100 (diferente da tela 2 que exige 500) -->
+        <div class="contador-caracteres" id="contador-caracteres-atualizar" aria-live="polite">
+          <span id="caracteres-digitados-atualizar">0</span> / 3.000 caracteres &middot; m&iacute;nimo 100
+        </div>
+
+        <!-- Aviso de privacidade: apenas 1 parágrafo nesta tela
+             (sem o segundo parágrafo de substituição do universo da tela 2) -->
+        <aside class="texto-privacidade" id="aviso-privacidade-atualizar">
+          <p>
+            Suas novidades e a especificação mais recente são enviadas ao Google (Gemini) para acrescentar uma fase. As fases anteriores são preservadas. O NEXUS não guarda seu texto. Na camada gratuita, o Google pode usar esses dados para melhorar produtos, e revisores humanos podem lê-los. Evite nomes reais e dados que identifiquem pessoas; use apelidos.
+          </p>
+        </aside>
+
+        <!-- Botão de ação: desabilitado por padrão até preencher 100 caracteres -->
+        <button class="btn btn-laranja btn-gerar-universo" id="botao-atualizar-universo" type="button" disabled>
+          <span class="btn__feixe" aria-hidden="true"></span>
+          <span class="icone-play" aria-hidden="true">&#9654;</span>
+          <span class="rotulo-botao">ATUALIZAR MEU UNIVERSO</span>
+        </button>
+
+      </section><!-- fim .bloco-formulario -->
+
+    </main><!-- fim #painel-atualizar -->
+
+  </div><!-- fim #tela-atualizar -->
+  <div class="nexus-ui oculto" id="tela-gerenciamento" aria-hidden="true">
+
+    <main class="painel-vidro painel-comecar" id="painel-gerenciamento">
+
+      <!-- Cabeçalho: botão voltar + título -->
+      <header class="cabecalho-painel">
+        <button class="btn-voltar" id="botao-voltar-gerenciamento" type="button" aria-label="Voltar para a tela inicial">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          <span aria-hidden="true">&#10094;</span>
+        </button>
+        <h1 class="titulo-comecar" id="titulo-gerenciamento">GERENCIAMENTO</h1>
+      </header>
+
+      <!-- Área de conteúdo: rola internamente se necessário -->
+      <div class="conteudo-gerenciamento">
+
+        <!-- =====================================================
+             SEÇÃO: SEUS DADOS
+             ===================================================== -->
+        <section class="secao-gerenciamento" aria-labelledby="rotulo-seus-dados">
+          <h2 class="rotulo-secao" id="rotulo-seus-dados">SEUS DADOS</h2>
+
+          <!-- Linha estática: quantidade de fases salvas -->
+          <div class="item-dado" id="info-fases" aria-label="Histórico salvo">
+            <span class="item-dado-rotulo">Hist&oacute;rico salvo</span>
+            <!-- O JS do projeto atualiza este número dinamicamente -->
+            <span class="item-dado-valor" id="contagem-fases">1 fase(s)</span>
+          </div>
+
+          <!-- Linha clicável: baixar histórico em JSON -->
+          <button class="item-dado item-dado-acao" id="botao-baixar-historico" type="button">
+            <span class="btn__feixe" aria-hidden="true"></span>
+            <span class="item-dado-rotulo">Baixar hist&oacute;rico</span>
+            <span class="item-dado-acao-valor">JSON &#8250;</span>
+          </button>
+
+          <!-- Linha clicável: importar histórico JSON -->
+          <button class="item-dado item-dado-acao" id="botao-importar-historico" type="button">
+            <span class="btn__feixe" aria-hidden="true"></span>
+            <span class="item-dado-rotulo">Importar hist&oacute;rico</span>
+            <span class="item-dado-acao-valor">JSON &#8250;</span>
+          </button>
+
+          <!-- Texto de limite de armazenamento -->
+          <p class="texto-limite" id="texto-limite-dados">
+            Hist&oacute;rico salvo neste navegador. Limites: 10 fases, 1&nbsp;MiB por hist&oacute;rico, 128 corpos, 16 sistemas, 32 for&ccedil;as e 50 rotinas na uni&atilde;o.
+          </p>
+        </section>
+
+        <!-- =====================================================
+             SEÇÃO: APAGAR
+             ===================================================== -->
+        <section class="secao-gerenciamento" aria-labelledby="rotulo-apagar">
+          <h2 class="rotulo-secao" id="rotulo-apagar">APAGAR</h2>
+
+          <!-- Linha destrutiva: apagar histórico (texto em laranja) -->
+          <button class="item-dado item-dado-destrutivo" id="botao-apagar-historico" type="button">
+            <span class="btn__feixe" aria-hidden="true"></span>
+            <span class="item-dado-rotulo">Apagar hist&oacute;rico salvo</span>
+            <span class="item-dado-acao-valor">&#8250;</span>
+          </button>
+        </section>
+
+        <!-- =====================================================
+             SEÇÃO: PRIVACIDADE
+             ===================================================== -->
+        <section class="secao-gerenciamento" aria-labelledby="rotulo-privacidade" id="bloco-privacidade">
+          <h2 class="rotulo-secao" id="rotulo-privacidade">PRIVACIDADE</h2>
+
+          <div class="texto-privacidade">
+            <p>
+              Seu texto &eacute; enviado ao Google (Gemini) para ser interpretado. O NEXUS n&atilde;o guarda seu texto. Na camada gratuita, o Google pode us&aacute;-lo para melhorar produtos, e revisores humanos podem l&ecirc;-lo. Evite nomes reais e dados que identifiquem pessoas; use apelidos.
+            </p>
+            <p>
+              Uma nova gera&ccedil;&atilde;o cria outro universo e substitui o hist&oacute;rico salvo. Para acrescentar uma fase, use Atualizar meu universo.
+            </p>
+          </div>
+        </section>
+
+      </div><!-- fim .conteudo-gerenciamento -->
+
+    </main><!-- fim #painel-gerenciamento -->
+
+  </div><!-- fim #tela-gerenciamento -->
+  <div class="nexus-ui oculto" id="tela-visualizacao" aria-hidden="true">
+
+    <!-- BARRA INFERIOR DE CONTROLE -->
+    <footer class="barra-inferior" id="barra-inferior">
+
+      <!-- Esquerda: isotipo (abre o menu) -->
+      <div class="barra-zona barra-esquerda">
+        <button class="barra-btn" id="botao-menu" type="button" aria-label="Menu NEXUS">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          <img src="ui/svg/isotipo.svg" class="icone-barra icone-isotipo" alt="NEXUS">
+        </button>
+      </div>
+
+      <!-- Centro: navegação temporal (RETROCEDER | ampulheta | AVANÇAR) -->
+      <div class="barra-zona barra-centro">
+        <button class="barra-btn barra-btn-texto" id="botao-retroceder" type="button">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          RETROCEDER
+        </button>
+        <img src="ui/svg/ampulheta.svg" class="icone-barra icone-ampulheta" aria-hidden="true" alt="">
+        <button class="barra-btn barra-btn-texto" id="botao-avancar" type="button">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          AVANÇAR
+        </button>
+      </div>
+
+      <!-- Direita: saiba mais (?) -->
+      <div class="barra-zona barra-direita">
+        <button class="barra-btn" id="botao-saibamais" type="button" aria-label="Como ler este universo">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          <img src="ui/svg/saibamais.svg" class="icone-barra icone-saibamais" alt="Saiba mais">
+        </button>
+      </div>
+
+    </footer>
+
+  </div><!-- fim #tela-visualizacao -->
+  <div class="nexus-ui oculto" id="tela-saibamais" aria-hidden="true">
+
+    <!-- PAINEL EXPLICATIVO LATERAL DIREITO -->
+    <aside class="painel-saibamais" id="painel-saibamais" aria-labelledby="titulo-saibamais">
+
+      <h1 class="titulo-saibamais" id="titulo-saibamais">
+        Como ler este<br>universo
+      </h1>
+
+      <dl class="lista-definicoes-universo">
+
+        <!-- CAMADAS -->
+        <div class="item-definicao">
+          <dt class="rotulo-definicao">CAMADAS</dt>
+          <dd class="texto-definicao">
+            Corpos = o que existe &middot; For&ccedil;as = o que move tudo, sem forma &middot; Eventos = o que acontece no tempo
+          </dd>
+        </div>
+
+        <!-- ESTRELA -->
+        <div class="item-definicao">
+          <dt class="rotulo-definicao">ESTRELA</dt>
+          <dd class="texto-definicao">
+            O que emite luz (valores, paix&otilde;es)
+          </dd>
+        </div>
+
+        <!-- PLANETA -->
+        <div class="item-definicao">
+          <dt class="rotulo-definicao">PLANETA</dt>
+          <dd class="texto-definicao">
+            &Aacute;rea da vida (reflete luz)
+          </dd>
+        </div>
+
+        <!-- LUA -->
+        <div class="item-definicao">
+          <dt class="rotulo-definicao">LUA</dt>
+          <dd class="texto-definicao">
+            Faceta
+          </dd>
+        </div>
+
+        <!-- NEBULOSA ESCURA -->
+        <div class="item-definicao">
+          <dt class="rotulo-definicao">NEBULOSA ESCURA</dt>
+          <dd class="texto-definicao">
+            Desejo reprimido
+          </dd>
+        </div>
+
+        <!-- BURACO NEGRO -->
+        <div class="item-definicao">
+          <dt class="rotulo-definicao">BURACO NEGRO</dt>
+          <dd class="texto-definicao">
+            Trauma
+          </dd>
+        </div>
+
+        <!-- BURACO NEGRO CENTRAL -->
+        <div class="item-definicao">
+          <dt class="rotulo-definicao">BURACO NEGRO CENTRAL</dt>
+          <dd class="texto-definicao">
+            O Eu
+          </dd>
+        </div>
+
+        <!-- FORÇAS (GRAVIDADE, MARÉ, ECLIPSE) -->
+        <div class="item-definicao">
+          <dt class="rotulo-definicao">FOR&Ccedil;AS (GRAVIDADE, MAR&Eacute;, ECLIPSE)</dt>
+          <dd class="texto-definicao">
+            Sentimentos
+          </dd>
+        </div>
+
+      </dl>
+
+    </aside><!-- fim #painel-saibamais -->
+  </div><!-- fim #tela-saibamais -->
+  <div class="nexus-ui oculto" id="tela-astro" aria-hidden="true">
+
+    <!-- PAINEL DESCRITIVO DO ASTRO -->
+    <aside class="painel-astro" id="painel-astro" aria-labelledby="nome-astro">
+
+      <!-- Cabeçalho: subtipo e botão fechar -->
+      <header class="cabecalho-astro">
+        <span class="subtipo-astro" id="subtipo-astro">PLANETA COM AN&Eacute;IS &middot; &Aacute;REA DA VIDA</span>
+        <button class="btn-fechar-astro" id="botao-fechar-astro" type="button" aria-label="Fechar descrição do astro">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          &#10005;
+        </button>
+      </header>
+
+      <!-- Título: Nome do astro -->
+      <h1 class="titulo-astro" id="nome-astro">Fam&iacute;lia</h1>
+
+      <!-- Descrição principal -->
+      <p class="descricao-astro" id="descricao-astro">
+        Cada anel &eacute; uma camada de hist&oacute;ria: inf&acirc;ncia, expectativas, luto, obriga&ccedil;&otilde;es e mem&oacute;rias. Os an&eacute;is s&atilde;o bonitos &agrave; dist&acirc;ncia, mas tamb&eacute;m representam coisas que continuam girando ao redor de Helena mesmo depois de j&aacute; terem passado.
+      </p>
+
+      <!-- Seção "POR QUÊ?" -->
+      <section class="secao-astro" aria-labelledby="rotulo-porque">
+        <h2 class="rotulo-secao-astro" id="rotulo-porque">POR QU&Ecirc;?</h2>
+        <blockquote class="citacao-astro" id="citacao-astro">
+          Lei da escala: a dura&ccedil;&atilde;o de um astro &eacute; a perman&ecirc;ncia dele na mente.
+        </blockquote>
+        <p class="texto-secao-astro" id="texto-porque">
+          Os an&eacute;is representam perman&ecirc;ncia: hist&oacute;rias que continuam em &oacute;rbita mesmo quando seu tempo j&aacute; passou. A escala do planeta mostra a dura&ccedil;&atilde;o desses v&iacute;nculos.
+        </p>
+      </section>
+
+      <!-- Bloco "FASE" -->
+      <p class="bloco-fase-astro" id="bloco-fase">
+        <span class="rotulo-fase-astro" id="rotulo-fase">FASE</span>
+        <span class="texto-fase-astro" id="texto-fase">planeta com an&eacute;is: lembran&ccedil;as e pend&ecirc;ncias em &oacute;rbita</span>
+      </p>
+
+      <!-- Rodapé com métricas -->
+      <footer class="rodape-astro" id="rodape-astro">
+
+        <!-- Coluna 1: Peso Emocional (5 pontos) -->
+        <div class="coluna-metrica-astro" id="coluna-peso">
+          <span class="rotulo-metrica-astro" id="rotulo-peso-emocional">PESO EMOCIONAL</span>
+          <div class="pontos-peso-astro" id="pontos-peso-astro" role="img" aria-label="Peso emocional 3 de 5">
+            <span class="ponto-astro ativo" aria-hidden="true"></span>
+            <span class="ponto-astro ativo" aria-hidden="true"></span>
+            <span class="ponto-astro ativo" aria-hidden="true"></span>
+            <span class="ponto-astro inativo" aria-hidden="true"></span>
+            <span class="ponto-astro inativo" aria-hidden="true"></span>
+          </div>
+        </div>
+
+        <!-- Coluna 2: Profundidade -->
+        <div class="coluna-metrica-astro" id="coluna-profundidade">
+          <span class="rotulo-metrica-astro" id="rotulo-profundidade">PROFUNDIDADE</span>
+          <span class="valor-profundidade-astro" id="valor-profundidade">recente</span>
+        </div>
+
+      </footer>
+
+    </aside><!-- fim #painel-astro -->
+  </div><!-- fim #tela-astro -->
+  <div class="nexus-ui oculto" id="tela-menu" aria-hidden="true">
+
+    <!-- PAINEL LATERAL ESQUERDO -->
+    <nav class="painel-menu" id="painel-menu" aria-label="Menu principal">
+
+      <!-- Logotipo NEXUS no topo -->
+      <div class="menu-logo-container">
+        <img src="ui/svg/nexus_menu.svg" class="menu-logo" id="logo-menu" alt="NEXUS">
+      </div>
+
+      <!-- Ações do menu no rodapé do painel -->
+      <div class="menu-acoes">
+
+        <!-- Voltar à tela inicial (posicionado na base do painel) -->
+        <button class="btn-menu-lateral" id="botao-voltar-inicio" type="button">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          <img src="ui/svg/menu.svg" class="icone-menu-item icone-menu-hamburguer" alt="" aria-hidden="true">
+          <span class="texto-menu-item">VOLTAR A TELA INICIAL</span>
+        </button>
+
+      </div>
+
+    </nav><!-- fim #painel-menu -->
+
+    <!-- Dica de atalho no canto inferior esquerdo -->
+    <div class="dica-atalho-menu" id="dica-esc" aria-label="Pressione ESC para voltar">
+      <kbd class="tecla-atalho">ESC</kbd>
+      <span class="texto-atalho">Voltar</span>
+    </div>
+
+  </div><!-- fim #tela-menu -->
+  <div class="nexus-ui oculto" id="tela-sair" aria-hidden="true">
+
+    <!-- MODAL CENTRALIZADO (referência 12-sair.png) -->
+    <div class="modal-sair" id="modal-sair" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-sair">
+
+      <!-- Topo claro (#E2E3E4) -->
+      <div class="modal-sair-topo">
+        <h1 class="titulo-modal-sair" id="titulo-modal-sair">VOC&Ecirc; DESEJA SAIR?</h1>
+        <p class="subtitulo-modal-sair" id="subtitulo-modal-sair">
+          Voc&ecirc; tem certeza que deseja voltar &agrave; tela inicial?
+        </p>
+      </div>
+
+      <!-- Base azul principal (#111450) com os dois botões de ação -->
+      <div class="modal-sair-base">
+        <!-- Cancelar / Continuar aqui (cinza) -->
+        <button class="btn-modal-sair btn-cancelar-sair" id="botao-cancelar-sair" type="button">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          N&Atilde;O, CONTINUAR AQUI
+        </button>
+
+        <!-- Confirmar retorno (laranja principal) -->
+        <button class="btn-modal-sair btn-confirmar-sair" id="botao-confirmar-sair" type="button">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          SIM, VOLTAR
+        </button>
+      </div>
+
+    </div><!-- fim #modal-sair -->
+
+  </div><!-- fim #tela-sair -->
 </div>
-<div class="hint">arraste para girar · role ou pince para aproximar</div>
-<!-- Botão de legenda: só visível quando painel-aberto está no body -->
-<button class="nexus-legend-btn" aria-label="Legenda">?</button>
 <!-- Container do botão START (só visível no modo-start) -->
-<div class="nexus-start-container">
+<!-- Formulários antigos mantidos até aprovar as próximas telas. -->
+<div class="nexus-start-container oculto">
   <button class="nexus-start-btn">COMEÇAR</button>
 </div>
 
@@ -50,9 +583,15 @@
 <script src="js/world/nebula.js"></script>
 <script src="js/world/visitor.js"></script>
 <script src="js/ui/labels.js"></script>
+<script src="js/ui/interface.js"></script>
 <script src="js/ui/panel.js"></script>
 <script src="js/ui/legend.js"></script>
 <script src="js/ui/start.js"></script>
+<script src="js/ui/comecar.js"></script>
+<script src="js/ui/atualizar.js"></script>
+<script src="js/ui/gerenciamento.js"></script>
+<script src="js/ui/menu.js"></script>
+<script src="js/ui/saida.js"></script>
 <script src="js/ui/time.js"></script>
 <script src="js/world/arms.js"></script>
 <script src="js/world/halo.js"></script>

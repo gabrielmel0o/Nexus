@@ -1,0 +1,268 @@
+/*
+  ============================================================
+  NEXUS — tela-comecar.css
+  CSS específico do Menu Começar (Tela nº 2).
+  Referência visual: telas/02-comecar.png
+  Depende de css/base.css (carregado antes).
+  ============================================================
+*/
+
+
+/* ============================================================
+   1. CONTAINER DA TELA
+   Ocupa a tela inteira com pointer-events: none.
+   Centraliza/alinha o painel à esquerda conforme o design.
+   ============================================================ */
+
+#tela-comecar {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+  /* Margens proporcionais ajustadas para eliminar overflow vertical */
+  padding-top: clamp(1rem, 4vh, 2.5rem);
+  padding-left: clamp(1.5rem, 4.4vw, 5rem);
+  padding-bottom: clamp(1rem, 4vh, 2.5rem);
+  pointer-events: none;
+  z-index: 10;
+}
+
+
+/* ============================================================
+   2. PAINEL PRINCIPAL (painel-vidro)
+   Painel escuro translúcido à esquerda da tela.
+   Calculado para caber exatamente na tela sem estourar o limite.
+   ============================================================ */
+
+.painel-comecar {
+  width: clamp(320px, 36vw, 700px);
+  height: calc(100vh - clamp(2rem, 8vh, 5rem));
+  max-height: calc(100vh - clamp(2rem, 8vh, 5rem));
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1.2rem, 2vw, 2rem);
+  border-radius: var(--raio-painel);
+  border: 1px solid rgba(226, 227, 228, 0.08); /* Borda sutil de vidro */
+  pointer-events: auto; /* Reativa cliques dentro do painel */
+}
+
+
+/* ============================================================
+   3. CABEÇALHO DO PAINEL (Botão Voltar + Título)
+   ============================================================ */
+
+.cabecalho-painel {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin-bottom: clamp(1rem, 2vh, 1.8rem);
+  flex-shrink: 0;
+}
+
+/* Botão voltar circular com a seta < */
+.cabecalho-painel .btn-voltar {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  background: var(--cor-botoes);
+  border: 1.5px solid var(--cor-branco-nexus);
+  color: var(--cor-branco-nexus);
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* Título COMEÇAR em laranja e fonte pesada */
+.titulo-comecar {
+  font-family: var(--fonte-titulo);
+  font-weight: 900;
+  font-size: var(--tamanho-titulo-principal);
+  color: var(--cor-laranja-principal);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+
+/* ============================================================
+   4. BLOCO DE FORMULÁRIO (Card com borda fina)
+   Ocupa o espaço restante do painel via flexbox.
+   ============================================================ */
+
+.bloco-formulario {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 0.8rem;
+  border: 1px solid rgba(226, 227, 228, 0.14); /* Linha divisória fina */
+  border-radius: var(--raio-painel);
+  padding: clamp(0.9rem, 1.5vw, 1.5rem);
+}
+
+
+/* ============================================================
+   5. RÓTULO DE SEÇÃO COM LINHA
+   Ex.: "ESCREVA SOBRE A SUA MENTE"
+   ============================================================ */
+
+.bloco-formulario .rotulo-secao {
+  font-family: var(--fonte-texto);
+  font-size: var(--tamanho-rotulo);
+  color: var(--cor-branco-nexus);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.2rem;
+  flex-shrink: 0;
+}
+
+
+/* ============================================================
+   6. CAMPO DE TEXTO (Textarea com borda laranja)
+   Absorve o espaço vertical central e rola apenas internamente.
+   ============================================================ */
+
+.campo-texto-mente {
+  width: 100%;
+  flex: 1;
+  min-height: 120px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1.5px solid var(--cor-laranja-principal);
+  border-radius: var(--raio-campo);
+  color: var(--cor-branco-nexus);
+  font-family: var(--fonte-texto);
+  font-size: var(--tamanho-texto-corpo);
+  line-height: 1.6;
+  padding: 1rem 1.2rem;
+  resize: none;
+  outline: none;
+  overflow-y: auto; /* Rolagem funcional apenas aqui */
+
+  /* Personalização de scrollbar padrão (Firefox / W3C) */
+  scrollbar-width: thin;
+  scrollbar-color: var(--cor-laranja-secundario) rgba(16, 8, 25, 0.4);
+}
+
+.campo-texto-mente::placeholder {
+  color: var(--cor-texto-secundario);
+  opacity: 0.85;
+}
+
+.campo-texto-mente:focus {
+  border-color: var(--cor-laranja-principal);
+  box-shadow: 0 0 0 2px rgba(255, 137, 0, 0.3);
+}
+
+/* Personalização da scrollbar interna (Webkit: Chrome, Edge, Safari) */
+.campo-texto-mente::-webkit-scrollbar {
+  width: 6px;
+}
+
+.campo-texto-mente::-webkit-scrollbar-track {
+  background: rgba(16, 8, 25, 0.4);
+  border-radius: 4px;
+  margin: 6px 0;
+}
+
+.campo-texto-mente::-webkit-scrollbar-thumb {
+  background: var(--cor-laranja-secundario);
+  border-radius: 4px;
+}
+
+.campo-texto-mente::-webkit-scrollbar-thumb:hover {
+  background: var(--cor-laranja-principal);
+}
+
+
+/* ============================================================
+   7. CONTADOR DE CARACTERES
+   Alinhado à direita, texto em cor laranja.
+   ============================================================ */
+
+.contador-caracteres {
+  align-self: flex-end;
+  font-family: var(--fonte-texto);
+  font-size: var(--tamanho-rotulo);
+  color: var(--cor-laranja-principal);
+  letter-spacing: 0.05em;
+  margin-top: -0.2rem;
+}
+
+
+/* ============================================================
+   8. AVISOS DE PRIVACIDADE E REGRAS
+   Dois parágrafos informativos abaixo do contador.
+   ============================================================ */
+
+.bloco-formulario .texto-privacidade {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 0.5rem;
+  font-size: var(--tamanho-rotulo);
+  line-height: 1.55;
+  color: var(--cor-texto-secundario);
+}
+
+
+/* ============================================================
+   9. BOTÃO GERAR MEU UNIVERSO
+   Largo, alinhado à base do formulário, ícone ▶ à esquerda.
+   Desabilitado por padrão (opacidade 0.45) até atingir 500 caracteres.
+   ============================================================ */
+
+.btn-gerar-universo {
+  width: 100%;
+  min-height: clamp(3.2rem, 5.5vh, 4.2rem);
+  padding: 0;
+  border-radius: var(--raio-botao);
+  overflow: visible; /* Permite ao anel de luz renderizar por fora sem cortes */
+  display: flex;
+  align-items: stretch;
+  text-align: left;
+  border: none;
+  cursor: pointer;
+  background: var(--cor-laranja-principal);
+  margin-top: 0.5rem;
+}
+
+/* Ícone play ▶ dentro do botão */
+.btn-gerar-universo .icone-play {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cor-laranja-terciario); /* #632A00 */
+  color: var(--cor-laranja-principal);
+  font-size: 0.85rem;
+  width: 3.5rem;
+  flex-shrink: 0;
+  border-top-left-radius: var(--raio-botao);
+  border-bottom-left-radius: var(--raio-botao);
+}
+
+/* Texto do botão GERAR MEU UNIVERSO */
+.btn-gerar-universo .rotulo-botao {
+  display: flex;
+  align-items: center;
+  padding: 0 1.2rem;
+  font-family: var(--fonte-titulo);
+  font-weight: 900;
+  font-size: var(--tamanho-titulo-botao);
+  color: var(--texto-laranja); /* #291100 */
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Estado desabilitado (conforme seção 6 do LEIA-ME: opacidade .45, not-allowed) */
+.btn-gerar-universo:disabled,
+.btn-gerar-universo[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}

@@ -1,0 +1,117 @@
+/*
+  ============================================================
+  NEXUS — tela-saibamais.css
+  CSS específico do painel "Como ler este universo" (tela 6).
+  Referência visual: telas/06-saibamais.png
+  Depende de: css/base.css e css/barra-inferior.css.
+  ============================================================
+*/
+
+
+/* ============================================================
+   1. PAINEL LATERAL DIREITO ("Como ler este universo")
+   Painel flutuante sólido no canto direito, acima da barra inferior.
+   Alinhado à direita com a margem do botão saiba mais da barra (~24px).
+   Largura medida na referência: ~413px em 1920p (~21.6vw).
+   Fundo: roxo escuro sólido (#100819).
+   ============================================================ */
+
+.painel-saibamais {
+  position: fixed;
+  right: clamp(1rem, 1.25vw, 1.8rem);
+  bottom: calc(clamp(3.2rem, 6.5vh, 4.5rem) + clamp(0.8rem, 1.5vh, 1.5rem));
+  width: clamp(320px, 21.6vw, 440px);
+  max-height: calc(100vh - clamp(3.2rem, 6.5vh, 4.5rem) - clamp(2rem, 5vh, 4rem));
+
+  background: var(--cor-fundo-roxo-opaco); /* #100819 com 75% de opacidade */
+  border-radius: var(--raio-painel);
+  padding: clamp(1.4rem, 1.7vw, 2.2rem);
+
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 1.4vh, 1.6rem);
+
+  overflow-y: auto;
+  pointer-events: auto; /* Permite rolar e interagir com o conteúdo */
+  z-index: 10;
+
+  /* Scrollbar discreta personalizada caso a altura da tela seja pequena */
+  scrollbar-width: thin;
+  scrollbar-color: var(--cor-laranja-principal) rgba(16, 8, 25, 0.4);
+}
+
+.painel-saibamais::-webkit-scrollbar {
+  width: 6px;
+}
+
+.painel-saibamais::-webkit-scrollbar-track {
+  background: rgba(16, 8, 25, 0.4);
+  border-radius: 4px;
+  margin: 6px 0;
+}
+
+.painel-saibamais::-webkit-scrollbar-thumb {
+  background: var(--cor-laranja-principal);
+  border-radius: 4px;
+}
+
+.painel-saibamais::-webkit-scrollbar-thumb:hover {
+  background: var(--cor-laranja-principal);
+}
+
+
+/* ============================================================
+   2. TÍTULO DO PAINEL
+   Fonte Geologica Black 900, laranja principal (#FF8900).
+   Quebra em duas linhas: "Como ler este" / "universo".
+   ============================================================ */
+
+.titulo-saibamais {
+  font-family: var(--fonte-titulo);
+  font-weight: 900;
+  font-size: clamp(1.5rem, 1.95vw, 2.2rem);
+  line-height: 1.08;
+  color: var(--cor-laranja-principal);
+  margin: 0;
+  padding: 0;
+}
+
+
+/* ============================================================
+   3. LISTA DE DEFINIÇÕES (TERMOS E CONCEITOS)
+   ============================================================ */
+
+.lista-definicoes-universo {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.75rem, 1.1vh, 1.1rem);
+  margin: 0;
+  padding: 0;
+}
+
+.item-definicao {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+/* Rótulo do elemento (ex: CAMADAS, ESTRELA, PLANETA) */
+.rotulo-definicao {
+  font-family: var(--fonte-texto);
+  font-weight: 400;
+  font-size: clamp(0.65rem, 0.72vw, 0.8rem);
+  color: var(--cor-laranja-principal);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* Descrição explicativa do elemento */
+.texto-definicao {
+  font-family: var(--fonte-texto);
+  font-weight: 400;
+  font-size: clamp(0.7rem, 0.78vw, 0.88rem);
+  line-height: 1.35;
+  color: var(--cor-branco-nexus);
+  margin: 0;
+}

@@ -1,0 +1,217 @@
+/*
+  ============================================================
+  NEXUS — tela-gerenciamento.css
+  CSS específico da Tela Gerenciamento (nº 4).
+  Referência visual: telas/04-gerenciamento.png
+  Depende de: css/base.css e css/tela-comecar.css (carregados antes).
+  ============================================================
+*/
+
+
+/* ============================================================
+   1. CONTAINER E MAPEAMENTO DE IDs
+   Reutiliza a lógica do #tela-comecar com novo ID.
+   ============================================================ */
+
+#tela-gerenciamento {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+  padding-top: clamp(1rem, 4vh, 2.5rem);
+  padding-left: clamp(1.5rem, 4.4vw, 5rem);
+  padding-bottom: clamp(1rem, 4vh, 2.5rem);
+  pointer-events: none;
+  z-index: 10;
+  overflow-x: hidden;
+}
+
+#painel-gerenciamento {
+  overflow-x: hidden;
+}
+
+/* Título: mesma aparência que .titulo-comecar */
+#titulo-gerenciamento {
+  font-family: var(--fonte-titulo);
+  font-weight: 900;
+  font-size: var(--tamanho-titulo-principal);
+  color: var(--cor-laranja-principal);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1;
+  /* O título é muito longo — deixa ultrapassar sem quebrar */
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+
+/* ============================================================
+   2. ÁREA DE CONTEÚDO ROLÁVEL
+   Ocupa o espaço restante do painel após o cabeçalho.
+   Rola internamente se o conteúdo não couber na tela.
+   ============================================================ */
+
+.conteudo-gerenciamento {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;           /* Remove qualquer scroll lateral */
+  padding: 4px 6px;             /* Folga lateral para o anel de luz não cortar */
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 2vh, 1.8rem); /* Espaço entre as seções */
+
+  /* Scrollbar personalizada no estilo NEXUS (só se rolar) */
+  scrollbar-width: thin;
+  scrollbar-color: var(--cor-laranja-secundario) rgba(16, 8, 25, 0.4);
+}
+
+.conteudo-gerenciamento::-webkit-scrollbar {
+  width: 5px;
+}
+.conteudo-gerenciamento::-webkit-scrollbar-track {
+  background: rgba(16, 8, 25, 0.3);
+  border-radius: 4px;
+}
+.conteudo-gerenciamento::-webkit-scrollbar-thumb {
+  background: var(--cor-laranja-secundario);
+  border-radius: 4px;
+}
+.conteudo-gerenciamento::-webkit-scrollbar-thumb:hover {
+  background: var(--cor-laranja-principal);
+}
+
+
+/* ============================================================
+   3. SEÇÃO DE GERENCIAMENTO
+   Agrupa o rótulo e os itens de cada categoria.
+   ============================================================ */
+
+.secao-gerenciamento {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem; /* Espaçamento vertical entre itens da mesma seção */
+}
+
+/* Rótulo da seção (ex.: "SEUS DADOS", "APAGAR", "PRIVACIDADE")
+   Usa .rotulo-secao do base.css — a linha lateral já está incluída.
+   Pequeno ajuste de tamanho para corresponder ao PNG. */
+.secao-gerenciamento .rotulo-secao {
+  font-size: var(--tamanho-rotulo);
+  margin-bottom: 0.25rem;
+}
+
+
+/* ============================================================
+   4. ITEM DE DADO (linha de informação / ação)
+   Base comum a todos os itens de linha do painel.
+   ============================================================ */
+
+.item-dado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.65em 1em;
+  border-radius: var(--raio-botao);
+  background: var(--cor-fundo-roxo);           /* #100819 100% de opacidade */
+  border: 1px solid rgba(226, 227, 228, 0.15); /* Borda sutil */
+  text-align: left;
+  font-family: var(--fonte-texto);
+}
+
+/* Rótulo à esquerda (nome do dado/ação) */
+.item-dado-rotulo {
+  font-size: var(--tamanho-texto-corpo);
+  color: var(--cor-branco-nexus);
+  line-height: 1.2;
+}
+
+/* Valor à direita (ex.: "1 fase(s)") */
+.item-dado-valor {
+  font-size: var(--tamanho-rotulo);
+  color: var(--cor-texto-secundario);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+
+/* ============================================================
+   5. ITEM CLICÁVEL (botão de ação)
+   Herda de .item-dado; adiciona cursor pointer e pointer-events.
+   ============================================================ */
+
+.item-dado-acao {
+  cursor: pointer;
+  pointer-events: auto;
+  border: none;             /* Remove borda padrão do botão */
+  background: var(--cor-fundo-roxo);           /* #100819 100% de opacidade */
+  box-shadow: inset 0 0 0 1px rgba(226, 227, 228, 0.15); /* Borda via box-shadow */
+  overflow: visible;        /* Permite ao anel de luz renderizar por fora sem cortes */
+}
+
+/* Valor/ação à direita nos botões (ex.: "JSON ›") */
+.item-dado-acao-valor {
+  font-family: var(--fonte-texto);
+  font-size: var(--tamanho-rotulo);
+  color: var(--cor-texto-secundario);
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
+
+
+/* ============================================================
+   6. ITEM DESTRUTIVO (apagar histórico)
+   Igual ao ação, mas texto em laranja para indicar perigo.
+   ============================================================ */
+
+.item-dado-destrutivo {
+  cursor: pointer;
+  pointer-events: auto;
+  border: none;
+  background: var(--cor-fundo-roxo);           /* #100819 100% de opacidade */
+  box-shadow: inset 0 0 0 1px rgba(226, 227, 228, 0.15);
+  overflow: visible;        /* Permite ao anel de luz renderizar por fora sem cortes */
+}
+
+/* Texto em laranja: sinaliza ação irreversível */
+.item-dado-destrutivo .item-dado-rotulo {
+  color: var(--cor-laranja-principal);
+}
+
+.item-dado-destrutivo .item-dado-acao-valor {
+  color: var(--cor-laranja-principal);
+}
+
+
+/* ============================================================
+   7. TEXTO DE LIMITE DE ARMAZENAMENTO
+   Parágrafo informativo pequeno abaixo dos itens de dados.
+   ============================================================ */
+
+.texto-limite {
+  font-family: var(--fonte-texto);
+  font-size: var(--tamanho-rotulo);
+  color: var(--cor-texto-secundario);
+  line-height: 1.55;
+  padding: 0 0.2rem;
+}
+
+
+/* ============================================================
+   8. BLOCO DE PRIVACIDADE
+   Reutiliza .texto-privacidade do base.css.
+   ============================================================ */
+
+.secao-gerenciamento .texto-privacidade {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  font-size: var(--tamanho-rotulo);
+  line-height: 1.55;
+  color: var(--cor-texto-secundario);
+}

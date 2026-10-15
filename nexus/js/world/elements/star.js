@@ -81,6 +81,10 @@
 
     return {
       object: pivo,   // o grupo 3D que o planets.js vai adicionar ao grupo do planeta
+      applyHistory(data, continuing) {
+        if (!continuing) { t = 0; pivo.rotation.y = seed * 6.283; }
+        this.update(0);
+      },
       update(dt) {
         t += dt;
         pivo.rotation.y += dt * VEL_ORBITA;  // orbita devagar ao redor do planeta
@@ -104,14 +108,20 @@
         }
 
         // k vai de 0.5 a 1: usamos para escurecer a COR (não a opacidade, que é do LOD).
+        if (N.state && N.state.frame) {
+          var phaseBody = N.state.frame.bodies[el.id];
+          if (phaseBody && phaseBody.historyDeclaredAppear && el.signalIndex) appear *= N.state.get(el.id, 'appear');
+        }
         // Escurecer em mistura aditiva = diminuir a luz → efeito de piscar suave.
         sinalVisivel = appear > 0.001;
+        if (N.presence && !N.presence.isPresent(el.id)) sinalVisivel = false;
         const k = .75 + .25 * Math.sin(t * VEL_PISCAR + seed * 6.283);
         camadas.forEach(c => {
+          if (N.state.frame) c.sprite.position.x = (planeta.historyRadius === undefined ? planeta.size : planeta.historyRadius) * DISTANCIA;
           c.mat.color.copy(c.cor).multiplyScalar(k);
           const e = c.esc * (.8 + .2 * k) * appear;   // appear multiplica a escala mantendo o piscar
           c.sprite.scale.set(e, e, 1);
-          c.sprite.visible = (appear > 0.001);
+          c.sprite.visible = sinalVisivel;
         });
       }
     };

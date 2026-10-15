@@ -60,7 +60,9 @@
     // Reutiliza o limite do compilador: inclui corpos, halos e órbitas externas.
     // Uma esfera centrada no Eu também cobre a rotação dos sistemas.
     let extent = 0;
+    if (universe.historyFrames) extent = universe.historyExtent;
     for (const system of universe.systems) {
+      if (universe.historyFrames) break;
       extent = Math.max(extent, Math.hypot(...system.position) + geometry.systemRadius(system));
     }
     const fov = N.cam.getEffectiveFOV ? N.cam.getEffectiveFOV() : N.cam.fov;

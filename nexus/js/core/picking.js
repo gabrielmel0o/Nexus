@@ -24,6 +24,7 @@
 
   // ── selectBody / deselectBody ─────────────────────────────────────────────
   N.selectBody = function (id) {
+    if (N.presence && !N.presence.isPresent(id)) return;
     if (N.selected === id) return; // clique duplo no mesmo corpo = ignora
     N.selected = id;
     console.log('Selecionado:', id);
@@ -75,6 +76,10 @@
       const object = hits[i].object;
       const id = findPickId(object);
       if (!id) continue;
+      if (N.presence && !N.presence.isPresent(id)) continue;
+      let visible = true;
+      for (let parent = object; parent; parent = parent.parent) if (!parent.visible) visible = false;
+      if (!visible) continue;
       // As esferas invisíveis ampliam a área de clique, mas não podem cobrir
       // um corpo visível. Guardamos a mais próxima como alternativa.
       if (object.material && object.material.transparent && object.material.opacity === 0) {
@@ -172,5 +177,5 @@
     }
   });
 
-  N.picking = { update() {} };
+  N.picking = { update() {}, clearHover() { updateHover(null); } };
 })();

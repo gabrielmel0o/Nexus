@@ -9,16 +9,17 @@
 */
 
 const http = require('http');
-const path = require('path');
 
 // Carrega o validador e a Helena convertida diretamente do repositório (sem duplicação)
-const validateSpec = require('../nexus/js/data/validator.js');
+const history = require('../nexus/js/data/history.js');
+const compileHistory = require('../nexus/js/data/historyCompiler.js');
 const helenaSpec = require('../nexus/js/data/spec/helenaSpec.js');
 const { chamarGemini } = require('./gemini.js');
 
 const PORT = parseInt(process.env.PORT, 10) || 3000;
 const HOST = '127.0.0.1';
-const LIMITE_CORPO_BYTES = 20 * 1024; // 20 KB
+// Apenas uma especificação anterior (128 KiB), texto e envelope. Nunca histórico.
+const LIMITE_CORPO_BYTES = history.limits.httpBytes;
 
 // Configuração de CORS seguro para execução local
 function aplicarCors(res, req) {
@@ -57,8 +58,8 @@ const server = http.createServer(async (req, res) => {
     req.on('data', chunk => {
       bytesRecebidos += chunk.length;
       if (bytesRecebidos > LIMITE_CORPO_BYTES) {
-        req.destroy();
-        responderJson(res, 413, { erro: 'Tamanho da requisição excede o limite permitido (20 KB).' });
+        if (!res.writableEnded) responderJson(res, 413, { erro: 'Tamanho da requisição excede o limite permitido (160 KiB).' });
+        chunks.length = 0;
       } else {
         chunks.push(chunk);
       }
@@ -94,6 +95,19 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
+      const atualizacao = Object.prototype.hasOwnProperty.call(payload, 'especificacaoAnterior');
+      const segundaRodada = Object.prototype.hasOwnProperty.call(payload, 'respostas');
+      if (Array.isArray(payload) || Object.keys(payload).some(k => !['texto', 'respostas', 'especificacaoAnterior'].includes(k))
+        || (atualizacao && segundaRodada)) {
+        responderJson(res, 400, { erro: 'Envie somente texto e, separadamente, respostas ou uma especificação anterior. Não envie histórico.' });
+        return;
+      }
+      if (atualizacao && !history.validateSpecification(payload.especificacaoAnterior).ok) {
+        responderJson(res, 400, { erro: 'A especificação anterior é inválida ou excede 128 KiB.' });
+        return;
+      }
+      const especificacaoAnterior = atualizacao ? payload.especificacaoAnterior : undefined;
+
       if (typeof payload.texto !== 'string') {
         console.log(`[${new Date().toISOString()}] Status 400 (Campo texto não é string) | Duração: ${Date.now() - inicioTempo}ms`);
         responderJson(res, 400, { erro: 'O campo "texto" deve ser uma string.' });
@@ -103,17 +117,17 @@ const server = http.createServer(async (req, res) => {
       const texto = payload.texto.trim();
       const numCaracteres = texto.length; // contagem exata de caracteres
 
-      // 4. Checagem de tamanho (500 a 3000 caracteres)
-      if (numCaracteres < 500 || numCaracteres > 3000) {
+      // Primeiro relato: 500; novidades de atualização: 100. Ambos até 3.000.
+      const minimoCaracteres = atualizacao ? 100 : 500;
+      if (numCaracteres < minimoCaracteres || numCaracteres > 3000) {
         console.log(`[${new Date().toISOString()}] Status 400 (Texto fora do limite: ${numCaracteres} caracteres) | Duração: ${Date.now() - inicioTempo}ms`);
         responderJson(res, 400, {
-          erro: `O texto deve ter entre 500 e 3.000 caracteres. O texto enviado possui ${numCaracteres} caracteres.`
+          erro: `O texto deve ter entre ${minimoCaracteres} e 3.000 caracteres. O texto enviado possui ${numCaracteres} caracteres.`
         });
         return;
       }
 
       // A presença do campo, inclusive [], indica a segunda e última rodada.
-      const segundaRodada = Object.prototype.hasOwnProperty.call(payload, 'respostas');
       if (segundaRodada && (!Array.isArray(payload.respostas) || payload.respostas.length > 5
         || payload.respostas.some(r => typeof r !== 'string' || r.length > 500))) {
         responderJson(res, 400, { erro: 'Envie até 5 respostas, com até 500 caracteres cada.' });
@@ -123,8 +137,17 @@ const server = http.createServer(async (req, res) => {
       // (b) MODO_SIMULADO=1: Devolve a Helena sem chamar a API externa
       const modoSimulado = process.env.MODO_SIMULADO === '1' || process.env.MODO_SIMULADO === 'true';
       if (modoSimulado) {
-        console.log(`[${new Date().toISOString()}] Status 200 (Modo Simulado: Helena entregue) | Duração: ${Date.now() - inicioTempo}ms`);
-        responderJson(res, 200, { spec: helenaSpec });
+        // Simulação fixa: não interpreta novidades; não modifica a Helena canônica.
+        const spec = JSON.parse(JSON.stringify(atualizacao ? especificacaoAnterior : helenaSpec));
+        if (atualizacao) {
+          const centro = spec.sistemas[0].centro;
+          if (Object.prototype.hasOwnProperty.call(centro, 'summary')) centro.summary = 'Atualização simulada: a estrutura anterior foi preservada.';
+          if (Object.prototype.hasOwnProperty.call(centro, 'resumo') || !Object.prototype.hasOwnProperty.call(centro, 'summary')) {
+            centro.resumo = 'Atualização simulada: a estrutura anterior foi preservada.';
+          }
+        }
+        console.log(`[${new Date().toISOString()}] Status 200 (Modo Simulado) | Duração: ${Date.now() - inicioTempo}ms`);
+        responderJson(res, 200, { spec });
         return;
       }
 
@@ -153,7 +176,8 @@ const server = http.createServer(async (req, res) => {
               // Log conciso e seguro da tentativa de conexão (sem texto nem corpo)
               console.log(`[${new Date().toISOString()}] Falha na tentativa ${infoRetry.tentativa} | Status ${infoRetry.status} | Duração: ${infoRetry.duracao}ms`);
             },
-            respostas
+            respostas,
+            especificacaoAnterior
           );
           const specCandidata = resultadoGemini.parsed;
 
@@ -172,14 +196,23 @@ const server = http.createServer(async (req, res) => {
               && duvidas.length >= 1 && duvidas.length <= 5
               && duvidas.every(q => typeof q === 'string' && q.trim().length > 0 && q.length <= 200)
               && new Set(duvidas.map(q => q.trim().toLowerCase())).size === duvidas.length;
-            if (!segundaRodada && !errosAnteriores && formatoValido) {
+            if (!atualizacao && !segundaRodada && !errosAnteriores && formatoValido) {
               console.log(`[${new Date().toISOString()}] Status 200 (Dúvidas) | Duração: ${Date.now() - inicioTempo}ms`);
               responderJson(res, 200, { duvidas: duvidas.map(q => q.trim()) });
               return;
             }
             errosDuvidas = ['Não faça novas perguntas. Gere a especificação com os dados disponíveis, ou acione cuidado.'];
           }
-          const validacao = errosDuvidas ? { ok: false, erros: errosDuvidas } : validateSpec(specCandidata);
+          const validacao = errosDuvidas ? { ok: false, erros: errosDuvidas }
+            : history.validateSpecification(specCandidata);
+          if (validacao.ok && atualizacao) {
+            const identidade = history.validateTransition(especificacaoAnterior, specCandidata);
+            if (!identidade.ok) { validacao.ok = false; validacao.erros = identidade.erros; }
+          }
+          if (validacao.ok) {
+            const forcas = compileHistory.validateForces(specCandidata);
+            if (!forcas.ok) { validacao.ok = false; validacao.erros = forcas.erros; }
+          }
 
           if (validacao.ok) {
             specFinal = specCandidata;

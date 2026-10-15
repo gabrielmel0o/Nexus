@@ -28,6 +28,7 @@
 
   // Busca os dados no universo recebido pelo boot; antes dele, usa a Helena.
   function findBodyData(id) {
+    if (N.state && N.state.frame) return N.state.frame.bodies[id] || null;
     const u = N.currentUniverse || N.getUniverse();
     if (!u || !id) return null;
 
@@ -155,10 +156,13 @@
 
     // Peso emocional (0 a 10) mapeado para 5 bolinhas
     let mass = 0;
-    if (N.state && typeof N.state.get === 'function') {
+    if (N.state && N.state.frame) {
+      // O painel mostra o dado aprovado, não o valor intermediário da animação.
+      mass = N.state.frame.set[body.id].mass === undefined ? 0 : N.state.frame.set[body.id].mass;
+    } else if (N.state && typeof N.state.get === 'function') {
       mass = N.state.get(body.id, 'mass');
     }
-    if ((mass === undefined || mass === 0) && body.params && body.params.mass !== undefined) {
+    if ((!N.state || !N.state.current[body.id] || N.state.current[body.id].mass === undefined) && body.params && body.params.mass !== undefined) {
       mass = body.params.mass;
     }
     const filledDots = Math.min(5, Math.max(0, Math.round(mass / 2)));
@@ -261,6 +265,7 @@
   // Integração com selectBody / deselectBody
   const origSelectBody = N.selectBody;
   N.selectBody = function (id) {
+    if (N.presence && !N.presence.isPresent(id)) return;
     if (typeof origSelectBody === 'function') origSelectBody(id);
     if (id) {
       N.panel.open(id);

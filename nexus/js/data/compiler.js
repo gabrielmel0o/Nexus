@@ -581,6 +581,15 @@
   }
 
   // Medidas para conferir a geometria no Node e no navegador, sem duplicar cálculos.
+  // Reposicionamento opcional para a fase pessoal, após aplicar tamanhos reais.
+  // compileSpec e Helena continuam usando exatamente o caminho original.
+  compileSpec.layoutSystems = function (universe) {
+    var systems = universe.systems.filter(function (s) { return s.id !== 'eu'; });
+    positionSystems(systems.map(function (s, i) {
+      var rng = createRNG(s.id), radial = rng();
+      return { system: s, radial: radial, angle: i / systems.length * Math.PI * 2 + (rng() - 0.5) * 0.5 };
+    }));
+  };
   compileSpec.geometry = Object.freeze({
     selfRadius: RAIO_EU,
     diskRadius: RAIO_DISCO_EU,

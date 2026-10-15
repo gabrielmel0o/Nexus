@@ -2,7 +2,9 @@
    Permite carregar o universo tanto do backend quanto localmente.
    
    Disponibiliza:
-     NEXUS.universeSource.fromBackend(texto, respostas)
+     NEXUS.universeSource.fromBackend(texto, respostas, especificacaoAnterior)
+     NEXUS.universeSource.fromHistory(historico)
+     NEXUS.universeSource.saveHistory(historico)
      NEXUS.universeSource.fromHelenaCompilada()
 */
 
@@ -19,12 +21,16 @@
 
   N.universeSource = {
     /**
-     * Envia o texto da pessoa para o backend local, valida e compila o universo.
-     * @param {string} texto Relato em primeira pessoa (500 a 3000 caracteres)
+     * Envia o texto para o backend local e devolve a especificação validada.
+     * @param {string} texto Relato (500 a 3000) ou novidades (100 a 3000 caracteres)
      * @param {Array<string>} [respostas] Segunda rodada; [] significa pular perguntas
-     * @returns {Promise<object>} Universo compilado ou { duvidas: [...] }
+     * @param {object} [especificacaoAnterior] Somente a fase mais recente na atualização
+     * @returns {Promise<object>} { especificacao } ou { duvidas: [...] }
      */
-    async fromBackend(texto, respostas) {
+    async fromBackend(texto, respostas, especificacaoAnterior) {
+      if (especificacaoAnterior !== undefined && !N.history.validateSpecification(especificacaoAnterior).ok) {
+        throw { tipo: 'validacao' };
+      }
       let response;
       try {
         response = await fetch(BACKEND_URL, {
@@ -32,7 +38,8 @@
           headers: {
             'Content-Type': 'application/json; charset=utf-8'
           },
-          body: JSON.stringify({ texto: texto, ...(respostas !== undefined ? { respostas: respostas } : {}) })
+          body: JSON.stringify({ texto: texto, ...(respostas !== undefined ? { respostas: respostas } : {}),
+            ...(especificacaoAnterior !== undefined ? { especificacaoAnterior: especificacaoAnterior } : {}) })
         });
       } catch (err) {
         throw { tipo: 'rede' };
@@ -60,7 +67,7 @@
 
       if (Object.prototype.hasOwnProperty.call(data, 'duvidas')) {
         const duvidas = data.duvidas;
-        if (respostas !== undefined || data.spec || !Array.isArray(duvidas)
+        if (respostas !== undefined || especificacaoAnterior !== undefined || data.spec || !Array.isArray(duvidas)
           || duvidas.length < 1 || duvidas.length > 5
           || duvidas.some(q => typeof q !== 'string' || !q.trim() || q.length > 200)) {
           throw { tipo: 'validacao' };
@@ -81,13 +88,18 @@
         throw { tipo: 'validacao' };
       }
 
-      // Compilação determinística para o formato do motor 3D
-      if (typeof N.compileSpec !== 'function') {
-        throw { tipo: 'servidor' };
-      }
+      // O menu compõe e valida o histórico inteiro antes de substituir o salvo.
+      return { especificacao: JSON.parse(JSON.stringify(data.spec)) };
+    },
 
-      const universoCompilado = N.compileSpec(data.spec);
-      return universoCompilado;
+    fromHistory(historico) {
+      return N.compileHistory(historico);
+    },
+
+    saveHistory(historico) {
+      // Falha de compilação também preserva o mapa anterior. O boot vem depois.
+      const universo = this.fromHistory(historico);
+      return Object.assign(N.universeStore.save(historico), { universo: universo });
     },
 
     /**

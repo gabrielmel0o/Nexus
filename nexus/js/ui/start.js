@@ -236,6 +236,15 @@
     const formEl = document.createElement('div');
     formEl.className = 'nexus-start-form';
     formEl.innerHTML = `
+      <div class="nexus-start-history">
+        <p class="nexus-start-privacy nexus-start-history-info"></p>
+        <button class="nexus-start-gen-btn nexus-start-resume">Continuar meu universo</button>
+        <button class="nexus-start-gen-btn nexus-start-update">Atualizar meu universo</button>
+        <button class="nexus-start-gen-btn nexus-start-download">Baixar histórico JSON</button>
+        <button class="nexus-start-gen-btn nexus-start-import">Importar JSON</button>
+        <input class="nexus-start-file" type="file" accept=".json,application/json" hidden>
+        <button class="nexus-start-gen-btn nexus-start-delete">Apagar histórico salvo</button>
+      </div>
       <div class="nexus-start-divisor"><span>ou escreva sobre a sua mente</span></div>
       <div class="nexus-start-field">
         <textarea class="nexus-start-textarea" aria-label="Texto sobre a sua mente" aria-describedby="nexus-start-privacy" placeholder="Descreva como está a sua vida e a sua mente hoje (entre 500 e 3.000 caracteres)..." rows="4"></textarea>
@@ -244,7 +253,9 @@
         </div>
         <p class="nexus-start-privacy" id="nexus-start-privacy">Seu texto é enviado ao Google (Gemini) para ser interpretado. O NEXUS não guarda seu texto. Na camada gratuita, o Google pode usá-lo para melhorar produtos, e revisores humanos podem lê-lo. Evite nomes reais e dados que identifiquem pessoas; use apelidos.</p>
       </div>
-      <button class="nexus-start-gen-btn" disabled>Gerar meu universo</button>
+      <p class="nexus-start-privacy nexus-start-operation">Uma nova geração cria outro universo e substitui o histórico salvo. Para acrescentar uma fase, use Atualizar meu universo.</p>
+      <button class="nexus-start-gen-btn nexus-start-generate" disabled>Gerar meu universo</button>
+      <button class="nexus-start-gen-btn nexus-start-cancel-update" hidden>Voltar à nova geração</button>
       <div class="nexus-start-questions" hidden>
         <p class="nexus-start-privacy">Se quiser, esclareça estes pontos. As respostas também são enviadas ao Google; evite dados que identifiquem pessoas. Você pode deixar campos vazios ou pular.</p>
         <div class="nexus-start-question-fields"></div>
@@ -258,15 +269,123 @@
 
     const textarea = formEl.querySelector('.nexus-start-textarea');
     const counter = formEl.querySelector('.nexus-start-counter');
-    const genBtn = formEl.querySelector('.nexus-start-gen-btn');
+    const genBtn = formEl.querySelector('.nexus-start-generate');
     const statusEl = formEl.querySelector('.nexus-start-status');
     const questionsEl = formEl.querySelector('.nexus-start-questions');
     const fieldsEl = formEl.querySelector('.nexus-start-question-fields');
     const continueBtn = formEl.querySelector('.nexus-start-continue');
     const skipBtn = formEl.querySelector('.nexus-start-skip');
+    const historyInfo = formEl.querySelector('.nexus-start-history-info');
+    const resumeBtn = formEl.querySelector('.nexus-start-resume');
+    const updateBtn = formEl.querySelector('.nexus-start-update');
+    const downloadBtn = formEl.querySelector('.nexus-start-download');
+    const importBtn = formEl.querySelector('.nexus-start-import');
+    const fileInput = formEl.querySelector('.nexus-start-file');
+    const deleteBtn = formEl.querySelector('.nexus-start-delete');
+    const cancelUpdateBtn = formEl.querySelector('.nexus-start-cancel-update');
+    const operationInfo = formEl.querySelector('.nexus-start-operation');
     let camposRespostas = [];
     let textoDaRodada = null;
     let ocupado = false;
+    let atualizando = false;
+
+    function aviso(texto, erro) {
+      statusEl.style.display = 'block';
+      statusEl.className = 'nexus-start-status' + (erro ? ' is-error' : '');
+      statusEl.textContent = texto;
+    }
+
+    function refreshHistory() {
+      const loaded = N.universeStore.load();
+      const historico = loaded.historico;
+      const limites = N.history.limits;
+      historyInfo.textContent = (historico ? `${historico.capitulos.length} fase(s). ` : '')
+        + loaded.mensagem + ` Limites: ${limites.chapters} fases, 1 MiB por histórico, ${limites.bodies} corpos, ${limites.systems} sistemas, ${limites.forces} forças e ${limites.routines} rotinas na união.`;
+      resumeBtn.disabled = downloadBtn.disabled = ocupado || !historico;
+      updateBtn.disabled = ocupado || !historico || historico.capitulos.length >= limites.chapters;
+      importBtn.disabled = fileInput.disabled = cancelUpdateBtn.disabled = ocupado;
+      deleteBtn.disabled = ocupado || (!historico && loaded.ok);
+      return loaded;
+    }
+
+    function modoAtualizacao(valor) {
+      atualizando = valor;
+      limparPerguntas();
+      textarea.value = '';
+      textarea.placeholder = valor ? 'Conte apenas as novidades desta fase (entre 100 e 3.000 caracteres)...'
+        : 'Descreva como está a sua vida e a sua mente hoje (entre 500 e 3.000 caracteres)...';
+      textarea.setAttribute('aria-label', valor ? 'Novidades da sua mente' : 'Texto sobre a sua mente');
+      genBtn.textContent = valor ? 'Acrescentar fase ao meu universo' : 'Gerar meu universo';
+      cancelUpdateBtn.hidden = !valor;
+      operationInfo.textContent = valor
+        ? 'Acrescenta uma fase. Envia somente estas novidades e a especificação mais recente ao Google. As fases antigas permanecem intactas.'
+        : 'Uma nova geração cria outro universo e substitui o histórico salvo. Para acrescentar uma fase, use Atualizar meu universo.';
+      conferirTexto();
+    }
+
+    function abrirResultado(result) {
+      if (!result.ok) throw { tipo: result.codigo, mensagem: result.mensagem };
+      refreshHistory();
+      limparPerguntas();
+      if (!result.persistido) {
+        aviso(result.mensagem + ' Use Baixar histórico JSON ou Continuar meu universo.');
+        return;
+      }
+      N.boot(result.universo);
+      exitStartMode();
+    }
+
+    resumeBtn.addEventListener('click', () => {
+      if (ocupado) return;
+      try {
+        const loaded = refreshHistory();
+        if (!loaded.ok || !loaded.historico) throw { mensagem: loaded.mensagem };
+        N.boot(N.universeSource.fromHistory(loaded.historico));
+        limparPerguntas();
+        exitStartMode();
+      } catch (e) { aviso(e.mensagem || e.message || MENSAGENS.validacao, true); }
+    });
+    updateBtn.addEventListener('click', () => {
+      if (ocupado || updateBtn.disabled) return;
+      modoAtualizacao(true);
+      textarea.focus();
+    });
+    cancelUpdateBtn.addEventListener('click', () => { if (!ocupado) modoAtualizacao(false); });
+    downloadBtn.addEventListener('click', () => {
+      if (ocupado) return;
+      const result = N.universeStore.exportJSON();
+      if (!result.ok) { aviso(result.mensagem, true); return; }
+      const url = URL.createObjectURL(new Blob([result.json], { type: 'application/json;charset=utf-8' }));
+      const link = document.createElement('a');
+      link.href = url; link.download = result.nomeArquivo;
+      document.body.appendChild(link); link.click(); link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      aviso('Download do histórico completo solicitado. Confira o arquivo na pasta de downloads.');
+    });
+    deleteBtn.addEventListener('click', () => {
+      if (ocupado) return;
+      const result = N.universeStore.remove();
+      if (result.ok) modoAtualizacao(false);
+      refreshHistory(); aviso(result.mensagem, !result.ok);
+    });
+    importBtn.addEventListener('click', () => { if (!ocupado) fileInput.click(); });
+    fileInput.addEventListener('change', async () => {
+      if (ocupado) return;
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+      ocupado = true; startBtn.disabled = textarea.disabled = genBtn.disabled = true;
+      formEl.setAttribute('aria-busy', 'true'); refreshHistory();
+      try {
+        if (file.size > N.history.limits.historyBytes) throw { mensagem: 'Arquivo excede 1 MiB. O histórico anterior foi preservado.' };
+        const history = N.history.parse(await file.text());
+        abrirResultado(N.universeSource.saveHistory(history));
+      } catch (e) { aviso(e.mensagem || e.message || 'Não consegui importar esse histórico. O anterior foi preservado.', true); }
+      finally {
+        ocupado = false; fileInput.value = ''; startBtn.disabled = textarea.disabled = false;
+        formEl.setAttribute('aria-busy', 'false'); conferirTexto(); refreshHistory();
+      }
+    });
+    refreshHistory();
 
     // Nada vai para armazenamento: perguntas e respostas existem somente nesta tela.
     function limparPerguntas() {
@@ -300,12 +419,11 @@
       camposRespostas[0].input.focus();
     }
 
-    textarea.addEventListener('input', () => {
-      // Editar o relato inicia um novo pedido, sem misturar respostas do texto anterior.
-      if (textoDaRodada !== null) limparPerguntas();
+    function conferirTexto() {
       const len = textarea.value.trim().length;
-      if (len < 500) {
-        counter.textContent = `${len} / 500 caracteres (mínimo 500)`;
+      const minimo = atualizando ? 100 : 500;
+      if (len < minimo) {
+        counter.textContent = `${len} / ${minimo} caracteres (mínimo ${minimo})`;
         counter.classList.remove('is-valid');
         genBtn.disabled = true;
       } else if (len > 3000) {
@@ -315,16 +433,28 @@
       } else {
         counter.textContent = `${len} caracteres`;
         counter.classList.add('is-valid');
-        genBtn.disabled = false;
+        genBtn.disabled = ocupado;
       }
+    }
+    textarea.addEventListener('input', () => {
+      // Somente editar o relato invalida as perguntas, não uma importação falha.
+      if (textoDaRodada !== null) limparPerguntas();
+      conferirTexto();
     });
 
     async function gerar(respostas) {
       if (ocupado) return;
       const texto = respostas !== undefined ? textoDaRodada : textarea.value.trim();
       if (typeof texto !== 'string') return;
-      if (texto.length < 500 || texto.length > 3000) return;
+      if (texto.length < (atualizando ? 100 : 500) || texto.length > 3000) return;
+      const anterior = atualizando ? N.universeStore.load().historico : null;
+      if (atualizando && !anterior) return;
+      if (anterior && anterior.capitulos.length >= N.history.limits.chapters) {
+        aviso('Limite de 10 fases atingido. O histórico permanece completo e pode ser baixado.', true);
+        return;
+      }
       ocupado = true;
+      refreshHistory();
 
       // Estado de carregamento
       formEl.setAttribute('aria-busy', 'true');
@@ -343,21 +473,17 @@
           throw { tipo: 'servidor' };
         }
 
-        const universoGerado = await N.universeSource.fromBackend(texto, respostas);
+        const universoGerado = await N.universeSource.fromBackend(texto, respostas,
+          anterior ? N.history.latest(anterior) : undefined);
         if (universoGerado.duvidas) {
           mostrarPerguntas(universoGerado.duvidas, texto);
           statusEl.style.display = 'none';
           return;
         }
 
-        // Inicializa o motor com o universo recebido
-        if (typeof N.boot === 'function') {
-          N.boot(universoGerado);
-        }
-        limparPerguntas();
-
-        // Sucesso: inicia o mesmo voo suave do COMEÇAR
-        exitStartMode();
+        const historico = anterior ? N.history.append(anterior, universoGerado.especificacao)
+          : N.history.create(universoGerado.especificacao);
+        abrirResultado(N.universeSource.saveHistory(historico));
       } catch (err) {
         // Cuidado é um estado próprio. O texto permanece no campo em qualquer falha.
         textarea.disabled = false;
@@ -366,16 +492,21 @@
         const tipo = err && err.tipo;
         if (tipo === 'cuidado') limparPerguntas();
         statusEl.className = 'nexus-start-status ' + (tipo === 'cuidado' ? 'is-care' : 'is-error');
-        statusEl.textContent = MENSAGENS[tipo] || MENSAGENS.servidor;
+        statusEl.textContent = tipo === 'validacao' && atualizando
+          ? 'Não consegui validar essa atualização. O histórico anterior foi preservado. Revise as novidades (entre 100 e 3.000 caracteres).'
+          : MENSAGENS[tipo] || err.mensagem || err.message || MENSAGENS.servidor;
       } finally {
         ocupado = false;
         textarea.disabled = false;
         startBtn.disabled = false;
-        genBtn.disabled = textarea.value.trim().length < 500 || textarea.value.trim().length > 3000;
+        // Não apaga as respostas após uma falha; apenas atualiza o botão principal.
+        const len = textarea.value.trim().length;
+        genBtn.disabled = len < (atualizando ? 100 : 500) || len > 3000;
         continueBtn.disabled = false;
         skipBtn.disabled = false;
         camposRespostas.forEach(c => { c.input.disabled = false; });
         formEl.setAttribute('aria-busy', 'false');
+        refreshHistory();
       }
     }
 

@@ -198,6 +198,7 @@
       var cWP = new THREE.Vector3();
       N.registerOrbit({
         line: cometOrbitLine,
+        ownerId: el.id,
         category: 'comet',
         getBodyPos: function () {
           nucleo.getWorldPosition(cWP);
@@ -219,7 +220,12 @@
 
     return {
       object: pivo,
+      applyHistory: function (data, continuing) {
+        if (!continuing) { angle = seed * Math.PI * 2; t = 0; curHoverScale = 1; }
+        this.update(0, 0);
+      },
       update: function (dt, nomes) {
+        if (N.state.frame && N.presence && !N.presence.isPresent(id)) return;
         t += dt;
 
         // Lê parâmetros do state

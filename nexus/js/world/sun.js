@@ -77,7 +77,7 @@
     var esferaTex = N.makeTexture(512, 256, function (g, w, h) {
       g.fillStyle = center.color || '#ffffff';
       g.fillRect(0, 0, w, h);
-      N.blobs(g, w, h, patch, v.manchas);
+      N.blobs(g, w, h, patch, v.manchas, N.state.frame ? N.createRNG(systemId + ':' + spectral) : undefined);
     });
     var esferaMat = new THREE.MeshBasicMaterial({ map: esferaTex });
     var esfera = new THREE.Mesh(new THREE.SphereGeometry(v.raio, 48, 32), esferaMat);
@@ -128,6 +128,11 @@
 
     return {
       object: grupo,
+      applyHistory: function () {
+        esfera.rotation.y = 0;
+        ondas.forEach(function (o, i) { o.mesh.userData.fase = i * Math.PI * 2 / 3; });
+        this.update(0);
+      },
       update: function (dt) {
         esfera.rotation.y += dt * .05;
 

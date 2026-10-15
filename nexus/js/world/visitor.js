@@ -95,9 +95,19 @@
     const p1 = path[1];
 
     let t = 0;
+    let pathAngle = Math.atan2(p0[2], p0[0]);
+    let pathStartRadius = Math.hypot(p0[0], p0[2]), pathEndRadius = Math.hypot(p1[0], p1[2]);
 
     return {
       object: group,
+      applyHistory() {
+        t = 0;
+        const activePath = systemData.center.path || path;
+        pathAngle = Math.atan2(activePath[0][2], activePath[0][0]);
+        pathStartRadius = Math.hypot(activePath[0][0], activePath[0][2]);
+        pathEndRadius = Math.hypot(activePath[1][0], activePath[1][2]);
+        this.update(0);
+      },
       update(dt) {
         t += dt;
 
@@ -148,10 +158,19 @@
         }
 
         // Calcula o corredor dinâmico entre "A criação" e "A vida não escolhida"
-        let pStart = p0;
-        let pEnd = p1;
+        let pStart = N.state.frame && systemData.center.path ? systemData.center.path[0] : p0;
+        let pEnd = N.state.frame && systemData.center.path ? systemData.center.path[1] : p1;
+        if (N.state.frame) {
+          // O corredor muda gradualmente; arco polar evita atravessar o Eu.
+          const ease = Math.min(1, dt * 2.8), nextAngle = Math.atan2(pStart[2], pStart[0]);
+          pathAngle += Math.atan2(Math.sin(nextAngle - pathAngle), Math.cos(nextAngle - pathAngle)) * ease;
+          pathStartRadius += (Math.hypot(pStart[0], pStart[2]) - pathStartRadius) * ease;
+          pathEndRadius += (Math.hypot(pEnd[0], pEnd[2]) - pathEndRadius) * ease;
+          pStart = [Math.cos(pathAngle) * pathStartRadius, pStart[1], Math.sin(pathAngle) * pathStartRadius];
+          pEnd = [Math.cos(pathAngle) * pathEndRadius, pEnd[1], Math.sin(pathAngle) * pathEndRadius];
+        }
 
-        if (N.systemsById && N.systemsById['criacao'] && N.systemsById['nao-escolhida']) {
+        if (!N.state.frame && N.systemsById && N.systemsById['criacao'] && N.systemsById['nao-escolhida']) {
           const sysCriacao = N.systemsById['criacao'].group;
           const sysNao = N.systemsById['nao-escolhida'].group;
 

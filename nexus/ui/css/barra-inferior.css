@@ -102,6 +102,13 @@
 }
 
 
+/* ESTADO DESLIGADO
+   Mantém fonte, cor e tamanho; reduz apenas a intensidade visual. */
+.barra-btn-texto:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 /* ============================================================
    5. ÍCONES DENTRO DA BARRA
    Tamanhos proporcionais a cada ícone.

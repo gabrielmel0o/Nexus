@@ -108,6 +108,11 @@ async function testar() {
   assert.equal(await executar(`document.getElementById('botao-menu').disabled`), false);
   assert.equal(await executar(`document.getElementById('botao-retroceder').disabled`), true);
   assert.equal(await executar(`document.getElementById('botao-avancar').disabled`), false);
+  assert.equal(await executar(`getComputedStyle(document.getElementById('botao-retroceder')).opacity`), '0.35');
+  assert.equal(await executar(`getComputedStyle(document.getElementById('botao-retroceder')).cursor`), 'not-allowed');
+  await clicar('botao-retroceder');
+  assert.equal(await executar('NEXUS.state.chapter'), 0);
+  assert.equal(await executar(`getComputedStyle(document.querySelector('#botao-retroceder .btn__feixe')).display`), 'none');
   await capturar('tela5-helena');
   ok('Helena abre barra única, extremos corretos e menu disponível');
 
@@ -120,6 +125,10 @@ async function testar() {
     assert.equal(await executar('NEXUS.state.chapter'), fase);
   }
   assert.equal(await executar(`document.getElementById('botao-avancar').disabled`), true);
+  await clicar('botao-avancar');
+  assert.equal(await executar('NEXUS.state.chapter'), 3);
+  assert.equal(await executar(`getComputedStyle(document.getElementById('botao-avancar')).opacity`), '0.35');
+  assert.equal(await executar(`getComputedStyle(document.querySelector('#botao-avancar .btn__feixe')).display`), 'none');
   for (const fase of [2,1,0]) {
     await clicar('botao-retroceder');
     assert.equal(await executar('NEXUS.state.chapter'), fase);
@@ -128,6 +137,22 @@ async function testar() {
   assert.equal(await executar('limpezas'), 6);
   assert.equal(await executar(`(()=>{const agora=[];NEXUS.scene.traverse(o=>agora.push(o.uuid));return JSON.stringify(agora)===JSON.stringify(objetos);})()`), true);
   ok('um capítulo por clique nos dois sentidos, eventos limpos e objetos preservados');
+
+  // A mesma barra mantém os limites com guia, astro, menu e confirmação abertos.
+  await executar(`NEXUS.state.applyChapter(3);NEXUS.selectBody('criacao');NEXUS.legend.open();`);
+  assert.equal(await executar(`document.getElementById('botao-avancar').disabled
+    && !document.getElementById('botao-retroceder').disabled`), true);
+  await clicar('botao-menu');
+  await clicar('botao-voltar-inicio');
+  await clicar('botao-cancelar-sair');
+  await chamar('Input.dispatchKeyEvent', {type:'keyDown',key:'Escape',code:'Escape'});
+  assert.equal(await executar(`document.querySelectorAll('#barra-inferior').length===1
+    && document.getElementById('botao-avancar').disabled
+    && !document.getElementById('botao-retroceder').disabled`), true);
+  await executar(`NEXUS.state.applyChapter(0)`);
+  assert.equal(await executar(`!document.getElementById('botao-avancar').disabled
+    && document.getElementById('botao-retroceder').disabled`), true);
+  ok('disabled bloqueia clique e hover; aplicação direta de fase e retorno entre telas atualizam a barra única');
 
   await clicar('botao-avancar');
   await chamar('Input.dispatchMouseEvent', {type:'mouseMoved',x:1850,y:100});
@@ -175,6 +200,8 @@ async function testar() {
     window.salvoAntes=localStorage.getItem('nexus:universo');document.getElementById('botao-comecar').click();`);
   await esperar('NEXUS.travado===false');
   assert.equal(await executar('NEXUS.state.chapter'), 2);
+  assert.equal(await executar(`document.getElementById('botao-avancar').disabled
+    && !document.getElementById('botao-retroceder').disabled`), true);
   await clicar('botao-retroceder');
   assert.equal(await executar('NEXUS.state.chapter'), 1);
   assert.equal(await executar(`document.querySelector('.legenda-barra').textContent`), 'Fase 2 de 3');
@@ -189,10 +216,20 @@ async function testar() {
     NEXUS.ui.mostrarInicial();document.getElementById('botao-comecar').click();`);
   await esperar('NEXUS.travado===false');
   assert.equal(await executar(`getComputedStyle(document.querySelector('.barra-centro')).visibility`), 'hidden');
+  assert.equal(await executar(`document.getElementById('botao-avancar').disabled
+    && document.getElementById('botao-retroceder').disabled`), true);
   assert.equal(await executar(`document.getElementById('botao-saibamais').getBoundingClientRect().left>1800`), true);
   assert.equal(await executar(`getComputedStyle(document.querySelector('.legenda-barra')).display`), 'none');
   await capturar('tela5-uma-fase');
   ok('uma fase oculta tempo e mantém Saiba Mais à direita');
+  // Histórico vazio não é aceito no fluxo real. Simula apenas a lista vazia
+  // para verificar o recálculo da UI sem pedir ao motor para montar outro universo.
+  await executar(`window.caps=NEXUS.currentUniverse.chapters;
+    NEXUS.currentUniverse.chapters=[];NEXUS.time.refresh();`);
+  assert.equal(await executar(`document.getElementById('botao-avancar').disabled
+    && document.getElementById('botao-retroceder').disabled`), true);
+  await executar(`NEXUS.currentUniverse.chapters=caps;NEXUS.time.refresh();`);
+  ok('lista vazia também deixa os dois botões desabilitados');
   assert.deepEqual(erros, []);
   ok('nenhuma exceção JavaScript não tratada');
   console.log('OK: ' + grupos + ' grupos no Edge; API simulada, sem Gemini real. Capturas: ' + pasta);

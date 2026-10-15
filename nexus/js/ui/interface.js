@@ -17,6 +17,8 @@
   N.ui = {
     mostrarVisualizacao() {
       this.ocultarMenus();
+      // A barra é única: confere os limites também ao voltar do menu.
+      if (N.time) N.time.refresh();
       const tela = document.getElementById('tela-visualizacao');
       tela.classList.remove('oculto');
       tela.setAttribute('aria-hidden', 'false');

@@ -57,10 +57,27 @@
     if (captionEl) captionEl.classList.remove('is-visible');
   }
 
+  // Recalcula os dois limites, inclusive quando o controle fica oculto.
+  function atualizarBotoes(chapters) {
+    const atual = getCurrentChapter();
+    const semNavegacao = chapters.length < 2;
+    if (btnNextEl) {
+      btnNextEl.disabled = semNavegacao || atual >= chapters.length - 1;
+      if (btnNextEl.disabled) btnNextEl.classList.add('is-disabled');
+      else btnNextEl.classList.remove('is-disabled');
+    }
+    if (btnResetEl) {
+      btnResetEl.disabled = semNavegacao || atual <= 0;
+      if (btnResetEl.disabled) btnResetEl.classList.add('is-disabled');
+      else btnResetEl.classList.remove('is-disabled');
+    }
+  }
+
   // Atualiza os textos e o estado dos botões conforme o capítulo atual
   function updateUI() {
     if (!containerEl) return;
     const chapters  = getChapters();
+    atualizarBotoes(chapters);
 
     // Se o universo tiver menos de 2 capítulos, oculta o controle e a legenda
     if (!chapters || chapters.length < 2) {
@@ -85,27 +102,6 @@
         ? posicao : posicao + (currentCap.caption ? ' — ' + currentCap.caption : '');
     }
 
-    // Botão Avançar o tempo (desliga ao chegar ao último capítulo)
-    if (btnNextEl) {
-      const isLast = curIndex >= (chapters.length - 1);
-      btnNextEl.disabled = isLast;
-      if (isLast) {
-        btnNextEl.classList.add('is-disabled');
-      } else {
-        btnNextEl.classList.remove('is-disabled');
-      }
-    }
-
-    // Botão Voltar no tempo (desabilitado se já estiver no capítulo 0)
-    if (btnResetEl) {
-      const isFirst = curIndex === 0;
-      btnResetEl.disabled = isFirst;
-      if (isFirst) {
-        btnResetEl.classList.add('is-disabled');
-      } else {
-        btnResetEl.classList.remove('is-disabled');
-      }
-    }
   }
 
   // Ícone de ampulheta em SVG inline (sem hex de cor: usa currentColor herdado)

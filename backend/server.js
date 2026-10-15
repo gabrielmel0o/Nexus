@@ -18,6 +18,7 @@ const { chamarGemini } = require('./gemini.js');
 
 const PORT = parseInt(process.env.PORT, 10) || 3000;
 const HOST = '127.0.0.1';
+const { status: statusLocal } = require('./readiness.js');
 // Apenas uma especificação anterior (128 KiB), texto e envelope. Nunca histórico.
 const LIMITE_CORPO_BYTES = history.limits.httpBytes;
 
@@ -40,6 +41,13 @@ function responderJson(res, status, dados) {
 const server = http.createServer(async (req, res) => {
   const inicioTempo = Date.now();
   aplicarCors(res, req);
+
+  // Confirma que esta cópia do NEXUS está escutando. Não testa a API do Google.
+  if (req.method === 'GET' && req.url === '/api/pronto') {
+    res.setHeader('Cache-Control', 'no-store');
+    responderJson(res, 200, statusLocal());
+    return;
+  }
 
   // Tratamento de requisição preflight (OPTIONS)
   if (req.method === 'OPTIONS') {
@@ -270,3 +278,12 @@ server.listen(PORT, HOST, () => {
   console.log(`   Modo Simulado: ${modoSimulado ? 'LIGADO (não chama Gemini)' : 'DESLIGADO (usa Gemini)'}`);
   console.log(`====================================================`);
 });
+
+// O iniciador usa IPC: se sua janela fechar, encerra apenas o servidor que criou.
+// npm start e iniciar.bat não usam IPC e conservam seu funcionamento anterior.
+if (process.send) {
+  process.on('disconnect', () => {
+    server.close(() => process.exit(0));
+    server.closeAllConnections();
+  });
+}

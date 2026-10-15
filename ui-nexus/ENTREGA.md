@@ -136,6 +136,8 @@
 * **IDs interativos e ações ao clicar:**
   * `#botao-fechar-astro`: Fecha o painel lateral esquerdo e desseleciona o astro, voltando à **Tela 5**. Utiliza anel de luz circular (`border-radius: 50%`).
   * `#botao-menu`, `#botao-retroceder`, `#botao-avancar`, `#botao-saibamais`: Controles da barra inferior.
+* **Proporções do painel:**
+  * O painel `#painel-astro` possui proporção esguia e vertical (`min-height: clamp(560px, 72vh, 780px)`) e largura ligeiramente mais estreita (`width: clamp(300px, 22.8vw, 440px)`), garantindo que não colida com a órbita do planeta e mantendo as quebras de linha idênticas à referência `07-astro.png`.
 * **IDs de textos dinâmicos (alimentados pelo Three.js/IA):**
   * `#subtipo-astro`: Tipo e categoria do astro (ex.: `"PLANETA COM ANÉIS · ÁREA DA VIDA"`).
   * `#nome-astro`: Nome do astro (ex.: `"Família"`, `"Carreira"`, `"O Eu"`).
@@ -155,13 +157,12 @@
 * **Fundo desfocado:** Sim (desfoque gaussiano de 8,5px sobre o universo 3D via `#fundo-desfocado`).
 * **Fluxo de navegação:**
   * *Origem:* Telas 5, 6 ou 7 (ao clicar no isotipo NEXUS na barra inferior).
-  * *Destino:* Retorna à Tela 5 (pressionando ESC ou clicando fora), vai para a Tela 1 (via Voltar à tela inicial) ou abre a Tela 9 (ao clicar em Sair).
+  * *Destino:* Retorna à Tela 5 (pressionando ESC ou clicando fora) ou vai para a Tela 1 (via Voltar à tela inicial).
 * **IDs interativos e ações ao clicar:**
-  * `#botao-voltar-inicio`: Retorna para a **Tela 1 (Tela Inicial)**.
-  * `#botao-abrir-sair`: Abre o modal de confirmação de saída (**Tela 9**).
+  * `#botao-voltar-inicio`: Posicionado na base do painel (no rodapé das ações). Retorna para a **Tela 1 (Tela Inicial)**.
   * `#dica-esc` / Tecla `ESC`: Fecha o menu e retorna à visualização livre (**Tela 5**).
 * **Estilização dos botões e atalho:**
-  * O fundo dos botões `#botao-voltar-inicio` e `#botao-abrir-sair` é sólido com **100% de opacidade na cor `#100819`** (`var(--cor-fundo-roxo)`).
+  * O fundo do botão `#botao-voltar-inicio` é sólido com **100% de opacidade na cor `#100819`** (`var(--cor-fundo-roxo)`).
   * O indicador de atalho `#dica-esc` possui a tecla visual `<kbd class="tecla-atalho">ESC</kbd>` **preenchida em branco nexus** (`var(--cor-branco-nexus)`) com o texto "ESC" em `#100819` (`var(--cor-fundo-roxo)`), mantendo o texto auxiliar "Voltar" em branco nexus.
 * **IDs de textos dinâmicos:** Nenhum.
 
@@ -173,13 +174,13 @@
 * **Container principal:** `#tela-sair`
 * **Fundo desfocado:** Sim (desfoque gaussiano de 8,5px aplicado via `#fundo-desfocado` em `z-index: 15`, desfocando tanto o canvas quanto qualquer menu aberto atrás).
 * **Fluxo de navegação:**
-  * *Origem:* Tela 8 (ao clicar no botão SAIR).
-  * *Destino:* Retorna para a Tela 8 (ao clicar em NÃO, CONTINUAR NO NEXUS) ou encerra a aplicação (ao clicar em SIM, SAIR DO NEXUS).
+  * *Origem:* Menu Lateral (Tela 8) ou atalho de encerramento/retorno.
+  * *Destino:* Retorna à visualização / Menu (ao clicar em NÃO, CONTINUAR AQUI) ou retorna para a Tela 1 (ao clicar em SIM, VOLTAR).
 * **IDs interativos e ações ao clicar:**
-  * `#botao-cancelar-sair`: Fecha o modal e retorna para o **Menu (Tela 8)**.
-  * `#botao-confirmar-sair`: Confirma a saída, encerra a sessão e redireciona/fecha o NEXUS.
-* **Comportamento visual:** Ambos os botões são em formato de pílula (`border-radius: 9999px`) com o anel de luz correspondente adaptado ao contorno oval.
-* **IDs de textos dinâmicos:** Nenhum (mensagens fixas de confirmação).
+  * `#botao-cancelar-sair` (`NÃO, CONTINUAR AQUI`): Fecha o modal de confirmação e permanece na tela atual.
+  * `#botao-confirmar-sair` (`SIM, VOLTAR`): Confirma o retorno e redireciona para a **Tela Inicial (Tela 1)**.
+* **Comportamento visual:** Ambos os botões são em formato de pílula (`border-radius: 9999px`) com comprimentos idênticos (`flex: 1`), mesma distância simétrica em relação às bordas laterais, textos perfeitamente centralizados e o anel de luz correspondente adaptado ao contorno oval.
+* **IDs de textos dinâmicos:** Nenhum (mensagens fixas de confirmação; subtítulo: *"Você tem certeza que deseja voltar à tela inicial?"*).
 
 ---
 

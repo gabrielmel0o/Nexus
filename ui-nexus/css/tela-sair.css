@@ -104,6 +104,8 @@
 
 /* Botão genérico do modal de saída */
 .btn-modal-sair {
+  /* Divide o espaço igualmente, mesmo quando os textos têm comprimentos diferentes. */
+  flex: 1;
   height: clamp(2.8rem, 5vh, 3.8rem); /* ~63px em 1080p medidos na referência */
   padding: 0 clamp(1.4rem, 2.2vw, 2.8rem);
 

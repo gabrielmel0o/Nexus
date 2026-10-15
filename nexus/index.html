@@ -15,6 +15,8 @@
 <link rel="stylesheet" href="ui/css/tela-gerenciamento.css">
 <link rel="stylesheet" href="ui/css/tela-saibamais.css">
 <link rel="stylesheet" href="ui/css/tela-astro.css">
+<link rel="stylesheet" href="ui/css/tela-menu.css">
+<link rel="stylesheet" href="ui/css/tela-sair.css">
 <link rel="stylesheet" href="ui/css/estados-comecar.css">
 <link rel="stylesheet" href="ui/css/legenda-barra.css">
 <link rel="stylesheet" href="css/universo.css">
@@ -483,6 +485,68 @@
 
     </aside><!-- fim #painel-astro -->
   </div><!-- fim #tela-astro -->
+  <div class="nexus-ui oculto" id="tela-menu" aria-hidden="true">
+
+    <!-- PAINEL LATERAL ESQUERDO -->
+    <nav class="painel-menu" id="painel-menu" aria-label="Menu principal">
+
+      <!-- Logotipo NEXUS no topo -->
+      <div class="menu-logo-container">
+        <img src="ui/svg/nexus_menu.svg" class="menu-logo" id="logo-menu" alt="NEXUS">
+      </div>
+
+      <!-- Ações do menu no rodapé do painel -->
+      <div class="menu-acoes">
+
+        <!-- Voltar à tela inicial (posicionado na base do painel) -->
+        <button class="btn-menu-lateral" id="botao-voltar-inicio" type="button">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          <img src="ui/svg/menu.svg" class="icone-menu-item icone-menu-hamburguer" alt="" aria-hidden="true">
+          <span class="texto-menu-item">VOLTAR A TELA INICIAL</span>
+        </button>
+
+      </div>
+
+    </nav><!-- fim #painel-menu -->
+
+    <!-- Dica de atalho no canto inferior esquerdo -->
+    <div class="dica-atalho-menu" id="dica-esc" aria-label="Pressione ESC para voltar">
+      <kbd class="tecla-atalho">ESC</kbd>
+      <span class="texto-atalho">Voltar</span>
+    </div>
+
+  </div><!-- fim #tela-menu -->
+  <div class="nexus-ui oculto" id="tela-sair" aria-hidden="true">
+
+    <!-- MODAL CENTRALIZADO (referência 12-sair.png) -->
+    <div class="modal-sair" id="modal-sair" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-sair">
+
+      <!-- Topo claro (#E2E3E4) -->
+      <div class="modal-sair-topo">
+        <h1 class="titulo-modal-sair" id="titulo-modal-sair">VOC&Ecirc; DESEJA SAIR?</h1>
+        <p class="subtitulo-modal-sair" id="subtitulo-modal-sair">
+          Voc&ecirc; tem certeza que deseja voltar &agrave; tela inicial?
+        </p>
+      </div>
+
+      <!-- Base azul principal (#111450) com os dois botões de ação -->
+      <div class="modal-sair-base">
+        <!-- Cancelar / Continuar aqui (cinza) -->
+        <button class="btn-modal-sair btn-cancelar-sair" id="botao-cancelar-sair" type="button">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          N&Atilde;O, CONTINUAR AQUI
+        </button>
+
+        <!-- Confirmar retorno (laranja principal) -->
+        <button class="btn-modal-sair btn-confirmar-sair" id="botao-confirmar-sair" type="button">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          SIM, VOLTAR
+        </button>
+      </div>
+
+    </div><!-- fim #modal-sair -->
+
+  </div><!-- fim #tela-sair -->
 </div>
 <!-- Container do botão START (só visível no modo-start) -->
 <!-- Formulários antigos mantidos até aprovar as próximas telas. -->
@@ -526,6 +590,8 @@
 <script src="js/ui/comecar.js"></script>
 <script src="js/ui/atualizar.js"></script>
 <script src="js/ui/gerenciamento.js"></script>
+<script src="js/ui/menu.js"></script>
+<script src="js/ui/saida.js"></script>
 <script src="js/ui/time.js"></script>
 <script src="js/world/arms.js"></script>
 <script src="js/world/halo.js"></script>

@@ -105,11 +105,11 @@ async function testar() {
   assert.equal(await executar(`document.getElementById('tela-visualizacao').classList.contains('oculto')`), false);
   assert.equal(await executar(`document.querySelectorAll('.nexus-time-control').length`), 0);
   assert.equal(await executar(`document.querySelectorAll('canvas').length`), 1);
-  assert.equal(await executar(`document.getElementById('botao-menu').disabled`), true);
+  assert.equal(await executar(`document.getElementById('botao-menu').disabled`), false);
   assert.equal(await executar(`document.getElementById('botao-retroceder').disabled`), true);
   assert.equal(await executar(`document.getElementById('botao-avancar').disabled`), false);
   await capturar('tela5-helena');
-  ok('Helena abre barra única, extremos corretos e menu provisoriamente indisponível');
+  ok('Helena abre barra única, extremos corretos e menu disponível');
 
   await executar(`window.objetos=[];NEXUS.scene.traverse(o=>objetos.push(o.uuid));
     window.limpezas=0;window.supernovas=0;

@@ -1,5 +1,5 @@
-/* interface.js — liga as telas inicial, Começar, Atualizar, Gerenciamento e Visualização.
-   As outras telas ainda usam a interface antiga até sua integração ser aprovada. */
+/* interface.js — liga as telas inicial, Começar, Atualizar, Gerenciamento e exploração.
+   O botão do isotipo abre o menu da tela 8 sobre o universo existente. */
 (function () {
   const N = NEXUS;
 
@@ -60,10 +60,9 @@
 
   function preparar() {
     atualizarHistorico();
-    // O menu lateral será integrado na tela 8. Não antecipa retorno ou saída.
+    // O menu apenas cobre a exploração; os objetos do universo continuam montados.
     const menu = document.getElementById('botao-menu');
-    menu.disabled = true;
-    menu.title = 'Menu disponível após a integração da tela 8';
+    menu.addEventListener('click', () => N.menu.abrir());
     document.getElementById('botao-comecar').addEventListener('click', () => {
       const resultado = atualizarHistorico();
       if (resultado.ok && resultado.historico) {

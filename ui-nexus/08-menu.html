@@ -15,13 +15,11 @@
   3. #tela-menu                → container raiz da tela (pointer-events: none)
   4. #painel-menu              → painel flutuante de vidro no lado esquerdo
   5. #logo-menu                → logotipo expandido NEXUS com anel de órbita
-  6. #botao-voltar-inicio      → botão com ícone de menu: "VOLTAR A TELA INICIAL"
-  7. #botao-abrir-sair         → botão com ícone de energia: "SAIR"
-  8. #dica-esc                 → indicação visual "[ESC] Voltar" no canto inferior
+  6. #botao-voltar-inicio      → botão com ícone de menu: "VOLTAR A TELA INICIAL" (na base do painel)
+  7. #dica-esc                 → indicação visual "[ESC] Voltar" no canto inferior
 
   AO CLICAR / PRESSIONAR (lógica futura do projeto):
   - #botao-voltar-inicio → retorna para a Tela Inicial (tela 1)
-  - #botao-abrir-sair    → abre o modal de confirmação de saída (tela 9)
   - Tecla ESC ou clique fora → fecha o menu e volta para a tela 5 (visualização livre)
   ============================================================
 -->
@@ -64,18 +62,11 @@
       <!-- Ações do menu no rodapé do painel -->
       <div class="menu-acoes">
 
-        <!-- Voltar à tela inicial -->
+        <!-- Voltar à tela inicial (posicionado na base do painel) -->
         <button class="btn-menu-lateral" id="botao-voltar-inicio" type="button">
           <span class="btn__feixe" aria-hidden="true"></span>
           <img src="svg/menu.svg" class="icone-menu-item icone-menu-hamburguer" alt="" aria-hidden="true">
           <span class="texto-menu-item">VOLTAR A TELA INICIAL</span>
-        </button>
-
-        <!-- Sair (abre confirmação) -->
-        <button class="btn-menu-lateral" id="botao-abrir-sair" type="button">
-          <span class="btn__feixe" aria-hidden="true"></span>
-          <img src="svg/sair.svg" class="icone-menu-item icone-menu-sair" alt="" aria-hidden="true">
-          <span class="texto-menu-item">SAIR</span>
         </button>
 
       </div>

@@ -15,13 +15,13 @@
   3. #tela-sair                → container raiz da tela (pointer-events: none)
   4. #modal-sair               → caixa modal centralizada na viewport
   5. #titulo-modal-sair        → título "VOCÊ DESEJA SAIR?" (Geologica Black)
-  6. #subtitulo-modal-sair     → pergunta explicativa em HiburMono
-  7. #botao-cancelar-sair      → botão pílula cinza: "NÃO, CONTINUAR NO NEXUS"
-  8. #botao-confirmar-sair     → botão pílula laranja: "SIM, SAIR DO NEXUS"
+  6. #subtitulo-modal-sair     → pergunta explicativa em HiburMono: "Você tem certeza que deseja voltar à tela inicial?"
+  7. #botao-cancelar-sair      → botão pílula cinza: "NÃO, CONTINUAR AQUI"
+  8. #botao-confirmar-sair     → botão pílula laranja: "SIM, VOLTAR"
 
   AO CLICAR (lógica futura do projeto):
-  - #botao-cancelar-sair  → fecha o modal de saída e retorna para a tela 8 (Menu)
-  - #botao-confirmar-sair → confirma a saída, encerra a sessão e fecha a aplicação
+  - #botao-cancelar-sair  → fecha o modal e retorna à visualização / menu
+  - #botao-confirmar-sair → confirma e retorna para a Tela Inicial (tela 1)
   ============================================================
 -->
 <head>
@@ -59,22 +59,22 @@
       <div class="modal-sair-topo">
         <h1 class="titulo-modal-sair" id="titulo-modal-sair">VOC&Ecirc; DESEJA SAIR?</h1>
         <p class="subtitulo-modal-sair" id="subtitulo-modal-sair">
-          Voc&ecirc; tem certeza que deseja sair e fechar o Nexus?
+          Voc&ecirc; tem certeza que deseja voltar &agrave; tela inicial?
         </p>
       </div>
 
       <!-- Base azul principal (#111450) com os dois botões de ação -->
       <div class="modal-sair-base">
-        <!-- Cancelar / Continuar no NEXUS (cinza) -->
+        <!-- Cancelar / Continuar aqui (cinza) -->
         <button class="btn-modal-sair btn-cancelar-sair" id="botao-cancelar-sair" type="button">
           <span class="btn__feixe" aria-hidden="true"></span>
-          N&Atilde;O, CONTINUAR NO NEXUS
+          N&Atilde;O, CONTINUAR AQUI
         </button>
 
-        <!-- Confirmar saída (laranja principal) -->
+        <!-- Confirmar retorno (laranja principal) -->
         <button class="btn-modal-sair btn-confirmar-sair" id="botao-confirmar-sair" type="button">
           <span class="btn__feixe" aria-hidden="true"></span>
-          SIM, SAIR DO NEXUS
+          SIM, VOLTAR
         </button>
       </div>
 

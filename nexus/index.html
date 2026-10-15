@@ -10,12 +10,13 @@
 <link rel="stylesheet" href="ui/css/hover.css">
 <link rel="stylesheet" href="ui/css/tela-inicial.css">
 <link rel="stylesheet" href="ui/css/tela-comecar.css">
+<link rel="stylesheet" href="ui/css/tela-atualizar.css">
 <link rel="stylesheet" href="ui/css/estados-comecar.css">
 <link rel="stylesheet" href="css/universo.css">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 </head>
 <body class="modo-start">
-<!-- Telas inicial e Começar integradas; as demais ainda usam a interface antiga. -->
+<!-- Telas inicial, Começar e Atualizar integradas; as demais ainda usam a interface antiga. -->
 <div id="interface-nexus">
   <div class="nexus-ui" id="tela-inicial">
 
@@ -158,6 +159,61 @@
     </main><!-- fim #painel-comecar -->
 
   </div><!-- fim #tela-comecar -->
+  <div class="nexus-ui oculto" id="tela-atualizar" aria-hidden="true">
+
+    <!-- Painel de vidro lateral esquerdo -->
+    <main class="painel-vidro painel-comecar" id="painel-atualizar">
+
+      <!-- Cabeçalho: botão voltar + título da tela -->
+      <header class="cabecalho-painel">
+        <button class="btn-voltar" id="botao-voltar-atualizar" type="button" aria-label="Voltar para a tela inicial">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          <span aria-hidden="true">&#10094;</span>
+        </button>
+        <h1 class="titulo-comecar" id="titulo-atualizar">ATUALIZAR</h1>
+      </header>
+
+      <!-- Bloco de formulário interno com borda sutil -->
+      <section class="bloco-formulario" aria-label="Formulário de atualização da mente">
+
+        <!-- Rótulo de seção: "O QUE MUDOU" (em vez de "ESCREVA SOBRE A SUA MENTE") -->
+        <h2 class="rotulo-secao" id="rotulo-secao-mudancas">O QUE MUDOU</h2>
+
+        <!-- Campo de texto: mínimo 100 caracteres (diferente da tela 2 que exige 500) -->
+        <textarea
+          class="campo-texto campo-texto-mente"
+          id="campo-texto-mudancas"
+          placeholder="Conte o que mudou na sua vida e na sua mente (entre 100 e 3.000 caracteres)..."
+          rows="12"
+          maxlength="3000"
+          spellcheck="false"
+        ></textarea>
+
+        <!-- Contador: mínimo 100 (diferente da tela 2 que exige 500) -->
+        <div class="contador-caracteres" id="contador-caracteres-atualizar" aria-live="polite">
+          <span id="caracteres-digitados-atualizar">0</span> / 3.000 caracteres &middot; m&iacute;nimo 100
+        </div>
+
+        <!-- Aviso de privacidade: apenas 1 parágrafo nesta tela
+             (sem o segundo parágrafo de substituição do universo da tela 2) -->
+        <aside class="texto-privacidade" id="aviso-privacidade-atualizar">
+          <p>
+            Suas novidades e a especificação mais recente são enviadas ao Google (Gemini) para acrescentar uma fase. As fases anteriores são preservadas. O NEXUS não guarda seu texto. Na camada gratuita, o Google pode usar esses dados para melhorar produtos, e revisores humanos podem lê-los. Evite nomes reais e dados que identifiquem pessoas; use apelidos.
+          </p>
+        </aside>
+
+        <!-- Botão de ação: desabilitado por padrão até preencher 100 caracteres -->
+        <button class="btn btn-laranja btn-gerar-universo" id="botao-atualizar-universo" type="button" disabled>
+          <span class="btn__feixe" aria-hidden="true"></span>
+          <span class="icone-play" aria-hidden="true">&#9654;</span>
+          <span class="rotulo-botao">ATUALIZAR MEU UNIVERSO</span>
+        </button>
+
+      </section><!-- fim .bloco-formulario -->
+
+    </main><!-- fim #painel-atualizar -->
+
+  </div><!-- fim #tela-atualizar -->
 </div>
 <div class="hint oculto">arraste para girar · role ou pince para aproximar</div>
 <!-- Botão de legenda: só visível quando painel-aberto está no body -->
@@ -202,6 +258,7 @@
 <script src="js/ui/legend.js"></script>
 <script src="js/ui/start.js"></script>
 <script src="js/ui/comecar.js"></script>
+<script src="js/ui/atualizar.js"></script>
 <script src="js/ui/time.js"></script>
 <script src="js/world/arms.js"></script>
 <script src="js/world/halo.js"></script>

@@ -1,4 +1,4 @@
-/* interface.js — liga as telas inicial e Começar aos caminhos que já funcionam.
+/* interface.js — liga as telas inicial, Começar e Atualizar aos caminhos que já funcionam.
    As outras telas ainda usam a interface antiga até sua integração ser aprovada. */
 (function () {
   const N = NEXUS;
@@ -18,6 +18,7 @@
     mostrarInicial() {
       // Voltar do formulário não recarrega a página nem descarta texto ou resultado em memória.
       if (N.comecar) N.comecar.ocultar();
+      if (N.atualizar) N.atualizar.ocultar();
       formularioAntigo().classList.add('oculto');
       inicial().classList.remove('oculto');
       inicial().setAttribute('aria-hidden', 'false');
@@ -31,11 +32,18 @@
     ocultarMenus() {
       this.ocultarInicial();
       if (N.comecar) N.comecar.ocultar();
+      if (N.atualizar) N.atualizar.ocultar();
       formularioAntigo().classList.add('oculto');
+    },
+    usarDesfoque(tela) {
+      // O mesmo elemento acompanha o formulário aberto, sempre atrás do painel.
+      const fundo = document.getElementById('fundo-desfocado');
+      tela.insertBefore(fundo, tela.firstChild);
     },
     abrirFormularioAntigo(modo) {
       this.ocultarInicial();
       if (N.comecar) N.comecar.ocultar();
+      if (N.atualizar) N.atualizar.ocultar();
       formularioAntigo().classList.remove('oculto');
       N.start.abrirFormulario(modo);
     }
@@ -57,7 +65,11 @@
       N.start.abrirHelena();
     });
     document.getElementById('botao-atualizar').addEventListener('click', () => {
-      if (!document.getElementById('botao-atualizar').disabled) N.ui.abrirFormularioAntigo('atualizar');
+      atualizarHistorico();
+      if (!document.getElementById('botao-atualizar').disabled) {
+        N.ui.ocultarMenus();
+        N.atualizar.abrir();
+      }
     });
     document.getElementById('botao-gerenciamento').addEventListener('click', () => {
       N.ui.abrirFormularioAntigo('gerenciamento');

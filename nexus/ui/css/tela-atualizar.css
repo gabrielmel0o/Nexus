@@ -1,0 +1,44 @@
+/*
+  ============================================================
+  NEXUS — tela-atualizar.css
+  Ajustes específicos da Tela Atualizar (nº 3).
+  Reaproveitamento: toda a estrutura de layout já vem de
+  css/tela-comecar.css (carregado antes).
+  Este arquivo só remapeia os seletores de ID para que as
+  mesmas regras se apliquem aos elementos desta tela.
+  ============================================================
+*/
+
+
+/* ============================================================
+   REMAPEAMENTO DE IDs
+   Os elementos aqui têm IDs diferentes dos da tela 2, mas
+   estrutura e aparência idênticas. Aplicamos as mesmas
+   propriedades visuais via seletores de ID desta tela.
+   ============================================================ */
+
+/* Container da tela: mesma lógica de #tela-comecar */
+#tela-atualizar {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+  padding-top: clamp(1rem, 4vh, 2.5rem);
+  padding-left: clamp(1.5rem, 4.4vw, 5rem);
+  padding-bottom: clamp(1rem, 4vh, 2.5rem);
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Título da tela: mesma aparência de .titulo-comecar */
+#titulo-atualizar {
+  font-family: var(--fonte-titulo);
+  font-weight: 900;
+  font-size: var(--tamanho-titulo-principal);
+  color: var(--cor-laranja-principal);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  line-height: 1;
+}

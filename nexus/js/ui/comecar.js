@@ -171,6 +171,7 @@
     campo.addEventListener('input', conferir);
     N.comecar = {
       abrir() {
+        N.ui.usarDesfoque(tela);
         tela.classList.remove('oculto');
         tela.setAttribute('aria-hidden', 'false');
         conferir();

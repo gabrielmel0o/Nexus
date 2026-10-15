@@ -1,0 +1,262 @@
+/*
+  ============================================================
+  NEXUS — tela-astro.css
+  CSS específico do painel descritivo do astro (tela 7).
+  Referência visual: telas/07-astro.png
+  Depende de: css/base.css e css/barra-inferior.css.
+  ============================================================
+*/
+
+
+/* ============================================================
+   1. PAINEL LATERAL ESQUERDO DO ASTRO
+   Painel flutuante de vidro no lado esquerdo da tela.
+   Margem esquerda: ~4.4vw (~86px em 1920p).
+   Largura: ~525px em 1920p (~27.3vw).
+   Fundo: roxo opaco (rgba(16, 8, 25, 0.75)).
+   ============================================================ */
+
+.painel-astro {
+  position: fixed;
+  left: clamp(1.5rem, 4.4vw, 5rem);
+  top: clamp(2rem, 8.8vh, 5.5rem);
+  width: clamp(340px, 27.5vw, 540px);
+  max-height: calc(100vh - clamp(3.2rem, 6.5vh, 4.5rem) - clamp(2.5rem, 10vh, 6rem));
+
+  background: var(--cor-fundo-roxo-opaco);
+  border-radius: var(--raio-painel);
+  padding: clamp(1.4rem, 1.8vw, 2.4rem);
+
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.9rem, 1.4vh, 1.5rem);
+
+  overflow-y: auto;
+  pointer-events: auto;
+  z-index: 10;
+
+  /* Scrollbar customizada para telas menores */
+  scrollbar-width: thin;
+  scrollbar-color: var(--cor-laranja-principal) rgba(16, 8, 25, 0.4);
+}
+
+.painel-astro::-webkit-scrollbar {
+  width: 6px;
+}
+
+.painel-astro::-webkit-scrollbar-track {
+  background: rgba(16, 8, 25, 0.4);
+  border-radius: 4px;
+  margin: 6px 0;
+}
+
+.painel-astro::-webkit-scrollbar-thumb {
+  background: var(--cor-laranja-principal);
+  border-radius: 4px;
+}
+
+.painel-astro::-webkit-scrollbar-thumb:hover {
+  background: var(--cor-laranja-principal);
+}
+
+
+/* ============================================================
+   2. CABEÇALHO DO PAINEL (subtipo e botão fechar)
+   ============================================================ */
+
+.cabecalho-astro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.subtipo-astro {
+  font-family: var(--fonte-texto);
+  font-weight: 400;
+  font-size: clamp(0.6rem, 0.7vw, 0.75rem);
+  color: var(--cor-texto-secundario);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.btn-fechar-astro {
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 0.2rem 0.4rem;
+  color: var(--cor-texto-secundario);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  transition: color 0.15s ease;
+}
+
+.btn-fechar-astro:hover,
+.btn-fechar-astro:focus-visible {
+  color: var(--cor-branco-nexus);
+  outline: none;
+}
+
+
+/* ============================================================
+   3. TÍTULO DO ASTRO (ex: Família)
+   ============================================================ */
+
+.titulo-astro {
+  font-family: var(--fonte-titulo);
+  font-weight: 900;
+  font-size: clamp(1.8rem, 2.4vw, 2.8rem);
+  line-height: 1.05;
+  color: var(--cor-laranja-principal);
+  margin: 0;
+  padding: 0;
+}
+
+
+/* ============================================================
+   4. TEXTO DESCRITIVO PRINCIPAL
+   ============================================================ */
+
+.descricao-astro {
+  font-family: var(--fonte-texto);
+  font-weight: 400;
+  font-size: clamp(0.75rem, 0.85vw, 0.95rem);
+  line-height: 1.45;
+  color: var(--cor-branco-nexus);
+  margin: 0;
+}
+
+
+/* ============================================================
+   5. SEÇÃO "POR QUÊ?" COM CITAÇÃO
+   ============================================================ */
+
+.secao-astro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.rotulo-secao-astro {
+  font-family: var(--fonte-texto);
+  font-weight: 400;
+  font-size: clamp(0.65rem, 0.72vw, 0.8rem);
+  color: var(--cor-laranja-principal);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.citacao-astro {
+  margin: 0.2rem 0;
+  padding-left: clamp(0.6rem, 0.8vw, 1rem);
+  border-left: 2px solid var(--cor-laranja-principal);
+
+  font-family: var(--fonte-texto);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(0.72rem, 0.82vw, 0.92rem);
+  line-height: 1.4;
+  color: var(--cor-branco-nexus);
+}
+
+.texto-secao-astro {
+  font-family: var(--fonte-texto);
+  font-weight: 400;
+  font-size: clamp(0.75rem, 0.85vw, 0.95rem);
+  line-height: 1.45;
+  color: var(--cor-branco-nexus);
+  margin: 0;
+}
+
+
+/* ============================================================
+   6. BLOCO "FASE"
+   ============================================================ */
+
+.bloco-fase-astro {
+  font-family: var(--fonte-texto);
+  font-size: clamp(0.72rem, 0.82vw, 0.92rem);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.rotulo-fase-astro {
+  font-weight: 400;
+  color: var(--cor-laranja-principal);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-right: 0.4rem;
+}
+
+.texto-fase-astro {
+  font-style: italic;
+  color: var(--cor-branco-nexus);
+}
+
+
+/* ============================================================
+   7. RODAPÉ DE MÉTRICAS (Peso Emocional e Profundidade)
+   ============================================================ */
+
+.rodape-astro {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-top: auto;
+  padding-top: clamp(0.6rem, 1vh, 1.2rem);
+}
+
+.coluna-metrica-astro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.rotulo-metrica-astro {
+  font-family: var(--fonte-texto);
+  font-weight: 400;
+  font-size: clamp(0.6rem, 0.68vw, 0.75rem);
+  color: var(--cor-laranja-principal);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Indicador de peso (5 círculos) */
+.pontos-peso-astro {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.ponto-astro {
+  display: inline-block;
+  width: clamp(7px, 0.48vw, 10px);
+  height: clamp(7px, 0.48vw, 10px);
+  border-radius: 50%;
+}
+
+.ponto-astro.ativo {
+  background-color: var(--cor-branco-nexus);
+}
+
+.ponto-astro.inativo {
+  border: 1px solid var(--cor-branco-nexus);
+  background-color: transparent;
+  opacity: 0.4;
+}
+
+/* Valor de profundidade (ex: "recente") */
+.valor-profundidade-astro {
+  font-family: var(--fonte-titulo);
+  font-weight: 900;
+  font-size: clamp(0.85rem, 1vw, 1.15rem);
+  color: var(--cor-branco-nexus);
+  line-height: 1;
+}

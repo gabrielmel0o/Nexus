@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<!--
+  ============================================================
+  CONFIRMAÇÃO DE SAÍDA (nº 9) — referência visual: telas/12-sair.png
+  ============================================================
+  Esta tela é exibida quando o usuário clica no botão "SAIR"
+  dentro do menu (tela 8). O modal de confirmação de saída abre
+  centralizado na tela e aplica um desfoque gaussiano de 8,5px sobre
+  toda a área atrás dele (representada pelo fundo verde na referência).
+
+  PARTES DESTA TELA E SEUS IDs:
+  1. .fundo-teste.com-desfoque → fundo de teste com listras coloridas (REMOVER NO PROJETO FINAL)
+  2. #fundo-desfocado          → camada com backdrop-filter: blur(8.5px)
+  3. #tela-sair                → container raiz da tela (pointer-events: none)
+  4. #modal-sair               → caixa modal centralizada na viewport
+  5. #titulo-modal-sair        → título "VOCÊ DESEJA SAIR?" (Geologica Black)
+  6. #subtitulo-modal-sair     → pergunta explicativa em HiburMono
+  7. #botao-cancelar-sair      → botão pílula cinza: "NÃO, CONTINUAR NO NEXUS"
+  8. #botao-confirmar-sair     → botão pílula laranja: "SIM, SAIR DO NEXUS"
+
+  AO CLICAR (lógica futura do projeto):
+  - #botao-cancelar-sair  → fecha o modal de saída e retorna para a tela 8 (Menu)
+  - #botao-confirmar-sair → confirma a saída, encerra a sessão e fecha a aplicação
+  ============================================================
+-->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXUS — Deseja Sair?</title>
+
+  <!-- Base: variáveis CSS, fontes e regras comuns -->
+  <link rel="stylesheet" href="css/base.css">
+
+  <!-- Hover: anel de luz global — deve vir logo após base.css -->
+  <link rel="stylesheet" href="css/hover.css">
+
+  <!-- CSS específico desta tela: modal de saída -->
+  <link rel="stylesheet" href="css/tela-sair.css">
+
+  <!-- Fundo de teste com listras coloridas para verificar o blur (REMOVER NO PROJETO FINAL) -->
+  <link rel="stylesheet" href="css/fundo-teste.css">
+</head>
+<body>
+
+  <!-- FUNDO DE TESTE (REMOVER NO PROJETO FINAL) -->
+  <div class="fundo-teste com-desfoque" aria-hidden="true"></div>
+
+  <!-- CAMADA DE DESFOQUE (8,5px) SOBRE TODA A ÁREA ATRÁS DO MODAL -->
+  <div id="fundo-desfocado" aria-hidden="true"></div>
+
+  <!-- INTERFACE DO MODAL DE SAÍDA -->
+  <div class="nexus-ui" id="tela-sair">
+
+    <!-- MODAL CENTRALIZADO (referência 12-sair.png) -->
+    <div class="modal-sair" id="modal-sair" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-sair">
+
+      <!-- Topo claro (#E2E3E4) -->
+      <div class="modal-sair-topo">
+        <h1 class="titulo-modal-sair" id="titulo-modal-sair">VOC&Ecirc; DESEJA SAIR?</h1>
+        <p class="subtitulo-modal-sair" id="subtitulo-modal-sair">
+          Voc&ecirc; tem certeza que deseja sair e fechar o Nexus?
+        </p>
+      </div>
+
+      <!-- Base azul principal (#111450) com os dois botões de ação -->
+      <div class="modal-sair-base">
+        <!-- Cancelar / Continuar no NEXUS (cinza) -->
+        <button class="btn-modal-sair btn-cancelar-sair" id="botao-cancelar-sair" type="button">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          N&Atilde;O, CONTINUAR NO NEXUS
+        </button>
+
+        <!-- Confirmar saída (laranja principal) -->
+        <button class="btn-modal-sair btn-confirmar-sair" id="botao-confirmar-sair" type="button">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          SIM, SAIR DO NEXUS
+        </button>
+      </div>
+
+    </div><!-- fim #modal-sair -->
+
+  </div><!-- fim #tela-sair -->
+
+  <script src="js/teste.js"></script>
+</body>
+</html>

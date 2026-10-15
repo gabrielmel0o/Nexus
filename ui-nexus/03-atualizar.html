@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<!--
+  ============================================================
+  MENU ATUALIZAR (nº 3) — referência visual: telas/03-atualizar.png
+  ============================================================
+  PARTES DESTA TELA E SEUS IDs:
+
+  1. .fundo-teste.com-desfoque → fundo de teste com listras coloridas para verificar o desfoque (REMOVER NO PROJETO FINAL)
+  2. #fundo-desfocado          → camada de tela cheia com backdrop-filter: blur()
+  3. #tela-atualizar           → container raiz da interface (pointer-events: none)
+  4. #painel-atualizar         → painel de vidro lateral esquerdo (.painel-vidro)
+  5. #botao-voltar             → botão circular com seta para fechar o menu e voltar à tela inicial
+  6. #titulo-atualizar         → título principal da tela ("ATUALIZAR")
+  7. #rotulo-secao-mudancas    → rótulo com linha horizontal ("O QUE MUDOU")
+  8. #campo-texto-mudancas     → campo de texto grande (textarea) com borda laranja
+  9. #contador-caracteres      → contador dinâmico ("0 / 3.000 caracteres · mínimo 100")
+  10. #aviso-privacidade       → bloco informativo de privacidade
+  11. #botao-atualizar-universo→ botão de ação para atualizar o universo 3D (desabilitado até atingir 100 caracteres)
+
+  DIFERENÇAS EM RELAÇÃO À TELA 2 (COMEÇAR):
+  - Mínimo de caracteres: 100 (em vez de 500)
+  - Rótulo da seção: "O QUE MUDOU" (em vez de "ESCREVA SOBRE A SUA MENTE")
+  - Placeholder diferente
+  - Apenas 1 parágrafo de aviso (sem o aviso de substituição do universo)
+  - Botão: "ATUALIZAR MEU UNIVERSO"
+
+  AO CLICAR (lógica futura do projeto):
+  - #botao-voltar              → cancela e retorna para a Tela Inicial (tela 1)
+  - #campo-texto-mudancas      → digitação atualiza #contador-caracteres; ao atingir 100 caracteres, habilita #botao-atualizar-universo
+  - #botao-atualizar-universo  → envia o texto para atualizar o universo 3D e avança para a Tela de Visualização (tela 5)
+  ============================================================
+-->
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXUS — Atualizar</title>
+
+  <!-- Base: variáveis CSS, fontes e regras comuns -->
+  <link rel="stylesheet" href="css/base.css">
+
+  <!-- Hover: anel de luz global — deve vir logo após base.css -->
+  <link rel="stylesheet" href="css/hover.css">
+
+  <!-- CSS da tela 2: estrutura identica, reaproveitada inteiramente -->
+  <link rel="stylesheet" href="css/tela-comecar.css">
+
+  <!-- Ajustes específicos desta tela (IDs diferentes, sem alterar o layout) -->
+  <link rel="stylesheet" href="css/tela-atualizar.css">
+
+  <!-- Fundo de teste com listras para verificação do desfoque (REMOVER NO PROJETO FINAL) -->
+  <link rel="stylesheet" href="css/fundo-teste.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       FUNDO DE TESTE COM LISTRAS (telas com desfoque)
+       REMOVER NO PROJETO FINAL — substituído pelo canvas Three.js
+       ============================================================ -->
+  <div class="fundo-teste com-desfoque" aria-hidden="true"></div>
+
+
+  <!-- ============================================================
+       CAMADA DE DESFOQUE (backdrop-filter)
+       Mesma da tela 2 — desfoca o universo 3D ao fundo.
+       ============================================================ -->
+  <div id="fundo-desfocado" aria-hidden="true"></div>
+
+
+  <!-- ============================================================
+       INTERFACE DO MENU ATUALIZAR
+       Estrutura idêntica à tela 2; apenas IDs e textos diferem.
+       ============================================================ -->
+  <div class="nexus-ui" id="tela-atualizar">
+
+    <!-- Painel de vidro lateral esquerdo -->
+    <main class="painel-vidro painel-comecar" id="painel-atualizar">
+
+      <!-- Cabeçalho: botão voltar + título da tela -->
+      <header class="cabecalho-painel">
+        <button class="btn-voltar" id="botao-voltar-atualizar" type="button" aria-label="Voltar para a tela inicial">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          <span aria-hidden="true">&#10094;</span>
+        </button>
+        <h1 class="titulo-comecar" id="titulo-atualizar">ATUALIZAR</h1>
+      </header>
+
+      <!-- Bloco de formulário interno com borda sutil -->
+      <section class="bloco-formulario" aria-label="Formulário de atualização da mente">
+
+        <!-- Rótulo de seção: "O QUE MUDOU" (em vez de "ESCREVA SOBRE A SUA MENTE") -->
+        <h2 class="rotulo-secao" id="rotulo-secao-mudancas">O QUE MUDOU</h2>
+
+        <!-- Campo de texto: mínimo 100 caracteres (diferente da tela 2 que exige 500) -->
+        <textarea
+          class="campo-texto campo-texto-mente"
+          id="campo-texto-mudancas"
+          placeholder="Conte o que mudou na sua vida e na sua mente (entre 100 e 3.000 caracteres)..."
+          rows="12"
+          maxlength="3000"
+          spellcheck="false"
+        ></textarea>
+
+        <!-- Contador: mínimo 100 (diferente da tela 2 que exige 500) -->
+        <div class="contador-caracteres" id="contador-caracteres-atualizar" aria-live="polite">
+          <span id="caracteres-digitados-atualizar">0</span> / 3.000 caracteres &middot; m&iacute;nimo 100
+        </div>
+
+        <!-- Aviso de privacidade: apenas 1 parágrafo nesta tela
+             (sem o segundo parágrafo de substituição do universo da tela 2) -->
+        <aside class="texto-privacidade" id="aviso-privacidade-atualizar">
+          <p>
+            Seu texto &eacute; enviado ao Google (Gemini) para ser interpretado. O NEXUS n&atilde;o guarda seu texto. Na camada gratuita, o Google pode us&aacute;-lo para melhorar produtos, e revisores humanos podem l&ecirc;-lo. Evite nomes reais e dados que identifiquem pessoas; use apelidos.
+          </p>
+        </aside>
+
+        <!-- Botão de ação: desabilitado por padrão até preencher 100 caracteres -->
+        <button class="btn btn-laranja btn-gerar-universo" id="botao-atualizar-universo" type="button" disabled>
+          <span class="btn__feixe" aria-hidden="true"></span>
+          <span class="icone-play" aria-hidden="true">&#9654;</span>
+          <span class="rotulo-botao">ATUALIZAR MEU UNIVERSO</span>
+        </button>
+
+      </section><!-- fim .bloco-formulario -->
+
+    </main><!-- fim #painel-atualizar -->
+
+  </div><!-- fim #tela-atualizar -->
+
+
+  <!-- JS de teste mínimo da interface -->
+  <script src="js/teste.js"></script>
+
+</body>
+</html>

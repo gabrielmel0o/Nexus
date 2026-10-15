@@ -1,0 +1,131 @@
+/*
+  ============================================================
+  NEXUS — barra-inferior.css
+  CSS da barra de controle compartilhada pelas telas 5, 6 e 7.
+  Referência visual: telas/11-visualização.png
+  Depende de: css/base.css (carregado antes).
+  ============================================================
+*/
+
+
+/* ============================================================
+   1. BARRA INFERIOR
+   Faixa fixa no rodapé, 3 zonas: esquerda | centro | direita.
+   Fundo semitransparente escuro (rgba(0,0,0,0.26)).
+   Altura medida nos pixels da referência: ~65px = 6vh em 1080p.
+   ============================================================ */
+
+.barra-inferior {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: clamp(3.2rem, 6.5vh, 4.5rem); /* ~70px em 1080p medidos na referência */
+  background: var(--barra-funcionalidades); /* Gradiente preto: 100% (borda inferior) a 30% (topo) */
+
+  display: flex;
+  align-items: center;
+
+  pointer-events: none; /* Container não bloqueia o mouse */
+  z-index: 20; /* Acima dos painéis flutuantes (z-index: 10) */
+}
+
+
+/* ============================================================
+   2. ZONAS DE LAYOUT (esquerda | centro | direita)
+   ============================================================ */
+
+.barra-zona {
+  display: flex;
+  align-items: center;
+}
+
+/* Esquerda: isotipo NEXUS (botão de menu) — ~22px da borda */
+.barra-esquerda {
+  flex: 0 0 auto;
+  padding-left: clamp(1rem, 1.2vw, 1.8rem);
+}
+
+/* Centro: RETROCEDER | ampulheta | AVANÇAR — centralizado na tela */
+.barra-centro {
+  flex: 1;
+  justify-content: center;
+  gap: clamp(1rem, 1.9vw, 2.5rem); /* ~36-38px medidos na referência */
+}
+
+/* Direita: ícone saiba mais (?) — ~24px da borda */
+.barra-direita {
+  flex: 0 0 auto;
+  padding-right: clamp(1rem, 1.3vw, 1.8rem);
+}
+
+
+/* ============================================================
+   3. BOTÃO GENÉRICO DA BARRA
+   Reativa pointer-events (o pai tem none).
+   Remove estilos padrão de botão do navegador.
+   ============================================================ */
+
+.barra-btn {
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: auto; /* Reativa clique nos botões */
+  outline: none;
+}
+
+.barra-btn:focus-visible {
+  outline: 2px solid var(--cor-branco-nexus);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+
+/* ============================================================
+   4. BOTÃO DE TEXTO (RETROCEDER e AVANÇAR)
+   Fonte Geologica, maiúsculas, branca.
+   ============================================================ */
+
+.barra-btn-texto {
+  font-family: var(--fonte-titulo);
+  font-weight: 900;
+  font-size: var(--tamanho-barra-botao);
+  color: var(--cor-branco-nexus);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+
+/* ============================================================
+   5. ÍCONES DENTRO DA BARRA
+   Tamanhos proporcionais a cada ícone.
+   ============================================================ */
+
+.icone-barra {
+  display: block;
+  object-fit: contain;
+}
+
+/* Isotipo (X laranja do NEXUS) — botão de menu (~43px de altura em 1080p) */
+.icone-isotipo {
+  height: clamp(1.8rem, 4vh, 2.8rem);
+  width: auto;
+}
+
+/* Ampulheta — ícone de fase/tempo (~38px de altura em 1080p) */
+.icone-ampulheta {
+  height: clamp(1.5rem, 3.5vh, 2.4rem);
+  width: auto;
+}
+
+/* Saiba mais (?) — ícone no canto direito (~23px de altura em 1080p) */
+.icone-saibamais {
+  height: clamp(1.1rem, 2.2vh, 1.6rem);
+  width: auto;
+}

@@ -1,0 +1,175 @@
+/*
+  ============================================================
+  NEXUS — hover.css
+  Efeitos de hover e foco globais da interface NEXUS.
+  Fonte oficial: teste-hover.html (vídeo 1014.mp4).
+  Aplica o efeito de anel de luz por fora em todos os botões da UI.
+  ============================================================
+*/
+
+:root {
+  /* Variáveis de controle do tempo e da curva de animação */
+  --hover-tempo: 1.35s;   /* Duração de um ciclo completo do feixe */
+  --hover-curva: linear;  /* Velocidade constante em laço sem emenda */
+
+  /* Geometria do anel de luz */
+  --anel-espessura: 2px;  /* Espessura da linha do anel */
+  --anel-gap: 2px;        /* Distância entre o anel e a borda do botão */
+
+  /* Cores do feixe no anel de luz */
+  --cor-anel-ciano:  #78B4D0;
+  --cor-anel-roxo:   #6F378B;
+  --cor-anel-escuro: var(--cor-botoes);
+}
+
+
+/* ============================================================
+   1. ISOLAMENTO DO BOTÃO
+   Garante contexto de empilhamento para o anel renderizar por fora.
+   ============================================================ */
+
+.btn,
+.btn-comecar,
+.btn-laranja,
+.btn-gerar-universo,
+.btn-menu-item,
+.btn-voltar,
+.barra-btn,
+.btn-fechar-astro,
+.btn-menu-lateral,
+.btn-modal-sair,
+.item-dado-acao,
+.item-dado-destrutivo,
+.com-anel-luz {
+  position: relative;
+  isolation: isolate;
+  outline: none;
+}
+
+
+/* ============================================================
+   2. ANEL DE LUZ (elemento .btn__feixe)
+   Fica do lado de fora do botão, recortado via máscara CSS.
+   ============================================================ */
+
+.btn__feixe {
+  position: absolute;
+  inset: calc(-1 * (var(--anel-gap) + var(--anel-espessura)));
+  border-radius: calc(var(--raio-botao, 0.5rem) + var(--anel-gap) + var(--anel-espessura));
+  padding: var(--anel-espessura);
+  overflow: hidden;
+
+  /* Máscara: recorta o miolo do botão deixando apenas o anel de luz visível */
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Variante circular para botões de voltar e fechar */
+.btn-voltar .btn__feixe,
+.btn-fechar-astro .btn__feixe {
+  border-radius: 50%;
+}
+
+/* Variante pílula para botões do modal de saída */
+.btn-modal-sair .btn__feixe {
+  border-radius: 9999px;
+}
+
+/* Gradiente diagonal contínuo com todas as faixas de cor */
+.btn__feixe::before {
+  content: "";
+  position: absolute;
+  left: -150%;
+  top: -150%;
+  width: 400%;
+  height: 400%;
+  transform: translate(22.5%, 22.5%);
+  background: repeating-linear-gradient(to top left,
+    var(--cor-branco-nexus) -17.5%,
+    var(--cor-branco-nexus) -5%,
+    var(--cor-anel-escuro) 4.25%,
+    var(--cor-anel-escuro) 8.5%,
+    #231935 9.5%,
+    #3C2046 10.5%,
+    #4A2761 12.5%,
+    var(--cor-anel-roxo) 16.25%,
+    #9169AB 17.5%,
+    #9792BF 20.75%,
+    var(--cor-anel-ciano) 22%,
+    #C8D7DE 26.75%,
+    var(--cor-branco-nexus) 27.5%);
+  will-change: transform;
+}
+
+
+/* ============================================================
+   3. ATIVAÇÃO NO HOVER E FOCO VISÍVEL
+   Liga e desliga instantaneamente (sem fade de opacidade).
+   ============================================================ */
+
+:is(.btn, .btn-comecar, .btn-laranja, .btn-gerar-universo, .btn-menu-item, .btn-voltar, .barra-btn, .btn-fechar-astro, .btn-menu-lateral, .btn-modal-sair, .item-dado-acao, .item-dado-destrutivo, .com-anel-luz):hover:not(:disabled) > .btn__feixe,
+:is(.btn, .btn-comecar, .btn-laranja, .btn-gerar-universo, .btn-menu-item, .btn-voltar, .barra-btn, .btn-fechar-astro, .btn-menu-lateral, .btn-modal-sair, .item-dado-acao, .item-dado-destrutivo, .com-anel-luz):focus-visible:not(:disabled) > .btn__feixe {
+  opacity: 1;
+}
+
+:is(.btn, .btn-comecar, .btn-laranja, .btn-gerar-universo, .btn-menu-item, .btn-voltar, .barra-btn, .btn-fechar-astro, .btn-menu-lateral, .btn-modal-sair, .item-dado-acao, .item-dado-destrutivo, .com-anel-luz):hover:not(:disabled) > .btn__feixe::before,
+:is(.btn, .btn-comecar, .btn-laranja, .btn-gerar-universo, .btn-menu-item, .btn-voltar, .barra-btn, .btn-fechar-astro, .btn-menu-lateral, .btn-modal-sair, .item-dado-acao, .item-dado-destrutivo, .com-anel-luz):focus-visible:not(:disabled) > .btn__feixe::before {
+  animation: varrer var(--hover-tempo) var(--hover-curva) infinite;
+}
+
+
+/* ============================================================
+   4. ESTADO ATIVO (:active) NO CLIQUE
+   Micro-escala leve de feedback tátil sem alterar layout.
+   ============================================================ */
+
+:is(.btn, .btn-comecar, .btn-laranja, .btn-gerar-universo, .btn-menu-item, .btn-voltar, .barra-btn, .btn-fechar-astro, .btn-menu-lateral, .btn-modal-sair, .item-dado-acao, .item-dado-destrutivo, .com-anel-luz):active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+
+/* ============================================================
+   5. ANIMAÇÃO DE VARREDURA
+   Apenas a propriedade transform é animada.
+   ============================================================ */
+
+@keyframes varrer {
+  from { transform: translate(22.5%, 22.5%); }
+  to   { transform: translate(-22.5%, -22.5%); }
+}
+
+
+/* ============================================================
+   6. ACESSIBILIDADE (prefers-reduced-motion)
+   Sem animação contínua: fixa anel branco estático.
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.btn, .btn-comecar, .btn-menu-item, .btn-voltar, .barra-btn, .btn-fechar-astro, .btn-menu-lateral, .btn-modal-sair, .item-dado-acao, .item-dado-destrutivo, .com-anel-luz):hover > .btn__feixe::before,
+  :is(.btn, .btn-comecar, .btn-menu-item, .btn-voltar, .barra-btn, .btn-fechar-astro, .btn-menu-lateral, .btn-modal-sair, .item-dado-acao, .item-dado-destrutivo, .com-anel-luz):focus-visible > .btn__feixe::before {
+    animation: none;
+  }
+
+  .btn__feixe::before {
+    background: var(--cor-branco-nexus);
+    transform: none;
+  }
+}
+
+
+/* ============================================================
+   7. BOTÕES DESABILITADOS
+   O anel nunca aparece em botões desabilitados.
+   ============================================================ */
+
+button:disabled .btn__feixe,
+button[disabled] .btn__feixe,
+.btn:disabled .btn__feixe,
+.btn[disabled] .btn__feixe {
+  display: none !important;
+}

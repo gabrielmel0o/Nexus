@@ -12,8 +12,7 @@
 
 @font-face {
   font-family: 'NEXUS Texto';
-  src: url('../assets/fonts/HiburMono-Regular.ttf') format('truetype'),
-       url('assets/fonts/HiburMono-Regular.ttf') format('truetype');
+  src: url('../ui/fontes/HiburMono-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;

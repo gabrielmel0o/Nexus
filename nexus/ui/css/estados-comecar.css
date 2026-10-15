@@ -1,0 +1,33 @@
+/* Complementos somente para os estados que não vieram no desenho.
+   O CSS aprovado da tela permanece intacto. Tudo começa oculto. */
+.perguntas-comecar {
+  display: flex;
+  flex-direction: column;
+  gap: .8rem;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: .4rem;
+}
+.perguntas-comecar label {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  font: var(--tamanho-texto-corpo) var(--fonte-texto);
+}
+.acoes-comecar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .8rem;
+  padding: .4rem;
+  flex-shrink: 0;
+}
+.acoes-comecar .btn {
+  white-space: normal;
+  font-size: var(--tamanho-rotulo);
+}
+.estado-comecar {
+  flex-shrink: 0;
+  max-height: 28%;
+  overflow-y: auto;
+}

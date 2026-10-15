@@ -1,0 +1,393 @@
+/*
+  ============================================================
+  NEXUS — base.css
+  Arquivo base: variáveis, fontes e regras comuns a todas as telas.
+  Este arquivo deve ser incluído ANTES de qualquer outro CSS do projeto.
+  ============================================================
+*/
+
+
+/* ============================================================
+   1. FONTES CUSTOMIZADAS
+   Registra as fontes da pasta fontes/ para uso no projeto.
+   ============================================================ */
+
+@font-face {
+  /* Fonte de títulos: Geologica Black (pesada, usada em "COMEÇAR", "NEXUS", etc.) */
+  font-family: 'Geologica';
+  src: url('../fontes/Geologica-Black.ttf') format('truetype');
+  font-weight: 900;   /* Black = peso 900 */
+  font-style: normal;
+  font-display: swap; /* Mostra o texto com fonte do sistema enquanto carrega */
+}
+
+@font-face {
+  /* Fonte de textos: HiburMono Regular (monoespaçada, usada em textos corridos e campos) */
+  font-family: 'HiburMono';
+  src: url('../fontes/HiburMono-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+/* ============================================================
+   2. VARIÁVEIS CSS
+   Todos os valores de cor e fonte ficam aqui.
+   Em NENHUM outro arquivo escreva um hex diretamente fora do :root.
+   ============================================================ */
+
+:root {
+
+  /* --- Fontes --- */
+  --fonte-titulo: 'Geologica', sans-serif;  /* Títulos e botões principais */
+  --fonte-texto:  'HiburMono', monospace;   /* Textos corridos, campos, rótulos */
+
+  /* --- Cores principais --- */
+  --cor-fundo-roxo:          #100819;             /* Fundo de painéis (use com rgba para 75%) */
+  --cor-fundo-roxo-opaco:    rgba(16, 8, 25, 0.75); /* Painel com 75% de opacidade */
+  --cor-botoes:              #100819;             /* Fundo dos botões padrão (sólido) */
+  --cor-branco-nexus:        #E2E3E4;             /* Títulos, símbolos e textos gerais */
+  --cor-texto-secundario:    #9D9D9D;             /* Textos secundários e descritivos */
+
+  /* --- Cores laranja --- */
+  --cor-laranja-principal:   #FF8900;  /* Laranja principal (botão COMEÇAR, destaques) */
+  --cor-laranja-secundario:  #A35808;  /* Rótulos pequenos */
+  --cor-laranja-terciario:   #632A00;  /* Símbolo dentro do botão COMEÇAR */
+  --texto-laranja:           #291100;  /* Texto escrito EM CIMA de área laranja */
+
+  /* --- Outras cores --- */
+  --cor-azul-principal:      #111450;  /* Azul principal (base do modal de saída) */
+
+  /* Barra inferior nas telas de visualização (5, 6 e 7):
+     Gradiente de preto: 100% de opacidade na borda inferior até 30% no topo da barra. */
+  --barra-funcionalidades:   linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.3) 100%);
+
+  /* --- Gradiente da tela inicial ---
+     Da borda esquerda (#100819) até 0% de opacidade na linha vermelha (~67.5%),
+     conforme especificado no LEIA-ME.md e na imagem de referência 10-tela_inicial.png. */
+  --gradiente-menu-inicial: linear-gradient(
+    to right,
+    #100819 0%,
+    transparent 67.5%
+  );
+
+  /* --- Cores do anel de hover (seção 6 do LEIA-ME) --- */
+  --cor-anel-ciano:  #78B4D0;  /* Faixa ciano no anel animado */
+  --cor-anel-roxo:   #6F378B;  /* Faixa roxa no anel animado */
+  --cor-anel-escuro: #100819;  /* Faixa escura no anel animado (mesma que --cor-botoes) */
+
+  /* --- Parâmetros do anel de hover --- */
+  --anel-espessura: 2px;   /* Largura do anel de luz ao redor do botão */
+  --anel-gap:       2px;   /* Folga entre o botão e o anel */
+  --volta:          1.35s; /* Duração do ciclo da animação do anel */
+
+  /* --- Arredondamentos comuns --- */
+  --raio-botao:   0.5rem;  /* Borda arredondada dos botões padrão */
+  --raio-painel:  0.75rem; /* Borda arredondada dos painéis de vidro */
+  --raio-campo:   0.4rem;  /* Borda arredondada dos campos de texto */
+
+  /* --- Tamanhos de fonte (escala para 1920×1080) ---
+     Decididos com base nos PNGs de referência.
+     Todos os títulos de mesma importância têm o mesmo tamanho. */
+  --tamanho-titulo-principal: clamp(1.8rem, 2.5vw, 2.8rem); /* Títulos de tela: COMEÇAR, ATUALIZAR... */
+  --tamanho-titulo-botao:     clamp(1rem,  1.4vw, 1.5rem);  /* Rótulo principal dos botões da tela inicial */
+  --tamanho-subtitulo:        clamp(0.65rem, 0.8vw, 0.9rem);/* Subtítulo abaixo dos botões */
+  --tamanho-texto-corpo:      clamp(0.75rem, 0.85vw, 1rem); /* Texto corrido nos painéis */
+  --tamanho-rotulo:           clamp(0.6rem, 0.7vw, 0.75rem);/* Rótulos pequenos (seção, contador) */
+  --tamanho-barra-botao:      clamp(0.8rem, 1vw, 1.1rem);   /* Texto dos botões da barra inferior */
+}
+
+
+/* ============================================================
+   3. RESET BÁSICO
+   Remove margens e paddings padrão do navegador.
+   ============================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box; /* Inclui borda e padding no cálculo de largura */
+  margin: 0;
+  padding: 0;
+}
+
+
+/* ============================================================
+   4. CAMADA RAIZ DA INTERFACE
+   O body e o container principal ficam transparentes,
+   pois a interface flutua POR CIMA do canvas Three.js.
+   ============================================================ */
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  background: transparent; /* Deixa o canvas 3D aparecer atrás */
+  overflow: hidden;         /* Sem barras de rolagem: a interface é sempre tela cheia */
+  font-family: var(--fonte-texto);
+  color: var(--cor-branco-nexus);
+}
+
+/* Container principal: cobre a tela toda, não bloqueia o mouse por padrão */
+.nexus-ui {
+  position: fixed;    /* Fica preso à viewport, não rola com a página */
+  inset: 0;           /* top:0, right:0, bottom:0, left:0 — cobre tudo */
+  pointer-events: none; /* Por padrão, o mouse passa para o canvas 3D abaixo */
+  z-index: 10;        /* Fica acima do canvas */
+}
+
+/* Qualquer elemento clicável DENTRO da interface precisa reativar o mouse */
+.nexus-ui button,
+.nexus-ui a,
+.nexus-ui input,
+.nexus-ui textarea,
+.nexus-ui [role="button"],
+.nexus-ui .clicavel {
+  pointer-events: auto; /* Reativa o clique só nos elementos interativos */
+}
+
+
+/* ============================================================
+   5. CAMADA DE DESFOQUE (backdrop-filter)
+   Aparece ATRÁS dos painéis que precisam de fundo desfocado.
+   Só é visível nas telas que pedem desfoque (telas 2, 3, 4, 8, 9).
+   O elemento com id="fundo-desfocado" deve ser inserido em cada
+   uma dessas telas, ANTES do conteúdo do painel.
+   Desfoque gaussiano: 8.5px conforme referência do projeto.
+   ============================================================ */
+
+#fundo-desfocado {
+  position: fixed;
+  inset: 0;
+  /* Desfoque gaussiano de 8.5px do que está atrás (o canvas 3D) */
+  -webkit-backdrop-filter: blur(8.5px); /* Safari / Chrome antigo */
+  backdrop-filter: blur(8.5px);
+  pointer-events: none; /* Não bloqueia cliques: o painel acima é que recebe */
+  z-index: 0;           /* Fica atrás do painel, mas acima do canvas */
+}
+
+
+/* ============================================================
+   6. PAINEL DE VIDRO (componente reutilizável)
+   Fundo semitransparente roxo usado nos painéis das telas
+   2, 3, 4, 7 e 8. Aplique a classe .painel-vidro no elemento.
+   ============================================================ */
+
+.painel-vidro {
+  background: var(--cor-fundo-roxo-opaco); /* #100819 com 75% de opacidade */
+  border-radius: var(--raio-painel);
+  position: relative;
+  z-index: 1; /* Fica acima do fundo desfocado */
+}
+
+
+/* ============================================================
+   7. BOTÃO PADRÃO (classe base .btn)
+   Estilos compartilhados por todos os botões do projeto.
+   Cada tela pode sobrescrever cor e tamanho.
+   ============================================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75em;              /* Espaço entre ícone e texto */
+  padding: 0.65em 1em;
+  border: none;
+  border-radius: var(--raio-botao);
+  cursor: pointer;
+  font-family: var(--fonte-titulo);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: none; /* Sem transição: o anel de hover liga na hora */
+  position: relative; /* Necessário para o anel ficar posicionado ao redor */
+  outline: none;      /* Remove o outline padrão (o anel substitui visualmente) */
+}
+
+/* Botão padrão escuro (telas 1, 5, 6, 7 e 8) */
+.btn-padrao {
+  background: var(--cor-botoes);
+  color: var(--cor-branco-nexus);
+}
+
+/* Botão laranja (botão COMEÇAR da tela 1, botões de ação nas telas 2 e 3) */
+.btn-laranja {
+  background: var(--cor-laranja-principal);
+  color: var(--texto-laranja);
+}
+
+/* Botão desabilitado: sem interação, aparência apagada */
+.btn:disabled,
+.btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+
+/* ============================================================
+   8. ÍCONE DENTRO DO BOTÃO (container quadrado)
+   Usado para os ícones SVG ao lado do texto do botão.
+   ============================================================ */
+
+.btn-icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2em;   /* Proporcional ao tamanho do texto do botão */
+  height: 2em;
+  flex-shrink: 0; /* Não encolhe se o texto for longo */
+}
+
+.btn-icone img,
+.btn-icone svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+
+/* ============================================================
+   9. CAMPO DE TEXTO
+   Estilo base para <textarea> usada nas telas 2 e 3.
+   ============================================================ */
+
+.campo-texto {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.35);          /* Fundo levemente mais escuro que o painel */
+  border: 1.5px solid var(--cor-laranja-principal); /* Borda laranja */
+  border-radius: var(--raio-campo);
+  color: var(--cor-branco-nexus);
+  font-family: var(--fonte-texto);
+  font-size: var(--tamanho-texto-corpo);
+  padding: 0.75em 1em;
+  resize: none;            /* Sem alça de redimensionamento */
+  outline: none;
+  line-height: 1.5;
+}
+
+.campo-texto::placeholder {
+  color: var(--cor-texto-secundario); /* Placeholder mais apagado */
+}
+
+.campo-texto:focus {
+  /* Destaque sutil ao focar, sem alterar layout */
+  border-color: var(--cor-laranja-principal);
+  box-shadow: 0 0 0 2px rgba(255, 137, 0, 0.25);
+}
+
+
+/* ============================================================
+   10. RÓTULO DE SEÇÃO (linha fina ao lado do título)
+   Estilo para os títulos de seção como "ESCREVA SOBRE A SUA MENTE"
+   e "O QUE MUDOU" das telas 2 e 3.
+   ============================================================ */
+
+.rotulo-secao {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  font-family: var(--fonte-texto);
+  font-size: var(--tamanho-rotulo);
+  font-weight: 400;
+  color: var(--cor-branco-nexus);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Linha fina que vai do texto até o final do container */
+.rotulo-secao::after {
+  content: '';
+  flex: 1;          /* Ocupa o espaço restante */
+  height: 1px;
+  background: var(--cor-branco-nexus);
+  opacity: 0.4;     /* Linha sutil, não muito chamativa */
+}
+
+
+/* ============================================================
+   11. TEXTO DE PRIVACIDADE
+   Bloco de aviso repetido nas telas 2, 3 e 4.
+   ============================================================ */
+
+.texto-privacidade {
+  font-family: var(--fonte-texto);
+  font-size: var(--tamanho-rotulo);
+  color: var(--cor-texto-secundario);
+  line-height: 1.6;
+}
+
+
+/* ============================================================
+   12. BOTÃO CIRCULAR DE VOLTAR ( < )
+   Pequeno botão redondo com seta, no canto superior esquerdo
+   dos painéis das telas 2, 3 e 4.
+   ============================================================ */
+
+.btn-voltar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;             /* Círculo perfeito */
+  background: var(--cor-botoes);
+  border: 1.5px solid var(--cor-branco-nexus);
+  color: var(--cor-branco-nexus);
+  font-family: var(--fonte-titulo);
+  font-size: 1rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+
+/* ============================================================
+   13. UTILITÁRIOS GERAIS
+   Classes auxiliares de uso rápido.
+   ============================================================ */
+
+/* Esconde o elemento mas mantém o espaço (diferente de display:none) */
+.invisivel {
+  visibility: hidden;
+}
+
+/* Esconde completamente (remove do fluxo) */
+.oculto {
+  display: none !important;
+}
+
+/* Cor de destaque laranja para texto inline */
+.laranja {
+  color: var(--cor-laranja-principal);
+}
+
+/* Cor de texto secundário (cinza) */
+.secundario {
+  color: var(--cor-texto-secundario);
+}
+
+/* Rolagem interna estilizada padrão NEXUS */
+.rolagem-nexus {
+  scrollbar-width: thin;
+  scrollbar-color: var(--cor-laranja-principal) rgba(16, 8, 25, 0.4);
+}
+
+.rolagem-nexus::-webkit-scrollbar {
+  width: 6px;
+}
+
+.rolagem-nexus::-webkit-scrollbar-track {
+  background: rgba(16, 8, 25, 0.4);
+  border-radius: 4px;
+  margin: 6px 0;
+}
+
+.rolagem-nexus::-webkit-scrollbar-thumb {
+  background: var(--cor-laranja-principal);
+  border-radius: 4px;
+}
+
+.rolagem-nexus::-webkit-scrollbar-thumb:hover {
+  background: var(--cor-laranja-principal);
+}
+

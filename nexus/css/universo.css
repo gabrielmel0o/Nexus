@@ -1,0 +1,9 @@
+/* universo.css — estilos do canvas, dos nomes dos astros e do flash da supernova.
+   Copiados da aparência antiga. As fontes vêm das variáveis da UI aprovada.
+   style.css permanece durante a integração das outras telas. */
+canvas{position:fixed;inset:0;display:block;touch-action:none;cursor:grab}
+canvas:active{cursor:grabbing}
+.lb{position:fixed;left:0;top:0;font-family:var(--fonte-titulo);font-weight:normal;font-synthesis:none;font-size:12px;letter-spacing:.06em;pointer-events:none;white-space:nowrap;text-shadow:0 1px 8px var(--deep),0 0 2px var(--deep);transition:opacity .4s;color:var(--cor-texto-astro)}
+.lb.highlight{color:var(--cor-texto-astro);text-shadow:0 0 8px #c8b6ff,0 0 16px #9b5de5,0 1px 8px var(--deep);font-size:13px;letter-spacing:.08em}
+.nexus-supernova-flash{position:fixed;inset:0;pointer-events:none;z-index:999;background:radial-gradient(circle at center,rgba(255,252,235,.42) 0%,rgba(255,215,120,.16) 45%,transparent 75%);opacity:1;transition:opacity .5s cubic-bezier(.2,.8,.4,1)}
+.nexus-supernova-flash.fade-out{opacity:0}

@@ -132,6 +132,10 @@
 
     // Remove classe modo-start do body (logo volta à regra normal)
     document.body.classList.remove('modo-start');
+    // A nova tela inicial sai junto com a Start, sem mudar o voo ou o motor.
+    if (N.ui) N.ui.mostrarVisualizacao();
+    const hint = document.querySelector('.hint');
+    if (hint) hint.classList.remove('oculto');
 
     // Container de start some com fade
     const startContainer = document.querySelector('.nexus-start-container');
@@ -386,6 +390,40 @@
       }
     });
     refreshHistory();
+
+    // Ponte provisória: reutiliza as ações antigas, sem montar as telas 2, 3 e 4.
+    // Ela será substituída aos poucos, após a aprovação de cada tela.
+    N.start = {
+      // A tela nova usa a mesma entrada, pose e transição da Start existente.
+      mensagens: MENSAGENS,
+      entrar(universo) {
+        N.boot(universo);
+        exitStartMode();
+      },
+      abrirHelena() { startBtn.click(); },
+      continuar() {
+        // Se a compilação falhar, o aviso existente precisa continuar visível.
+        if (N.ui) N.ui.abrirFormularioAntigo('gerenciamento');
+        resumeBtn.click();
+      },
+      abrirFormulario(modo) {
+        refreshHistory();
+        // Reabrir o mesmo formulário preserva o que já foi digitado.
+        if (modo !== 'gerenciamento' && atualizando !== (modo === 'atualizar')) {
+          modoAtualizacao(modo === 'atualizar');
+        }
+        if (modo === 'gerenciamento') downloadBtn.focus();
+        else textarea.focus();
+      }
+    };
+    if (N.ui) {
+      const voltar = document.createElement('button');
+      voltar.type = 'button';
+      voltar.className = 'nexus-start-gen-btn';
+      voltar.textContent = 'Voltar à tela inicial';
+      voltar.addEventListener('click', () => { if (!ocupado) N.ui.mostrarInicial(); });
+      formEl.insertBefore(voltar, formEl.firstChild);
+    }
 
     // Nada vai para armazenamento: perguntas e respostas existem somente nesta tela.
     function limparPerguntas() {

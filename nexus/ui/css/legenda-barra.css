@@ -1,0 +1,10 @@
+/* Complemento autorizado: mantém a legenda temporal acima da barra aprovada.
+   A posição acompanha a altura da barra, sem alterar seu CSS ou seus botões. */
+.legenda-barra {
+  position: fixed;
+  bottom: calc(clamp(3.2rem, 6.5vh, 4.5rem) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  pointer-events: none;
+}

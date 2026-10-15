@@ -19,6 +19,7 @@
   let captionEl   = null;
   let btnNextEl   = null;
   let btnResetEl  = null;
+  let barraAprovada = false;
 
   // Timer para esconder a legenda 5 s após um clique
   let captionTimer = null;
@@ -41,6 +42,7 @@
     // Limpa o timer anterior para não acumular
     clearTimeout(captionTimer);
     captionTimer = setTimeout(function () {
+      captionTimer = null; // Após os 5 segundos, sair do hover também pode ocultar a legenda.
       // Só esconde se o mouse NÃO estiver sobre o controle
       if (!containerEl.matches(':hover')) {
         captionEl.classList.remove('is-visible');
@@ -62,10 +64,13 @@
 
     // Se o universo tiver menos de 2 capítulos, oculta o controle e a legenda
     if (!chapters || chapters.length < 2) {
-      containerEl.style.display = 'none';
+      // Na barra, preserva o espaço central para o botão ? continuar à direita.
+      if (barraAprovada) containerEl.classList.add('invisivel');
+      else containerEl.style.display = 'none';
       if (captionEl) captionEl.style.display = 'none';
       return;
     } else {
+      if (barraAprovada) containerEl.classList.remove('invisivel');
       containerEl.style.display = '';
       if (captionEl) captionEl.style.display = '';
     }
@@ -122,6 +127,27 @@
   // Cria a interface HTML do controle de tempo
   function buildUI() {
     if (containerEl) return containerEl;
+
+    // Usa a barra aprovada sem criar uma segunda linha de botões.
+    const barra = document.querySelector('#barra-inferior');
+    if (barra) {
+      barraAprovada = true;
+      containerEl = barra.querySelector('.barra-centro');
+      btnNextEl = barra.querySelector('#botao-avancar');
+      btnResetEl = barra.querySelector('#botao-retroceder');
+      captionEl = document.createElement('div');
+      captionEl.className = 'nexus-time-caption legenda-barra';
+      captionEl.setAttribute('aria-live', 'polite');
+      barra.appendChild(captionEl);
+      containerEl.addEventListener('mouseenter', () => captionEl.classList.add('is-visible'));
+      containerEl.addEventListener('mouseleave', () => {
+        if (!captionTimer) captionEl.classList.remove('is-visible');
+      });
+      btnNextEl.addEventListener('click', () => { N.nextChapter(); showCaption(); });
+      btnResetEl.addEventListener('click', () => { N.previousChapter(); showCaption(); });
+      updateUI();
+      return containerEl;
+    }
 
     containerEl = document.createElement('div');
     containerEl.className = 'nexus-time-control';

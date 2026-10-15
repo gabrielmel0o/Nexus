@@ -1,4 +1,4 @@
-/* interface.js — liga as telas inicial, Começar, Atualizar e Gerenciamento.
+/* interface.js — liga as telas inicial, Começar, Atualizar, Gerenciamento e Visualização.
    As outras telas ainda usam a interface antiga até sua integração ser aprovada. */
 (function () {
   const N = NEXUS;
@@ -15,6 +15,12 @@
   }
 
   N.ui = {
+    mostrarVisualizacao() {
+      this.ocultarMenus();
+      const tela = document.getElementById('tela-visualizacao');
+      tela.classList.remove('oculto');
+      tela.setAttribute('aria-hidden', 'false');
+    },
     mostrarInicial() {
       // Voltar do formulário não recarrega a página nem descarta texto ou resultado em memória.
       if (N.comecar) N.comecar.ocultar();
@@ -54,6 +60,10 @@
 
   function preparar() {
     atualizarHistorico();
+    // O menu lateral será integrado na tela 8. Não antecipa retorno ou saída.
+    const menu = document.getElementById('botao-menu');
+    menu.disabled = true;
+    menu.title = 'Menu disponível após a integração da tela 8';
     document.getElementById('botao-comecar').addEventListener('click', () => {
       const resultado = atualizarHistorico();
       if (resultado.ok && resultado.historico) {

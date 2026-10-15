@@ -22,7 +22,8 @@
 
     // Fecha ao clicar fora da legenda (desde que não seja em um astro clicável)
     document.addEventListener('click', (e) => {
-      if (N.legendaAberta && !legendEl.contains(e.target) && !e.target.closest('.nexus-legend-btn')) {
+      if (N.legendaAberta && !legendEl.contains(e.target) && !e.target.closest('.nexus-legend-btn')
+        && !e.target.closest('#botao-saibamais')) {
         // Se o clique caiu em um astro clicável, a seleção normal acontece
         // Se caiu no espaço vazio, fecha a legenda
         const pickTarget = e.target.closest('[data-pick-id]');
@@ -121,7 +122,8 @@
   };
 
   // Botão ? abre/fecha a legenda
-  const legendBtn = document.querySelector('.nexus-legend-btn');
+  const novoBotao = document.querySelector('#botao-saibamais');
+  const legendBtn = novoBotao || document.querySelector('.nexus-legend-btn');
   if (legendBtn) {
     legendBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -133,7 +135,8 @@
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-        if (!document.body.classList.contains('painel-aberto') && N.legendaAberta) {
+        // A nova barra permite abrir o guia mesmo sem selecionar um astro.
+        if (!novoBotao && !document.body.classList.contains('painel-aberto') && N.legendaAberta) {
           N.legend.close();
         }
       }

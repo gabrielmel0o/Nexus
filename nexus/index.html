@@ -8,16 +8,18 @@
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="ui/css/base.css">
 <link rel="stylesheet" href="ui/css/hover.css">
+<link rel="stylesheet" href="ui/css/barra-inferior.css">
 <link rel="stylesheet" href="ui/css/tela-inicial.css">
 <link rel="stylesheet" href="ui/css/tela-comecar.css">
 <link rel="stylesheet" href="ui/css/tela-atualizar.css">
 <link rel="stylesheet" href="ui/css/tela-gerenciamento.css">
 <link rel="stylesheet" href="ui/css/estados-comecar.css">
+<link rel="stylesheet" href="ui/css/legenda-barra.css">
 <link rel="stylesheet" href="css/universo.css">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 </head>
 <body class="modo-start">
-<!-- Telas 1 a 4 integradas; os painéis da exploração ainda usam a interface antiga. -->
+<!-- Telas 1 a 5 integradas; os painéis da exploração ainda usam a interface antiga. -->
 <div id="interface-nexus">
   <div class="nexus-ui" id="tela-inicial">
 
@@ -299,10 +301,44 @@
     </main><!-- fim #painel-gerenciamento -->
 
   </div><!-- fim #tela-gerenciamento -->
+  <div class="nexus-ui oculto" id="tela-visualizacao" aria-hidden="true">
+
+    <!-- BARRA INFERIOR DE CONTROLE -->
+    <footer class="barra-inferior" id="barra-inferior">
+
+      <!-- Esquerda: isotipo (abre o menu) -->
+      <div class="barra-zona barra-esquerda">
+        <button class="barra-btn" id="botao-menu" type="button" aria-label="Menu NEXUS">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          <img src="ui/svg/isotipo.svg" class="icone-barra icone-isotipo" alt="NEXUS">
+        </button>
+      </div>
+
+      <!-- Centro: navegação temporal (RETROCEDER | ampulheta | AVANÇAR) -->
+      <div class="barra-zona barra-centro">
+        <button class="barra-btn barra-btn-texto" id="botao-retroceder" type="button">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          RETROCEDER
+        </button>
+        <img src="ui/svg/ampulheta.svg" class="icone-barra icone-ampulheta" aria-hidden="true" alt="">
+        <button class="barra-btn barra-btn-texto" id="botao-avancar" type="button">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          AVANÇAR
+        </button>
+      </div>
+
+      <!-- Direita: saiba mais (?) -->
+      <div class="barra-zona barra-direita">
+        <button class="barra-btn" id="botao-saibamais" type="button" aria-label="Como ler este universo">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          <img src="ui/svg/saibamais.svg" class="icone-barra icone-saibamais" alt="Saiba mais">
+        </button>
+      </div>
+
+    </footer>
+
+  </div><!-- fim #tela-visualizacao -->
 </div>
-<div class="hint oculto">arraste para girar · role ou pince para aproximar</div>
-<!-- Botão de legenda: só visível quando painel-aberto está no body -->
-<button class="nexus-legend-btn" aria-label="Legenda">?</button>
 <!-- Container do botão START (só visível no modo-start) -->
 <!-- Formulários antigos mantidos até aprovar as próximas telas. -->
 <div class="nexus-start-container oculto">

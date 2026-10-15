@@ -133,7 +133,7 @@
     // Remove classe modo-start do body (logo volta à regra normal)
     document.body.classList.remove('modo-start');
     // A nova tela inicial sai junto com a Start, sem mudar o voo ou o motor.
-    if (N.ui) N.ui.ocultarMenus();
+    if (N.ui) N.ui.mostrarVisualizacao();
     const hint = document.querySelector('.hint');
     if (hint) hint.classList.remove('oculto');
 

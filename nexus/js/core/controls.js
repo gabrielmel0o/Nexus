@@ -31,13 +31,63 @@
   // S = onde a câmera ESTÁ (suavizado)
   // T = para onde ela QUER ir
   const HOME_R = 52;
+  const ZOOM_MAX_PADRAO = 260;
+  const FOLGA_ENQUADRAMENTO = 1.08; // Deixa espaço nas bordas da visão geral.
+  const FOLGA_ZOOM = 1.5; // Permite afastar um pouco além do enquadramento.
+  const FAR_PADRAO = N.cam.far;
   const S = { th: .5, ph: 1.12, r: HOME_R };
   const T = { ...S };
 
   // Limites de zoom: ajustados dinamicamente ao selecionar um corpo
   let rMin = 14;
-  let rMax = 260;
+  let rMax = ZOOM_MAX_PADRAO;
   const clampR = r => Math.min(rMax, Math.max(rMin, r));
+
+  // A preparação do universo mantém a referência aos capítulos da Helena.
+  // Só esse universo conserva a câmera escolhida à mão para a demo original.
+  function isOriginalHelena(universe) {
+    return universe && N.data && universe.chapters === N.data.chapters;
+  }
+
+  function getOverviewRadius() {
+    const universe = N.currentUniverse;
+    const geometry = N.compileSpec && N.compileSpec.geometry;
+    if (!universe || isOriginalHelena(universe) || !geometry) {
+      rMax = ZOOM_MAX_PADRAO;
+      return HOME_R;
+    }
+
+    // Reutiliza o limite do compilador: inclui corpos, halos e órbitas externas.
+    // Uma esfera centrada no Eu também cobre a rotação dos sistemas.
+    let extent = 0;
+    if (universe.historyFrames) extent = universe.historyExtent;
+    for (const system of universe.systems) {
+      if (universe.historyFrames) break;
+      extent = Math.max(extent, Math.hypot(...system.position) + geometry.systemRadius(system));
+    }
+    const fov = N.cam.getEffectiveFOV ? N.cam.getEffectiveFOV() : N.cam.fov;
+    const verticalHalfAngle = fov * Math.PI / 360;
+    const horizontalHalfAngle = Math.atan(Math.tan(verticalHalfAngle) * N.cam.aspect);
+    const halfAngle = Math.min(verticalHalfAngle, horizontalHalfAngle);
+    // Usa seno para caber a esfera inteira, inclusive a parte mais perto da câmera.
+    const radius = Math.max(HOME_R, extent * FOLGA_ENQUADRAMENTO / Math.sin(halfAngle));
+    rMax = Math.max(ZOOM_MAX_PADRAO, radius * FOLGA_ZOOM);
+    // Universos grandes também precisam caber no limite distante da câmera.
+    const far = Math.max(FAR_PADRAO, rMax + extent * 2);
+    if (N.cam.far !== far) {
+      N.cam.far = far;
+      N.cam.updateProjectionMatrix();
+    }
+    return radius;
+  }
+
+  // Reenquadra a visão geral ao mudar o formato da janela, sem interromper
+  // a Start nem o acompanhamento de um astro selecionado.
+  window.addEventListener('resize', () => {
+    const radius = getOverviewRadius();
+    if (N.currentUniverse && !isOriginalHelena(N.currentUniverse)
+      && !(N.startMode && N.startMode()) && !N.selected) T.r = radius;
+  });
 
   // ── Alvo do lookAt (onde a câmera aponta) ────────────────────────────────
   // "look" é o Vector3 suavizado; "lookT" é o alvo instantâneo
@@ -110,6 +160,7 @@
   // ── API pública ───────────────────────────────────────────────────────────
   N.controls = {
     state: S,
+    getOverviewRadius: getOverviewRadius,
     // T é o ALVO da câmera (para onde ela vai). start.js precisa disso para definir a pose inicial.
     target: T,
     START_AJUSTE: START_AJUSTE, // Exposto para start.js decidir se trava
@@ -127,13 +178,13 @@
     // arrivalR = distância de chegada (proporcional ao tamanho do corpo)
     // bodyRadius = raio do corpo (define o zoom mínimo para não entrar)
     flyTo(getPosFn, arrivalR, bodyRadius) {
+      getOverviewRadius();
       followFn = getPosFn;
       const pos = getPosFn();
       lookT.copy(pos);
 
       // Define zoom mínimo como 1.4× o raio do corpo e máximo normal
       rMin = Math.max(bodyRadius * 1.4, 3);
-      rMax = 260;
 
       // Distância de chegada confortável
       T.r = Math.max(rMin, arrivalR);
@@ -144,11 +195,11 @@
 
     // Volta à visão geral suavemente
     flyHome() {
+      const overviewRadius = getOverviewRadius();
       followFn = null;
       lookT.set(0, 0, 0);
       rMin = 14;
-      rMax = 260;
-      T.r = clampR(Math.max(S.r, HOME_R)); // não sai muito perto
+      T.r = clampR(Math.max(S.r, overviewRadius)); // não sai muito perto
       flyProgress = 0;
       flyDuration = 1.0;
     },

@@ -1,13 +1,14 @@
-/* time.js — controle de tempo e linha de capítulos do universo de Helena.
+/* time.js — controle de tempo dos capítulos da Helena e do histórico pessoal.
    Posicionado discretamente no centro-inferior, em linha horizontal:
-     "Avançar no tempo. | [ícone de ampulheta] | Voltar ao início"
+     "Avançar no tempo. | [ícone de ampulheta] | Voltar no tempo"
    A legenda do capítulo fica oculta e aparece:
      (a) enquanto o mouse estiver sobre o controle, ou
      (b) por 5 segundos após um clique em avançar ou voltar.
 
    Disponibiliza:
      NEXUS.nextChapter()
-     NEXUS.resetChapters()
+     NEXUS.previousChapter()
+     NEXUS.resetChapters() — compatibilidade interna, sem botão de salto
    Tudo muda puramente por parâmetros do state, sem criar ou destruir objetos. */
 (function () {
   const N = NEXUS;
@@ -23,7 +24,7 @@
   let captionTimer = null;
 
   function getChapters() {
-    const universe = N.getUniverse();
+    const universe = N.currentUniverse || N.getUniverse();
     return (universe && universe.chapters) || [];
   }
 
@@ -58,17 +59,30 @@
   function updateUI() {
     if (!containerEl) return;
     const chapters  = getChapters();
+
+    // Se o universo tiver menos de 2 capítulos, oculta o controle e a legenda
+    if (!chapters || chapters.length < 2) {
+      containerEl.style.display = 'none';
+      if (captionEl) captionEl.style.display = 'none';
+      return;
+    } else {
+      containerEl.style.display = '';
+      if (captionEl) captionEl.style.display = '';
+    }
+
     const curIndex  = getCurrentChapter();
     const currentCap = chapters.find(c => c.id === curIndex) || chapters[0] || {};
 
     // Legenda do capítulo (texto atualizado; visibilidade controlada pelos eventos de hover/clique)
     if (captionEl) {
-      captionEl.textContent = currentCap.caption || '';
+      const posicao = `Fase ${curIndex + 1} de ${chapters.length}`;
+      captionEl.textContent = (N.currentUniverse || N.getUniverse()).historyFrames
+        ? posicao : posicao + (currentCap.caption ? ' — ' + currentCap.caption : '');
     }
 
-    // Botão Avançar o tempo (desliga após o capítulo 3)
+    // Botão Avançar o tempo (desliga ao chegar ao último capítulo)
     if (btnNextEl) {
-      const isLast = curIndex >= 3 || curIndex >= (chapters.length - 1);
+      const isLast = curIndex >= (chapters.length - 1);
       btnNextEl.disabled = isLast;
       if (isLast) {
         btnNextEl.classList.add('is-disabled');
@@ -77,7 +91,7 @@
       }
     }
 
-    // Botão Voltar ao início (desabilitado se já estiver no capítulo 0)
+    // Botão Voltar no tempo (desabilitado se já estiver no capítulo 0)
     if (btnResetEl) {
       const isFirst = curIndex === 0;
       btnResetEl.disabled = isFirst;
@@ -134,7 +148,7 @@
     captionEl = document.createElement('div');
     captionEl.className = 'nexus-time-caption';
 
-    // Linha de ações horizontal: "Avançar no tempo. | ícone | Voltar ao início"
+    // Linha de ações horizontal: "Avançar no tempo. | ícone | Voltar no tempo"
     const actionsEl = document.createElement('div');
     actionsEl.className = 'nexus-time-actions';
 
@@ -157,16 +171,16 @@
     iconEl.setAttribute('aria-hidden', 'true');
     iconEl.innerHTML = ' | ' + iconAmpulheta() + ' | ';
 
-    // Botão "Voltar ao início" (texto à direita)
+    // Botão "Voltar no tempo" (texto à direita)
     btnResetEl = document.createElement('button');
     btnResetEl.className = 'nexus-time-btn nexus-time-btn-secondary';
-    btnResetEl.setAttribute('aria-label', 'Voltar ao início');
-    btnResetEl.setAttribute('title', 'Voltar ao início');
-    btnResetEl.textContent = 'Voltar ao início';
+    btnResetEl.setAttribute('aria-label', 'Voltar uma fase no tempo');
+    btnResetEl.setAttribute('title', 'Voltar uma fase no tempo');
+    btnResetEl.textContent = 'Voltar no tempo';
     btnResetEl.addEventListener('click', (e) => {
       e.stopPropagation();
-      N.resetChapters();
-      // Mostra a legenda do capítulo 0 por 5 s
+      N.previousChapter();
+      // Mostra a legenda da fase anterior por 5 s
       showCaption();
     });
 
@@ -185,14 +199,18 @@
   }
 
   // ── Métodos Públicos ────────────────────────────────────────────────────────
+  // O boot chama refresh quando já sabe qual universo será mostrado.
+  N.time = { refresh: updateUI };
+
   N.nextChapter = function () {
     const curIndex  = getCurrentChapter();
     const chapters  = getChapters();
-    if (curIndex >= 3 || curIndex >= (chapters.length - 1)) {
+    if (curIndex >= (chapters.length - 1)) {
       return; // Já está no último capítulo
     }
 
     const nextIndex = curIndex + 1;
+    if (typeof N.events.cleanup === 'function') N.events.cleanup();
     if (N.state && typeof N.state.applyChapter === 'function') {
       N.state.applyChapter(nextIndex);
     }
@@ -209,12 +227,19 @@
   };
 
   N.resetChapters = function () {
+    if (N.events && typeof N.events.cleanup === 'function') N.events.cleanup();
     if (N.state && typeof N.state.applyChapter === 'function') {
       N.state.applyChapter(0);
     }
-    if (N.events && typeof N.events.cleanup === 'function') {
-      N.events.cleanup();
-    }
+    updateUI();
+  };
+
+  N.previousChapter = function () {
+    const curIndex = getCurrentChapter();
+    if (curIndex <= 0) return;
+    if (typeof N.events.cleanup === 'function') N.events.cleanup();
+    if (N.state && typeof N.state.applyChapter === 'function') N.state.applyChapter(curIndex - 1);
+    // Recuar não dispara o evento de avanço.
     updateUI();
   };
 

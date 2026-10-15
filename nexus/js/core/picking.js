@@ -24,6 +24,7 @@
 
   // ── selectBody / deselectBody ─────────────────────────────────────────────
   N.selectBody = function (id) {
+    if (N.presence && !N.presence.isPresent(id)) return;
     if (N.selected === id) return; // clique duplo no mesmo corpo = ignora
     N.selected = id;
     console.log('Selecionado:', id);
@@ -52,6 +53,10 @@
   let activeLabelEl = null;
 
   function findPickId(obj) {
+    // O brilho é uma imagem ampla: não pode roubar o clique de outro astro.
+    // Sinais têm pickId próprio e continuam selecionáveis, mesmo sendo sprites.
+    if (obj.isSprite && obj.material && obj.material.blending === THREE.AdditiveBlending
+      && !(obj.userData && obj.userData.pickId)) return null;
     let curr = obj;
     while (curr) {
       if (curr.userData && curr.userData.pickId) return curr.userData.pickId;
@@ -66,11 +71,24 @@
     mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
     raycaster.setFromCamera(mouse, N.cam);
     const hits = raycaster.intersectObjects(N.scene.children, true);
+    let expandedTargetId = null;
     for (let i = 0; i < hits.length; i++) {
-      const id = findPickId(hits[i].object);
-      if (id) return id;
+      const object = hits[i].object;
+      const id = findPickId(object);
+      if (!id) continue;
+      if (N.presence && !N.presence.isPresent(id)) continue;
+      let visible = true;
+      for (let parent = object; parent; parent = parent.parent) if (!parent.visible) visible = false;
+      if (!visible) continue;
+      // As esferas invisíveis ampliam a área de clique, mas não podem cobrir
+      // um corpo visível. Guardamos a mais próxima como alternativa.
+      if (object.material && object.material.transparent && object.material.opacity === 0) {
+        if (!expandedTargetId) expandedTargetId = id;
+        continue;
+      }
+      return id;
     }
-    return null;
+    return expandedTargetId;
   }
 
   function updateHover(id) {
@@ -150,18 +168,14 @@
     updateHover(id);
   });
 
-  // Esc já está tratado em controls.js (chama flyHome),
-  // mas também limpa N.selected aqui para manter consistência
+  // Um único Esc desmarca o astro e usa o mesmo retorno do clique no vazio.
+  // A legenda captura a tecla antes deste listener e fecha apenas ela.
   window.addEventListener('keydown', e => {
     if (N.travado) return;
     if (e.key === 'Escape') {
-      if (N.panel && N.panel.isOpen()) {
-        N.panel.close();
-        return;
-      }
       N.deselectBody();
     }
   });
 
-  N.picking = { update() {} };
+  N.picking = { update() {}, clearHover() { updateHover(null); } };
 })();

@@ -1,0 +1,585 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "NexusUniverseSpec",
+  "description": "Especificação semântica do universo NEXUS. Descreve unicamente o significado psicológico/afetivo da mente de uma pessoa segundo as Leis do NEXUS, sem coordenadas 3D, órbitas, velocidades ou cores hexadecimais.",
+  "type": "object",
+  "required": [
+    "titulo",
+    "rotinas",
+    "sistemas",
+    "forcas"
+  ],
+  "properties": {
+    "titulo": {
+      "type": "string",
+      "description": "Título poético da galáxia (ex: 'A galáxia de Helena')."
+    },
+    "rotinas": {
+      "type": "array",
+      "description": "De 0 a 5 rotinas ou hábitos estruturantes da vida da pessoa que formam os braços da galáxia.",
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "nome"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identificador único da rotina (ex: 'rot-trabalho')."
+          },
+          "nome": {
+            "type": "string",
+            "description": "Nome da rotina (ex: 'Trabalho', 'Academia')."
+          }
+        }
+      }
+    },
+    "sistemas": {
+      "type": "array",
+      "description": "Lista de sistemas cósmicos da mente (de 1 a 10 sistemas). O Eu central nunca é incluído aqui, pois é adicionado automaticamente pelo compilador.",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "nome",
+          "profundidade",
+          "centro"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identificador único do sistema (ex: 'criacao', 'desejo-seguranca')."
+          },
+          "nome": {
+            "type": "string",
+            "description": "Nome do sistema ou núcleo de sentido (ex: 'A criação', 'A voz da mãe')."
+          },
+          "profundidade": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4,
+            "description": "Acessibilidade à consciência (Lei da Distância): 0 = agora/consciente imediato, 1 = recente/acessível, 2 = memória/latente, 3 = inconsciente/profundo, 4 = inobservável. Não representa importância."
+          },
+          "centro": {
+            "type": "object",
+            "description": "O centro do sistema: pode ser uma estrela, anã branca, anã marrom, sistema binário, buraco negro de trauma, nebulosa ou visitante externo.",
+            "required": [
+              "tipo",
+              "massa",
+              "rotulo",
+              "resumo",
+              "porque",
+              "fase",
+              "lei"
+            ],
+            "properties": {
+              "tipo": {
+                "type": "string",
+                "enum": [
+                  "estrela",
+                  "anaBranca",
+                  "anaMarrom",
+                  "binaria",
+                  "buracoNegro",
+                  "nebulosa",
+                  "visitante"
+                ],
+                "description": "Tipo astronômico do centro segundo o catálogo do NEXUS."
+              },
+              "massa": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10,
+                "description": "Carga afetiva e gravidade do centro na mente de 0 a 10 (Lei da Massa)."
+              },
+              "brilho": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10,
+                "description": "Intensidade luminosa de 0 a 10. Obrigatório apenas para corpos que emitem luz própria (estrelas, anãs e binárias). Proibido em buracos negros, nebulosas e visitantes."
+              },
+              "temperatura": {
+                "type": "string",
+                "enum": [
+                  "quente",
+                  "neutra",
+                  "fria"
+                ],
+                "description": "Clima térmico semântico do brilho da estrela ou anã branca (quente = acolhedor/solar, neutra = equilibrado, fria = distante/cristalizado)."
+              },
+              "tensao": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10,
+                "description": "Grau de conflito ou tensão mútua (0 a 10). Aplicável a estrelas binárias."
+              },
+              "disco": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10,
+                "description": "Intensidade do disco de ruminação (0 a 10). Aplicável a buracos negros de trauma."
+              },
+              "protoestrela": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10,
+                "description": "Ponto de desejo começando a nascer no coração da nebulosa (0 a 10)."
+              },
+              "aproximacao": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10,
+                "description": "Proximidade atual de um visitante externo em relação ao centro da mente (0 a 10)."
+              },
+              "rotulo": {
+                "type": "string",
+                "description": "Subtítulo do astro para o painel (ex: 'Estrela · Valor interno')."
+              },
+              "resumo": {
+                "type": "string",
+                "description": "Descrição de como essa estrutura se manifesta na vida da pessoa."
+              },
+              "porque": {
+                "type": "string",
+                "description": "Justificativa da metáfora astronômica ligada à psicologia da pessoa."
+              },
+              "fase": {
+                "type": "string",
+                "description": "Estado atual ou momento evolutivo do astro (ex: 'estrela principal em fase ativa')."
+              },
+              "lei": {
+                "type": "string",
+                "enum": [
+                  "luz",
+                  "massa",
+                  "distancia",
+                  "escala",
+                  "evolucao"
+                ],
+                "description": "Chave da lei do NEXUS que rege este astro (apenas a chave, nunca o texto completo)."
+              }
+            }
+          },
+          "planetas": {
+            "type": "array",
+            "description": "Planetas que orbitam o centro do sistema. Representam áreas da vida derivadas da luz do centro (0 a 6 planetas).",
+            "maxItems": 6,
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "nome",
+                "tipo",
+                "massa",
+                "tamanho",
+                "rotulo",
+                "resumo",
+                "porque",
+                "fase",
+                "lei"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Identificador único do planeta (ex: 'carreira', 'corpo')."
+                },
+                "nome": {
+                  "type": "string",
+                  "description": "Nome da área da vida (ex: 'Carreira', 'Corpo', 'Família')."
+                },
+                "tipo": {
+                  "type": "string",
+                  "enum": [
+                    "rochoso",
+                    "gasoso",
+                    "aneis",
+                    "exo"
+                  ],
+                  "description": "Natureza física da área da vida segundo o catálogo."
+                },
+                "massa": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 10,
+                  "description": "Carga afetiva e prioridade da área (0 a 10)."
+                },
+                "tamanho": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 10,
+                  "description": "Dimensão aparente ou espaço ocupado na rotina da pessoa (0 a 10)."
+                },
+                "atmosfera": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 10,
+                  "description": "Densidade de regras, cansaço ou visibilidade externa de 0 a 10 (aplicável a rochoso e gasoso)."
+                },
+                "camadasAneis": {
+                  "type": "string",
+                  "enum": [
+                    "mistas",
+                    "afetivas",
+                    "pendencias"
+                  ],
+                  "description": "Qualidade semântica dos anéis (aplicável a planetas com anéis: mistas = memórias e pendências, afetivas = acolhimento, pendencias = deveres não resolvidos)."
+                },
+                "sinais": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 10,
+                  "description": "Grau de ressonância ou atenção dada ao exoplaneta (0 a 10)."
+                },
+                "rotulo": {
+                  "type": "string",
+                  "description": "Subtítulo do planeta para o painel (ex: 'Gigante gasoso · Área da vida')."
+                },
+                "resumo": {
+                  "type": "string",
+                  "description": "Descrição do estado atual dessa área da vida."
+                },
+                "porque": {
+                  "type": "string",
+                  "description": "Justificativa da metáfora do planeta conforme a lei."
+                },
+                "fase": {
+                  "type": "string",
+                  "description": "Fase evolutiva da área da vida (ex: 'atmosfera rarefeita')."
+                },
+                "lei": {
+                  "type": "string",
+                  "enum": [
+                    "luz",
+                    "massa",
+                    "distancia",
+                    "escala",
+                    "evolucao"
+                  ],
+                  "description": "Chave da lei do NEXUS que rege este planeta."
+                },
+                "luas": {
+                  "type": "array",
+                  "description": "Facetas ou dinâmicas que orbitam a área da vida (0 a 3 luas).",
+                  "maxItems": 3,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "nome",
+                      "massa",
+                      "tamanho",
+                      "rotulo",
+                      "resumo",
+                      "porque",
+                      "fase",
+                      "lei"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "Identificador único da lua (ex: 'aprovacao', 'medo')."
+                      },
+                      "nome": {
+                        "type": "string",
+                        "description": "Nome da faceta (ex: 'Lua da aprovação')."
+                      },
+                      "massa": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 10,
+                        "description": "Peso afetivo da faceta (0 a 10)."
+                      },
+                      "tamanho": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 10,
+                        "description": "Dimensão da lua em escala relativa de 0 a 10."
+                      },
+                      "tom": {
+                        "type": "string",
+                        "enum": [
+                          "claro",
+                          "escuro"
+                        ],
+                        "description": "Tom semântico da lua: clara/quente (ex: aprovação) ou escura/fria (ex: medo/sombra)."
+                      },
+                      "rotulo": {
+                        "type": "string",
+                        "description": "Subtítulo da lua para o painel."
+                      },
+                      "resumo": {
+                        "type": "string",
+                        "description": "Descrição do papel dessa faceta."
+                      },
+                      "porque": {
+                        "type": "string",
+                        "description": "Justificativa da lua conforme a lei."
+                      },
+                      "fase": {
+                        "type": "string",
+                        "description": "Fase orbital ou momento da lua."
+                      },
+                      "lei": {
+                        "type": "string",
+                        "enum": [
+                          "luz",
+                          "massa",
+                          "distancia",
+                          "escala",
+                          "evolucao"
+                        ],
+                        "description": "Chave da lei que rege a lua."
+                      }
+                    }
+                  }
+                },
+                "elementos": {
+                  "type": "array",
+                  "description": "Elementos especiais ligados ao planeta: cometa passageiro ou sinais estelares.",
+                  "maxItems": 5,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "id",
+                      "tipo",
+                      "titulo"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "Identificador único do elemento (ex: 'proposta', 'sinal-1')."
+                      },
+                      "tipo": {
+                        "type": "string",
+                        "enum": [
+                          "passageiro",
+                          "sinal"
+                        ],
+                        "description": "Natureza do elemento (passageiro = cometa que altera órbitas; sinal = marcador em exoplaneta)."
+                      },
+                      "titulo": {
+                        "type": "string",
+                        "description": "Nome do evento ou elemento (ex: 'A proposta', 'Sinal')."
+                      },
+                      "aproximacao": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 10,
+                        "description": "Proximidade do evento passageiro (0 a 10)."
+                      },
+                      "presenca": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 10,
+                        "description": "Intensidade da presença ou visibilidade do elemento (0 a 10)."
+                      },
+                      "indiceSinal": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 5,
+                        "description": "Ordem sequencial do sinal (1 a 3 para exoplaneta)."
+                      },
+                      "rotulo": {
+                        "type": "string",
+                        "description": "Subtítulo para o painel (quando inspecionável)."
+                      },
+                      "resumo": {
+                        "type": "string",
+                        "description": "Descrição do evento passageiro."
+                      },
+                      "porque": {
+                        "type": "string",
+                        "description": "Justificativa do evento segundo as leis."
+                      },
+                      "fase": {
+                        "type": "string",
+                        "description": "Momento do evento passageiro."
+                      },
+                      "lei": {
+                        "type": "string",
+                        "enum": [
+                          "luz",
+                          "massa",
+                          "distancia",
+                          "escala",
+                          "evolucao"
+                        ],
+                        "description": "Chave da lei que rege o elemento."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "orbitantes": {
+            "type": "array",
+            "description": "Corpos que orbitam o sistema estelar sem serem planetas (ex: companheira anã vermelha que representa cuidado estável, ou sonho recorrente em órbita excêntrica).",
+            "maxItems": 3,
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "tipo",
+                "nome",
+                "massa",
+                "rotulo",
+                "resumo",
+                "porque",
+                "fase",
+                "lei"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Identificador do orbitante (ex: 'cuidado', 'sonho-recorrente')."
+                },
+                "tipo": {
+                  "type": "string",
+                  "enum": [
+                    "companheira",
+                    "sonho"
+                  ],
+                  "description": "Tipo de orbitante do catálogo do NEXUS."
+                },
+                "nome": {
+                  "type": "string",
+                  "description": "Nome do orbitante (ex: 'O cuidado silencioso', 'O sonho recorrente')."
+                },
+                "massa": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 10,
+                  "description": "Carga afetiva do orbitante (0 a 10)."
+                },
+                "brilho": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 10,
+                  "description": "Intensidade luminosa (0 a 10). Aplicável a companheira estelar."
+                },
+                "alcance": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 10,
+                  "description": "Quão perto do coração da nebulosa o sonho recorrente consegue chegar (0 a 10)."
+                },
+                "rotulo": {
+                  "type": "string",
+                  "description": "Subtítulo do orbitante para o painel."
+                },
+                "resumo": {
+                  "type": "string",
+                  "description": "Descrição da experiência associada."
+                },
+                "porque": {
+                  "type": "string",
+                  "description": "Justificativa da metáfora do orbitante conforme a lei."
+                },
+                "fase": {
+                  "type": "string",
+                  "description": "Estado de órbita ou permanência."
+                },
+                "lei": {
+                  "type": "string",
+                  "enum": [
+                    "luz",
+                    "massa",
+                    "distancia",
+                    "escala",
+                    "evolucao"
+                  ],
+                  "description": "Chave da lei do NEXUS que rege este orbitante."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "forcas": {
+      "type": "array",
+      "description": "Forças invisíveis que alteram trajetórias e atmosferas na mente (sentimentos, vínculos, medos). Sentimentos nunca são corpos, são forças.",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "tipo",
+          "origem",
+          "alvos",
+          "intensidade",
+          "rotulo",
+          "resumo",
+          "porque",
+          "lei"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identificador da força (ex: 'mare-aprovacao', 'eclipse-medo', 'amor-rafael')."
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "mare",
+              "eclipse",
+              "gravidade"
+            ],
+            "description": "Fenômeno físico que manifesta o sentimento."
+          },
+          "origem": {
+            "type": "string",
+            "description": "ID do corpo de onde parte a força (ex: 'aprovacao', 'medo', 'rafael')."
+          },
+          "alvos": {
+            "type": "array",
+            "description": "Lista de IDs de corpos afetados pela força.",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "estrela": {
+            "type": "string",
+            "description": "ID da estrela cuja luz é bloqueada (obrigatório quando o tipo for 'eclipse')."
+          },
+          "intensidade": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 10,
+            "description": "Intensidade da força de 0 a 10 (converte para strength do motor)."
+          },
+          "rotulo": {
+            "type": "string",
+            "description": "Subtítulo da força para o painel (ex: 'Maré · Aprovação')."
+          },
+          "resumo": {
+            "type": "string",
+            "description": "Descrição de como a força atua sobre os corpos."
+          },
+          "porque": {
+            "type": "string",
+            "description": "Justificativa física da força segundo as Leis."
+          },
+          "lei": {
+            "type": "string",
+            "enum": [
+              "luz",
+              "massa",
+              "distancia",
+              "escala",
+              "evolucao"
+            ],
+            "description": "Chave da lei do NEXUS que rege esta força."
+          }
+        }
+      }
+    }
+  }
+}

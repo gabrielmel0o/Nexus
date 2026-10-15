@@ -214,6 +214,28 @@
         label: moonLabel,
         angle: rng() * Math.PI * 2
       };
+      if (N.state.frame && N.presence) N.presence.register(m.id, function (data, continuing) {
+        if (data) {
+          var baseOrbit = mc.baseOrbit || (mc.baseOrbit = m.orbit);
+          m.orbit = data.orbit; m.speed = data.speed; m.historyRadius = data.size;
+          if (!continuing) { mc.angle = data.startAngle || 0; mc.curOrbit = data.orbit; }
+          mc.hit = moonHit; mc.baseOrbit = baseOrbit;
+          moonMesh.position.x = mc.curOrbit; moonHit.position.x = mc.curOrbit;
+          var size = N.state.get(m.id, 'size');
+          moonMesh.scale.set(size, size, size);
+          var hitScale = Math.max(data.size * 2.4, 1.2) / 2.4;
+          moonHit.scale.set(hitScale, hitScale, hitScale);
+          moonMesh.material.color.set(data.color);
+          moonOrbitLine.scale.set(mc.curOrbit / baseOrbit, 1, mc.curOrbit / baseOrbit);
+          moonPivot.rotation.x = 0.15 + data.historyIndex * 0.18;
+          moonPivot.rotation.z = -0.1 + data.historyIndex * 0.12;
+          moonPivot.rotation.y = mc.angle;
+          moonLabel.textContent = data.name;
+          if (N.pickRegistry[m.id]) N.pickRegistry[m.id].radius = data.size;
+        }
+        N.presence.gate(m.id, moonPivot);
+        moonLabel.style.display = N.presence.isPresent(m.id) ? '' : 'none';
+      });
       moonControllers.push(mc);
       moonsById[m.id] = mc;
 
@@ -221,6 +243,7 @@
         const moonWP = new THREE.Vector3();
         N.registerOrbit({
           line: moonOrbitLine,
+          ownerId: m.id,
           category: 'moon',
           getBodyPos: function () {
             moonMesh.getWorldPosition(moonWP);
@@ -245,6 +268,11 @@
           const inst = builder(el, d);
           group.add(inst.object);
           elementos.push(inst);
+          if (N.state.frame && N.presence) N.presence.register(el.id, function (data, continuing) {
+            if (data) Object.assign(el, { signalIndex: data.signalIndex, title: data.title });
+            if (inst.applyHistory) inst.applyHistory(data, continuing);
+            N.presence.gate(el.id, inst.object);
+          });
         }
       });
     }
@@ -293,11 +321,32 @@
       haloColorFactor: 1.0,
       colorModifier: new THREE.Color(1, 1, 1)
     };
+    if (N.state.frame && N.presence) N.presence.register(d.id, function (data, continuing) {
+      if (data) {
+        var baseOrbit = planetObj.baseOrbit || (planetObj.baseOrbit = d.orbit);
+        d.orbit = data.orbit; d.speed = data.speed; d.historyRadius = data.size;
+        if (!continuing) { planetObj.angle = data.startAngle; planetObj.curOrbit = data.orbit; }
+        planetObj.curSize = N.state.get(d.id, 'size'); planetObj.curAtmo = N.state.get(d.id, 'atmosphere');
+        if (!continuing) {
+          planetObj.scaleModifier = planetObj.haloModifier = planetObj.haloColorFactor = 1;
+          planetObj.colorModifier.setRGB(1, 1, 1);
+          orbitGroup.rotation.set(0, 0, 0);
+        }
+        group.position.set(Math.cos(planetObj.angle) * planetObj.curOrbit, 0, Math.sin(planetObj.angle) * planetObj.curOrbit);
+        visualGroup.scale.set(planetObj.curSize, planetObj.curSize, planetObj.curSize);
+        orbit.scale.set(planetObj.curOrbit / baseOrbit, 1, planetObj.curOrbit / baseOrbit);
+        planetObj.label.textContent = data.name;
+        N.pickRegistry[d.id].radius = data.size;
+      }
+      N.presence.gate(d.id, orbitGroup);
+      planetObj.label.style.display = N.presence.isPresent(d.id) ? '' : 'none';
+    });
 
     if (N.registerOrbit) {
       const pWP = new THREE.Vector3();
       N.registerOrbit({
         line: orbit,
+        ownerId: d.id,
         category: 'planet',
         getBodyPos: function () {
           group.getWorldPosition(pWP);
@@ -325,13 +374,19 @@
   N.updatePlanets = (items, dt, nomes = 1) => {
     items.forEach(p => {
       const id = p.d.id;
+      if (N.state.frame && N.presence && !N.presence.isPresent(id)) return;
 
       // 1) Animação da posição orbital em torno da estrela
+      if (N.state.frame) {
+        p.curOrbit += (p.d.orbit - p.curOrbit) * Math.min(1, dt * 2.8);
+        p.orbit.scale.set(p.curOrbit / p.baseOrbit, 1, p.curOrbit / p.baseOrbit);
+      }
       p.angle += p.d.speed * dt;
+      const orbitRadius = N.state.frame ? p.curOrbit : p.d.orbit;
       p.group.position.set(
-        Math.cos(p.angle) * p.d.orbit,
+        Math.cos(p.angle) * orbitRadius,
         0,
-        Math.sin(p.angle) * p.d.orbit
+        Math.sin(p.angle) * orbitRadius
       );
 
       // Rotação axial do planeta
@@ -350,8 +405,12 @@
 
       // Aproxima os valores atuais dos alvos suavemente
       const lerpFactor = 1 - Math.exp(-dt * 4);
-      p.curSize += (targetSize - p.curSize) * lerpFactor;
-      p.curAtmo += (targetAtmo - p.curAtmo) * lerpFactor;
+      if (N.state.frame) {
+        p.curSize = targetSize; p.curAtmo = targetAtmo;
+      } else {
+        p.curSize += (targetSize - p.curSize) * lerpFactor;
+        p.curAtmo += (targetAtmo - p.curAtmo) * lerpFactor;
+      }
 
       // Escala 'size': afeta corpo, halo e anéis (visualGroup), preservando o raio orbital
       const scaleMod = (p.scaleModifier !== undefined) ? p.scaleModifier : 1.0;
@@ -386,13 +445,23 @@
       // 4) Luas: avançam na sua respectiva velocidade orbital
       const moonWP = new THREE.Vector3();
       p.moonControllers.forEach(mc => {
+        if (N.state.frame && N.presence && !N.presence.isPresent(mc.data.id)) return;
+        if (N.state.frame) {
+          mc.curOrbit += (mc.data.orbit - mc.curOrbit) * Math.min(1, dt * 2.8);
+          mc.moonMesh.position.x = mc.hit.position.x = mc.curOrbit;
+          mc.moonOrbitLine.scale.set(mc.curOrbit / mc.baseOrbit, 1, mc.curOrbit / mc.baseOrbit);
+          const size = N.state.get(mc.data.id, 'size');
+          mc.moonMesh.scale.set(size, size, size);
+          const hitScale = Math.max(size * 2.4, 1.2) / 2.4;
+          mc.hit.scale.set(hitScale, hitScale, hitScale);
+        }
         mc.angle += mc.data.speed * dt;
         mc.pivot.rotation.y = mc.angle;
 
         // Atualiza o rótulo da lua com a curva de distância da categoria 'moon'
         mc.moonMesh.getWorldPosition(moonWP);
         const moonAlpha = N.getLabelDistFactor ? N.getLabelDistFactor(moonWP, 'moon') : (nomes * 0.7);
-        N.updateLabel(mc.label, mc.moonMesh, mc.data.size, moonAlpha);
+        N.updateLabel(mc.label, mc.moonMesh, mc.data.historyRadius === undefined ? mc.data.size : mc.data.historyRadius, moonAlpha);
       });
 
       // 5) Elementos

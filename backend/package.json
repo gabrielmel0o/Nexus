@@ -1,0 +1,9 @@
+{
+  "name": "nexus-backend",
+  "version": "1.0.0",
+  "description": "Backend local do NEXUS para interpretação de texto e geração de universos",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --env-file=.env server.js"
+  }
+}

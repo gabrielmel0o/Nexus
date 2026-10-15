@@ -24,18 +24,87 @@
 
   // Estado interno para suavização do eclipse
   let eclipseFactor = 0;
+  var historyEclipses = Object.create(null);
+  N.prepareHistoryForces = function (universe) {
+    historyEclipses = Object.create(null);
+    (universe.historyFrames || []).forEach(f => f.forces.forEach(force => {
+      if (force.kind === 'eclipse') force.targets.forEach(id => { historyEclipses[force.id + ':' + id] = 0; });
+    }));
+  };
+  N.resetHistoryForces = function (previous) {
+    if (!previous) { Object.keys(historyEclipses).forEach(k => { historyEclipses[k] = 0; }); return; }
+    const current = N.state.frame;
+    previous.forces.concat(current.forces).forEach(f => {
+      if (f.kind !== 'eclipse') return;
+      const before = previous.forces.find(v => v.id === f.id), after = current.forces.find(v => v.id === f.id);
+      const same = before && after && before.source === after.source && before.star === after.star;
+      f.targets.forEach(id => {
+        if (!same || !before.targets.includes(id) || !after.targets.includes(id)
+          || !N.presence.isPresentIn(f.source, previous) || !N.presence.isPresent(f.source)
+          || !N.presence.isPresentIn(id, previous) || !N.presence.isPresent(id)) historyEclipses[f.id + ':' + id] = 0;
+      });
+    });
+  };
+  function updateHistory(dt) {
+    // Começa sempre nos valores neutros: uma força removida não deixa resíduos.
+    Object.values(N.planetsById || {}).forEach(p => {
+      p.scaleModifier = p.haloModifier = p.haloColorFactor = 1;
+      p.colorModifier.setRGB(1, 1, 1); p.orbitGroup.rotation.x = p.orbitGroup.rotation.z = 0;
+    });
+    Object.values(N.systemsById || {}).forEach(s => {
+      s.centerObj.object.userData.glowModifier = 1;
+      if (s.pointLight) {
+        var body = N.presence.body(s.data.id);
+        s.pointLight.intensity = body && N.presence.isPresent(s.data.id) && body.system.planets.length
+          ? 1.7 * (N.state.current[s.data.id].brightness === undefined ? 1 : N.state.get(s.data.id, 'brightness')) : 0;
+      }
+    });
+    N.state.frame.forces.forEach(force => {
+      const strength = N.state.get(force.id, 'strength');
+      if (!strength || !N.presence.isPresent(force.source) || (force.star && !N.presence.isPresent(force.star))) return;
+      force.targets.forEach(id => {
+        if (!N.presence.isPresent(id)) return;
+        const p = N.planetsById[id]; if (!p) return;
+        if (force.kind === 'tide') {
+          const wave = Math.sin(p.moonsById[force.source].angle * 2) * strength;
+          p.scaleModifier = Math.max(.96, Math.min(1.04, p.scaleModifier + wave * .04));
+          p.haloModifier = Math.max(.9, Math.min(1.1, p.haloModifier + wave * .1));
+          p.haloColorFactor = Math.max(.85, Math.min(1.15, p.haloColorFactor + wave * .15));
+        } else if (force.kind === 'gravity') {
+          p.group.getWorldPosition(vPlanet);
+          dirToSource.subVectors(N.pickRegistry[force.source].getPos(), vPlanet).normalize();
+          p.orbitGroup.rotation.x = Math.max(-.2, Math.min(.2, p.orbitGroup.rotation.x + dirToSource.z * .2 * strength));
+          p.orbitGroup.rotation.z = Math.max(-.2, Math.min(.2, p.orbitGroup.rotation.z - dirToSource.x * .2 * strength));
+        } else if (force.kind === 'eclipse') {
+          const star = N.systemsById[force.star];
+          p.group.getWorldPosition(vPlanet); p.moonsById[force.source].moonMesh.getWorldPosition(vMoon); star.group.getWorldPosition(vStar);
+          dirToStar.subVectors(vStar, vPlanet).normalize(); dirToMoon.subVectors(vMoon, vPlanet).normalize();
+          const dot = dirToStar.dot(dirToMoon), target = dot > .86 ? Math.sin(Math.min(1, (dot - .86) / .14) * Math.PI / 2) * strength : 0;
+          const key = force.id + ':' + id;
+          historyEclipses[key] += (target - historyEclipses[key]) * Math.min(1, dt * 5);
+          const factor = historyEclipses[key];
+          p.colorModifier.multiplyScalar(Math.max(.2, 1 - factor * .75));
+          star.centerObj.object.userData.glowModifier *= 1 - factor * .55;
+          if (star.pointLight) star.pointLight.intensity *= 1 - factor * .45;
+        }
+      });
+    });
+  }
 
   N.updateForces = function (dt) {
-    const universe = N.getUniverse();
+    const universe = N.currentUniverse || N.getUniverse();
     if (!universe || !universe.forces) return;
+    if (N.state.frame) { updateHistory(dt); return; }
 
     universe.forces.forEach(force => {
       // Lê a intensidade dinâmica da força via state (com fallback para params)
       let strength = 0;
-      if (N.state && typeof N.state.get === 'function') {
+      const temIntensidade = N.state && N.state.current && N.state.current[force.id]
+        && N.state.current[force.id].strength !== undefined;
+      if (temIntensidade && typeof N.state.get === 'function') {
         strength = N.state.get(force.id, 'strength');
-      }
-      if ((strength === undefined || strength === 0) && force.params && force.params.strength !== undefined) {
+      } else if (force.params && force.params.strength !== undefined) {
+        // Zero no estado é uma força desligada, não ausência de parâmetro.
         strength = force.params.strength;
       }
 

@@ -18,7 +18,16 @@
   const OPACIDADE_PONTOS     = 0.38;   // Opacidade sutil dos pontos (não ofusca estrelas)
   // ══════════════════════════════════════════════════════════════════
 
-  N.buildArms = function () {
+  N.buildArms = function (routinesOverride) {
+    if (N.state.frame && !routinesOverride) {
+      var prepared = N.currentUniverse.historyFrames.map(f => N.buildArms(f.routines));
+      N.presence.register('eu', function () {
+        const current = prepared.find(a => a.object.visible);
+        const angle = current ? current.object.rotation.y : 0;
+        prepared.forEach((a, i) => a.setHistoryVisible(i === N.state.chapter, angle));
+      });
+      return { update(dt) { prepared[N.state.chapter].update(dt); } };
+    }
     const ROTACAO_VELOCIDADE = (2 * Math.PI) / (N.VOLTA_GALAXIA_SEGUNDOS || 240);
 
     const armsGroup = new THREE.Group();
@@ -31,10 +40,10 @@
       };
     }
 
-    const universe = N.getUniverse();
-    const routinesData = (universe.galaxy && universe.galaxy.arms && universe.galaxy.arms.routines)
+    const universe = N.currentUniverse || N.getUniverse();
+    const routinesData = routinesOverride || ((universe.galaxy && universe.galaxy.arms && universe.galaxy.arms.routines)
       ? universe.galaxy.arms.routines
-      : [];
+      : []);
 
     const rng = N.createRNG('helena-routines-arms');
 
@@ -163,6 +172,11 @@
 
     return {
       object: armsGroup,
+      setHistoryVisible(active, angle) {
+        armsGroup.visible = active; armsGroup.scale.set(active ? 1 : 0, active ? 1 : 0, active ? 1 : 0);
+        armsGroup.rotation.y = angle;
+        routineAnchors.forEach(r => { r.label.style.display = active ? '' : 'none'; });
+      },
       update(dt) {
         // Rotação lentíssima dos braços da galáxia (sincronizada com a galáxia)
         if (N.ROTACAO_GALAXIA !== false) {

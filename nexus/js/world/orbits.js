@@ -159,6 +159,7 @@
     for (var i = 0; i < N.registeredOrbits.length; i++) {
       var item = N.registeredOrbits[i];
       var line = item.line;
+      if (item.ownerId && N.presence && !N.presence.isPresent(item.ownerId)) { line.visible = false; continue; }
       var category = item.category || 'planet';
 
       var bodyPos = item.getBodyPos ? item.getBodyPos() : null;

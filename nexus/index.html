@@ -11,12 +11,13 @@
 <link rel="stylesheet" href="ui/css/tela-inicial.css">
 <link rel="stylesheet" href="ui/css/tela-comecar.css">
 <link rel="stylesheet" href="ui/css/tela-atualizar.css">
+<link rel="stylesheet" href="ui/css/tela-gerenciamento.css">
 <link rel="stylesheet" href="ui/css/estados-comecar.css">
 <link rel="stylesheet" href="css/universo.css">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 </head>
 <body class="modo-start">
-<!-- Telas inicial, Começar e Atualizar integradas; as demais ainda usam a interface antiga. -->
+<!-- Telas 1 a 4 integradas; os painéis da exploração ainda usam a interface antiga. -->
 <div id="interface-nexus">
   <div class="nexus-ui" id="tela-inicial">
 
@@ -214,6 +215,90 @@
     </main><!-- fim #painel-atualizar -->
 
   </div><!-- fim #tela-atualizar -->
+  <div class="nexus-ui oculto" id="tela-gerenciamento" aria-hidden="true">
+
+    <main class="painel-vidro painel-comecar" id="painel-gerenciamento">
+
+      <!-- Cabeçalho: botão voltar + título -->
+      <header class="cabecalho-painel">
+        <button class="btn-voltar" id="botao-voltar-gerenciamento" type="button" aria-label="Voltar para a tela inicial">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          <span aria-hidden="true">&#10094;</span>
+        </button>
+        <h1 class="titulo-comecar" id="titulo-gerenciamento">GERENCIAMENTO</h1>
+      </header>
+
+      <!-- Área de conteúdo: rola internamente se necessário -->
+      <div class="conteudo-gerenciamento">
+
+        <!-- =====================================================
+             SEÇÃO: SEUS DADOS
+             ===================================================== -->
+        <section class="secao-gerenciamento" aria-labelledby="rotulo-seus-dados">
+          <h2 class="rotulo-secao" id="rotulo-seus-dados">SEUS DADOS</h2>
+
+          <!-- Linha estática: quantidade de fases salvas -->
+          <div class="item-dado" id="info-fases" aria-label="Histórico salvo">
+            <span class="item-dado-rotulo">Hist&oacute;rico salvo</span>
+            <!-- O JS do projeto atualiza este número dinamicamente -->
+            <span class="item-dado-valor" id="contagem-fases">1 fase(s)</span>
+          </div>
+
+          <!-- Linha clicável: baixar histórico em JSON -->
+          <button class="item-dado item-dado-acao" id="botao-baixar-historico" type="button">
+            <span class="btn__feixe" aria-hidden="true"></span>
+            <span class="item-dado-rotulo">Baixar hist&oacute;rico</span>
+            <span class="item-dado-acao-valor">JSON &#8250;</span>
+          </button>
+
+          <!-- Linha clicável: importar histórico JSON -->
+          <button class="item-dado item-dado-acao" id="botao-importar-historico" type="button">
+            <span class="btn__feixe" aria-hidden="true"></span>
+            <span class="item-dado-rotulo">Importar hist&oacute;rico</span>
+            <span class="item-dado-acao-valor">JSON &#8250;</span>
+          </button>
+
+          <!-- Texto de limite de armazenamento -->
+          <p class="texto-limite" id="texto-limite-dados">
+            Hist&oacute;rico salvo neste navegador. Limites: 10 fases, 1&nbsp;MiB por hist&oacute;rico, 128 corpos, 16 sistemas, 32 for&ccedil;as e 50 rotinas na uni&atilde;o.
+          </p>
+        </section>
+
+        <!-- =====================================================
+             SEÇÃO: APAGAR
+             ===================================================== -->
+        <section class="secao-gerenciamento" aria-labelledby="rotulo-apagar">
+          <h2 class="rotulo-secao" id="rotulo-apagar">APAGAR</h2>
+
+          <!-- Linha destrutiva: apagar histórico (texto em laranja) -->
+          <button class="item-dado item-dado-destrutivo" id="botao-apagar-historico" type="button">
+            <span class="btn__feixe" aria-hidden="true"></span>
+            <span class="item-dado-rotulo">Apagar hist&oacute;rico salvo</span>
+            <span class="item-dado-acao-valor">&#8250;</span>
+          </button>
+        </section>
+
+        <!-- =====================================================
+             SEÇÃO: PRIVACIDADE
+             ===================================================== -->
+        <section class="secao-gerenciamento" aria-labelledby="rotulo-privacidade" id="bloco-privacidade">
+          <h2 class="rotulo-secao" id="rotulo-privacidade">PRIVACIDADE</h2>
+
+          <div class="texto-privacidade">
+            <p>
+              Seu texto &eacute; enviado ao Google (Gemini) para ser interpretado. O NEXUS n&atilde;o guarda seu texto. Na camada gratuita, o Google pode us&aacute;-lo para melhorar produtos, e revisores humanos podem l&ecirc;-lo. Evite nomes reais e dados que identifiquem pessoas; use apelidos.
+            </p>
+            <p>
+              Uma nova gera&ccedil;&atilde;o cria outro universo e substitui o hist&oacute;rico salvo. Para acrescentar uma fase, use Atualizar meu universo.
+            </p>
+          </div>
+        </section>
+
+      </div><!-- fim .conteudo-gerenciamento -->
+
+    </main><!-- fim #painel-gerenciamento -->
+
+  </div><!-- fim #tela-gerenciamento -->
 </div>
 <div class="hint oculto">arraste para girar · role ou pince para aproximar</div>
 <!-- Botão de legenda: só visível quando painel-aberto está no body -->
@@ -259,6 +344,7 @@
 <script src="js/ui/start.js"></script>
 <script src="js/ui/comecar.js"></script>
 <script src="js/ui/atualizar.js"></script>
+<script src="js/ui/gerenciamento.js"></script>
 <script src="js/ui/time.js"></script>
 <script src="js/world/arms.js"></script>
 <script src="js/world/halo.js"></script>

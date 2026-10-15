@@ -1,4 +1,4 @@
-/* interface.js — liga as telas inicial, Começar e Atualizar aos caminhos que já funcionam.
+/* interface.js — liga as telas inicial, Começar, Atualizar e Gerenciamento.
    As outras telas ainda usam a interface antiga até sua integração ser aprovada. */
 (function () {
   const N = NEXUS;
@@ -19,6 +19,7 @@
       // Voltar do formulário não recarrega a página nem descarta texto ou resultado em memória.
       if (N.comecar) N.comecar.ocultar();
       if (N.atualizar) N.atualizar.ocultar();
+      if (N.gerenciamento) N.gerenciamento.ocultar();
       formularioAntigo().classList.add('oculto');
       inicial().classList.remove('oculto');
       inicial().setAttribute('aria-hidden', 'false');
@@ -33,6 +34,7 @@
       this.ocultarInicial();
       if (N.comecar) N.comecar.ocultar();
       if (N.atualizar) N.atualizar.ocultar();
+      if (N.gerenciamento) N.gerenciamento.ocultar();
       formularioAntigo().classList.add('oculto');
     },
     usarDesfoque(tela) {
@@ -44,6 +46,7 @@
       this.ocultarInicial();
       if (N.comecar) N.comecar.ocultar();
       if (N.atualizar) N.atualizar.ocultar();
+      if (N.gerenciamento) N.gerenciamento.ocultar();
       formularioAntigo().classList.remove('oculto');
       N.start.abrirFormulario(modo);
     }
@@ -72,7 +75,8 @@
       }
     });
     document.getElementById('botao-gerenciamento').addEventListener('click', () => {
-      N.ui.abrirFormularioAntigo('gerenciamento');
+      N.ui.ocultarMenus();
+      N.gerenciamento.abrir();
     });
   }
 

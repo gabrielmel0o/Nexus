@@ -31,7 +31,7 @@
   // S = onde a câmera ESTÁ (suavizado)
   // T = para onde ela QUER ir
   const HOME_R = 52;
-  const ZOOM_MAX_PADRAO = 260;
+  const ZOOM_MAX_PADRAO = 150;
   const FOLGA_ENQUADRAMENTO = 1.08; // Deixa espaço nas bordas da visão geral.
   const FOLGA_ZOOM = 1.5; // Permite afastar um pouco além do enquadramento.
   const FAR_PADRAO = N.cam.far;
@@ -41,6 +41,10 @@
   // Limites de zoom: ajustados dinamicamente ao selecionar um corpo
   let rMin = 14;
   let rMax = ZOOM_MAX_PADRAO;
+  let zoomMaxSelecionado = null;
+  let larguraPainel = 0;
+  let deslocamentoAtual = 0;
+  let ultimoDeslocamento = 0;
   const clampR = r => Math.min(rMax, Math.max(rMin, r));
 
   // A preparação do universo mantém a referência aos capítulos da Helena.
@@ -53,7 +57,7 @@
     const universe = N.currentUniverse;
     const geometry = N.compileSpec && N.compileSpec.geometry;
     if (!universe || isOriginalHelena(universe) || !geometry) {
-      rMax = ZOOM_MAX_PADRAO;
+      rMax = zoomMaxSelecionado || ZOOM_MAX_PADRAO;
       return HOME_R;
     }
 
@@ -71,9 +75,10 @@
     const halfAngle = Math.min(verticalHalfAngle, horizontalHalfAngle);
     // Usa seno para caber a esfera inteira, inclusive a parte mais perto da câmera.
     const radius = Math.max(HOME_R, extent * FOLGA_ENQUADRAMENTO / Math.sin(halfAngle));
-    rMax = Math.max(ZOOM_MAX_PADRAO, radius * FOLGA_ZOOM);
+    const zoomGeral = Math.max(ZOOM_MAX_PADRAO, radius * FOLGA_ZOOM);
+    rMax = zoomMaxSelecionado || zoomGeral;
     // Universos grandes também precisam caber no limite distante da câmera.
-    const far = Math.max(FAR_PADRAO, rMax + extent * 2);
+    const far = Math.max(FAR_PADRAO, zoomGeral + extent * 2);
     if (N.cam.far !== far) {
       N.cam.far = far;
       N.cam.updateProjectionMatrix();
@@ -163,6 +168,9 @@
     getOverviewRadius: getOverviewRadius,
     // T é o ALVO da câmera (para onde ela vai). start.js precisa disso para definir a pose inicial.
     target: T,
+    // O painel informa sua borda direita em pixels. O alvo continua seguindo
+    // o corpo real; somente a projeção muda para aproveitar a área livre.
+    setPanelWidth(pixels) { larguraPainel = Math.max(0, pixels); },
     START_AJUSTE: START_AJUSTE, // Exposto para start.js decidir se trava
     START_DIST: START_DIST, // Exposto para start.js usar
     START_ELEV: START_ELEV, // Exposto para start.js usar (em graus)
@@ -185,6 +193,9 @@
 
       // Define zoom mínimo como 1.4× o raio do corpo e máximo normal
       rMin = Math.max(bodyRadius * 1.4, 3);
+      // Ao selecionar, não permite afastar até o limite do universo inteiro.
+      zoomMaxSelecionado = Math.max(rMin, arrivalR) * 10;
+      rMax = zoomMaxSelecionado;
 
       // Distância de chegada confortável
       T.r = Math.max(rMin, arrivalR);
@@ -195,6 +206,8 @@
 
     // Volta à visão geral suavemente
     flyHome() {
+      zoomMaxSelecionado = null;
+      larguraPainel = 0;
       const overviewRadius = getOverviewRadius();
       followFn = null;
       lookT.set(0, 0, 0);
@@ -233,6 +246,20 @@
       );
       N.cam.position.copy(look).add(camOffset);
       N.cam.lookAt(look);
+
+      // Deslocamento suave, sem mexer na pose START_* ou na posição do corpo.
+      // Painel aberto: centro da área restante à direita. Fechado: centro da tela.
+      const largura = canvas.clientWidth || 0;
+      const altura = canvas.clientHeight || 0;
+      const destino = followFn ? Math.min(larguraPainel, largura * .7) / 2 : 0;
+      deslocamentoAtual += (destino - deslocamentoAtual) * k;
+      if (Math.abs(deslocamentoAtual - destino) < .1) deslocamentoAtual = destino;
+      if (largura && altura && typeof N.cam.setViewOffset === 'function' && (deslocamentoAtual !== ultimoDeslocamento
+        || (N.cam.view && N.cam.view.enabled && (N.cam.view.fullWidth !== largura || N.cam.view.fullHeight !== altura)))) {
+        if (deslocamentoAtual === 0) N.cam.clearViewOffset();
+        else N.cam.setViewOffset(largura, altura, -deslocamentoAtual, 0, largura, altura);
+        ultimoDeslocamento = deslocamentoAtual;
+      }
     }
   };
 })();

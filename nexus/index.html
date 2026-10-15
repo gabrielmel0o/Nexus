@@ -14,13 +14,14 @@
 <link rel="stylesheet" href="ui/css/tela-atualizar.css">
 <link rel="stylesheet" href="ui/css/tela-gerenciamento.css">
 <link rel="stylesheet" href="ui/css/tela-saibamais.css">
+<link rel="stylesheet" href="ui/css/tela-astro.css">
 <link rel="stylesheet" href="ui/css/estados-comecar.css">
 <link rel="stylesheet" href="ui/css/legenda-barra.css">
 <link rel="stylesheet" href="css/universo.css">
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 </head>
 <body class="modo-start">
-<!-- Telas 1 a 6 integradas; os painéis da exploração ainda usam a interface antiga. -->
+<!-- Telas 1 a 7 integradas; os painéis da exploração ainda usam a interface antiga. -->
 <div id="interface-nexus">
   <div class="nexus-ui" id="tela-inicial">
 
@@ -418,6 +419,70 @@
 
     </aside><!-- fim #painel-saibamais -->
   </div><!-- fim #tela-saibamais -->
+  <div class="nexus-ui oculto" id="tela-astro" aria-hidden="true">
+
+    <!-- PAINEL DESCRITIVO DO ASTRO -->
+    <aside class="painel-astro" id="painel-astro" aria-labelledby="nome-astro">
+
+      <!-- Cabeçalho: subtipo e botão fechar -->
+      <header class="cabecalho-astro">
+        <span class="subtipo-astro" id="subtipo-astro">PLANETA COM AN&Eacute;IS &middot; &Aacute;REA DA VIDA</span>
+        <button class="btn-fechar-astro" id="botao-fechar-astro" type="button" aria-label="Fechar descrição do astro">
+          <span class="btn__feixe" aria-hidden="true"></span>
+          &#10005;
+        </button>
+      </header>
+
+      <!-- Título: Nome do astro -->
+      <h1 class="titulo-astro" id="nome-astro">Fam&iacute;lia</h1>
+
+      <!-- Descrição principal -->
+      <p class="descricao-astro" id="descricao-astro">
+        Cada anel &eacute; uma camada de hist&oacute;ria: inf&acirc;ncia, expectativas, luto, obriga&ccedil;&otilde;es e mem&oacute;rias. Os an&eacute;is s&atilde;o bonitos &agrave; dist&acirc;ncia, mas tamb&eacute;m representam coisas que continuam girando ao redor de Helena mesmo depois de j&aacute; terem passado.
+      </p>
+
+      <!-- Seção "POR QUÊ?" -->
+      <section class="secao-astro" aria-labelledby="rotulo-porque">
+        <h2 class="rotulo-secao-astro" id="rotulo-porque">POR QU&Ecirc;?</h2>
+        <blockquote class="citacao-astro" id="citacao-astro">
+          Lei da escala: a dura&ccedil;&atilde;o de um astro &eacute; a perman&ecirc;ncia dele na mente.
+        </blockquote>
+        <p class="texto-secao-astro" id="texto-porque">
+          Os an&eacute;is representam perman&ecirc;ncia: hist&oacute;rias que continuam em &oacute;rbita mesmo quando seu tempo j&aacute; passou. A escala do planeta mostra a dura&ccedil;&atilde;o desses v&iacute;nculos.
+        </p>
+      </section>
+
+      <!-- Bloco "FASE" -->
+      <p class="bloco-fase-astro" id="bloco-fase">
+        <span class="rotulo-fase-astro" id="rotulo-fase">FASE</span>
+        <span class="texto-fase-astro" id="texto-fase">planeta com an&eacute;is: lembran&ccedil;as e pend&ecirc;ncias em &oacute;rbita</span>
+      </p>
+
+      <!-- Rodapé com métricas -->
+      <footer class="rodape-astro" id="rodape-astro">
+
+        <!-- Coluna 1: Peso Emocional (5 pontos) -->
+        <div class="coluna-metrica-astro" id="coluna-peso">
+          <span class="rotulo-metrica-astro" id="rotulo-peso-emocional">PESO EMOCIONAL</span>
+          <div class="pontos-peso-astro" id="pontos-peso-astro" role="img" aria-label="Peso emocional 3 de 5">
+            <span class="ponto-astro ativo" aria-hidden="true"></span>
+            <span class="ponto-astro ativo" aria-hidden="true"></span>
+            <span class="ponto-astro ativo" aria-hidden="true"></span>
+            <span class="ponto-astro inativo" aria-hidden="true"></span>
+            <span class="ponto-astro inativo" aria-hidden="true"></span>
+          </div>
+        </div>
+
+        <!-- Coluna 2: Profundidade -->
+        <div class="coluna-metrica-astro" id="coluna-profundidade">
+          <span class="rotulo-metrica-astro" id="rotulo-profundidade">PROFUNDIDADE</span>
+          <span class="valor-profundidade-astro" id="valor-profundidade">recente</span>
+        </div>
+
+      </footer>
+
+    </aside><!-- fim #painel-astro -->
+  </div><!-- fim #tela-astro -->
 </div>
 <!-- Container do botão START (só visível no modo-start) -->
 <!-- Formulários antigos mantidos até aprovar as próximas telas. -->

@@ -5,6 +5,7 @@
    Atualiza-se automaticamente se o capítulo mudar enquanto aberto. */
 (function () {
   const N = NEXUS;
+  const telaNova = document.querySelector('#tela-astro');
 
   // Dicionário de profundidade psíquica conforme a Lei da Distância
   const DEPTH_WORDS = {
@@ -111,6 +112,16 @@
   // Cria a estrutura HTML do painel se ainda não existir
   function ensureElement() {
     if (panelEl) return panelEl;
+    if (telaNova) {
+      // Usa os campos aprovados, sem reconstruir o painel a cada seleção.
+      panelEl = telaNova.querySelector('#painel-astro');
+      panelEl.setAttribute('tabindex', '0');
+      panelEl.addEventListener('click', e => {
+        // Fechar a descrição mantém o astro selecionado e acompanhado pela câmera.
+        if (e.target.closest('#botao-fechar-astro')) N.panel.close();
+      });
+      return panelEl;
+    }
     panelEl = document.createElement('div');
     panelEl.className = 'nexus-panel';
     panelEl.setAttribute('role', 'dialog');
@@ -179,6 +190,25 @@
     const depthVal = body.depth !== undefined ? body.depth : 0;
     const depthWord = DEPTH_WORDS[depthVal] || 'agora';
 
+    if (telaNova) {
+      // Conteúdo externo é sempre texto. Nenhum trecho vira HTML executável.
+      const textos = {
+        'subtipo-astro': label, 'nome-astro': name, 'descricao-astro': summary,
+        'citacao-astro': lawText, 'texto-porque': why,
+        'texto-fase': phase + (phase && chapterNote ? ' — ' : '') + chapterNote,
+        'valor-profundidade': depthWord
+      };
+      Object.keys(textos).forEach(id => { el.querySelector('#' + id).textContent = textos[id]; });
+      const pontos = el.querySelector('#pontos-peso-astro');
+      pontos.setAttribute('aria-label', 'Peso emocional ' + filledDots + ' de 5');
+      pontos.setAttribute('title', 'Massa: ' + mass + '/10');
+      pontos.querySelectorAll('.ponto-astro').forEach((ponto, indice) => {
+        ponto.classList.toggle('ativo', indice < filledDots);
+        ponto.classList.toggle('inativo', indice >= filledDots);
+      });
+      return;
+    }
+
     el.innerHTML = `
       <button class="nexus-panel-close" aria-label="Fechar painel" title="Fechar (Esc)">×</button>
 
@@ -229,15 +259,24 @@
       currentBodyId = id;
       render(body);
       const el = ensureElement();
+      if (telaNova) {
+        telaNova.classList.remove('oculto');
+        telaNova.setAttribute('aria-hidden', 'false');
+      }
       el.classList.add('is-visible');
       el.inert = false;
       el.setAttribute('aria-hidden', 'false');
       // Liga classe no body para mostrar logo (reutilizável para legenda e start)
       document.body.classList.add('painel-aberto');
+      if (telaNova && N.controls.setPanelWidth) N.controls.setPanelWidth(el.getBoundingClientRect().right);
     },
 
     close() {
       currentBodyId = null;
+      if (telaNova) {
+        telaNova.classList.add('oculto');
+        telaNova.setAttribute('aria-hidden', 'true');
+      }
       if (panelEl) {
         panelEl.inert = true; // Os botões ocultos não recebem foco ou cliques.
         panelEl.classList.remove('is-visible');
@@ -245,6 +284,7 @@
       }
       // Remove classe do body para esconder logo
       document.body.classList.remove('painel-aberto');
+      if (N.controls && N.controls.setPanelWidth) N.controls.setPanelWidth(0);
     },
 
     refresh() {
@@ -267,6 +307,13 @@
       }
     }
   };
+
+  // O formato da janela pode mudar enquanto a descrição continua aberta.
+  if (telaNova) window.addEventListener('resize', () => {
+    if (telaNova && N.panel.isOpen() && N.controls.setPanelWidth) {
+      N.controls.setPanelWidth(panelEl.getBoundingClientRect().right);
+    }
+  });
 
   // Integração com selectBody / deselectBody
   const origSelectBody = N.selectBody;

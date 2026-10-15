@@ -145,17 +145,15 @@ async function testar() {
   await executar(`NEXUS.selectBody('criacao')`);
   await clicar('botao-saibamais');
   assert.equal(await executar('NEXUS.panel.isOpen() && NEXUS.legend.isOpen()'), true);
-  assert.equal(await executar(`(()=>{const a=document.querySelector('.nexus-panel').getBoundingClientRect();
+  assert.equal(await executar(`(()=>{const a=document.querySelector('#painel-astro').getBoundingClientRect();
     const g=document.getElementById('painel-saibamais').getBoundingClientRect();
-    const x=(Math.max(a.left,g.left)+Math.min(a.right,g.right))/2;
-    const y=(Math.max(a.top,g.top)+Math.min(a.bottom,g.bottom))/2;
-    return a.left>1000 && g.left>1000 && !!document.elementFromPoint(x,y).closest('#painel-saibamais');})()`), true);
+    return a.right<g.left && g.left>1000;})()`), true);
   await capturar('tela6-com-astro');
   await chamar('Input.dispatchKeyEvent', {type:'keyDown',key:'Escape',code:'Escape'});
   assert.equal(await executar('NEXUS.panel.isOpen() && !NEXUS.legend.isOpen()'), true);
   await chamar('Input.dispatchKeyEvent', {type:'keyDown',key:'Escape',code:'Escape'});
   assert.equal(await executar('NEXUS.panel.isOpen()'), false);
-  ok('painéis à direita, guia acima na sobreposição e Esc preserva seleção');
+  ok('astro à esquerda e guia à direita; Esc preserva seleção');
 
   await chamar('Emulation.setDeviceMetricsOverride', {width:1280,height:400,deviceScaleFactor:1,mobile:false});
   await clicar('botao-saibamais');
